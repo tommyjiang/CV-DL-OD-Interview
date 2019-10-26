@@ -1,0 +1,12 @@
+master.pdf
+.texpadtmp/
+*.aux
+*.out
+*.bbl
+*.blg
+*.fls
+*.gz
+*.toc
+*.xdv
+*.log
+*_latexmk

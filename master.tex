@@ -1,0 +1,86 @@
+\documentclass[12pt, a4paper, UTF8, fontset=adobe, oneside]{ctexbook} % oneside 去掉所有空白页
+
+\setmainfont{Times New Roman} % 英文用 Times New Roman 字体
+\linespread{1.3} % 行距设置
+\setcounter{secnumdepth}{3} % 层次为 3 以上的标题生成序号
+
+%% 宏包
+\usepackage{amsmath} % AMS数学宏包
+\usepackage{fancyhdr} % 设置页眉页脚宏包
+\usepackage{geometry} % 设置页边距宏包
+\usepackage{xcolor} % 颜色宏包
+\usepackage{hyperref} % 交叉引用宏包 colorlinks启用彩色模式 参考文献引用为紫红色
+\usepackage[listings,breakable]{tcolorbox} % 彩色盒子宏包 代码宏包
+\usepackage{enumitem} % 枚举设置宏包
+\usepackage{tikz} % 画图宏包
+\usepackage{booktabs} % 表格宏包
+
+% 宏包设置
+% 页眉页脚样式
+\pagestyle{fancy} % 页面样式采用fancyhdr宏包中的fancy
+\fancyhf{} % 去掉页眉
+\cfoot{\thepage} % 页脚中间显示页码
+\renewcommand{\headrulewidth}{0pt} % 去掉页眉的横线
+% 页边距设置
+\geometry{top = 2.54cm, bottom = 2.54cm, left = 3.18cm, right = 3.18cm}
+% 章节样式设置
+\CTEXsetup[name={第,章},number={\arabic{chapter}}]{chapter}
+% 文档设置
+\renewcommand\contentsname{目录} % 中文 目录
+\renewcommand\bibname{参考文献} % 中文 参考文献
+% 清华紫
+\definecolor{THU}{RGB}{111, 23, 135}
+% 交叉引用宏包设置
+\hypersetup{colorlinks=true,linkcolor=THU,citecolor=THU}
+
+% tcolorbox 样式设置
+\newtcolorbox{redbox}[2][]{colback=yellow!10,colframe=red!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,breakable} % 红色
+\newtcolorbox{RCbox}[2][]{colback=yellow!10,colframe=red!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,center
+  title, center upper,breakable} % 红色居中
+\newtcolorbox{magbox}[2][]{colback=yellow!10,colframe=magenta!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1} % 紫红色
+\newtcolorbox{THUbox}[2][]{colback=yellow!10,colframe=THU!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,breakable} % 紫罗兰色
+\newtcolorbox{THUCbox}[2][]{colback=yellow!10,colframe=THU!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,center title,center upper,breakable} % 紫罗兰色 居中
+\newtcolorbox{purbox}[2][]{colback=yellow!10,colframe=purple!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,center title,center upper} % 紫色
+% \usetikzlibrary{calc,shapes.multipart,chains,arrows,positioning} % tikz library
+% \tikzset{circarrow/.style={*->,shorten <=-2pt}}
+
+% enumerate 样式设置
+\setlist[enumerate]{label={\arabic*.},leftmargin=2.5em,align=left,topsep=0em,itemsep=-0.5em,labelsep=-0.5em,  before=\vspace{2pt},after=\vspace{2pt}}
+\setlist[itemize]{leftmargin=2.5em,align=left,topsep=0em,itemsep=-0.5em,labelsep=-0.5em,  before=\vspace{2pt},after=\vspace{2pt}}
+
+\begin{document}
+\frontmatter
+\begin{titlepage}
+\begin{center}
+
+\vspace*{5cm}
+% Title
+{\huge \bfseries 计算机视觉深度学习知识总结}\\[0.4cm]
+
+\vspace{12cm}
+
+{\large Tommy} \\[1cm]
+{\large \today}
+
+\end{center}
+\end{titlepage}
+
+{
+\hypersetup{linkcolor=black} % 目录链接为黑色
+\pagenumbering{Roman} % 页码编号为大写罗马数字
+\tableofcontents % 目录
+}
+
+\mainmatter % 正文部分 重新编号
+\pagenumbering{arabic} % 页码编号为阿拉伯数字
+
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+
+\bibliographystyle{thubib}
+\bibliography{refs}
+\end{document}
+
+%%% Local Variables:
+%%% TeX-master: t
+%%% End:
