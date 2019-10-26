@@ -10,3 +10,5 @@ master.pdf
 *.xdv
 *.log
 *_latexmk
+
+auto/
