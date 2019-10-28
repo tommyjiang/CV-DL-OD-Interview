@@ -2,9 +2,65 @@
 
 \chapter{基本概念}
 
+\section{激活函数}
+
+激活函数的作用是为神经网络引入非线性因素，如果没有激活函数，无论神经网络有多少层，
+输出总为输入的线性函数，因此网络的拟合能力十分有限。
+
+\subsection{Sigmoid 函数}
+\label{subsec:Sigmoid}
+
+Sigmoid 函数的原函数和导数如公式~\ref{equ:sigmoid}~所示：
+\begin{align}
+  \label{equ:sigmoid}
+  \sigma(x) & = \frac{1}{1 + e^{-x}} \\
+  \sigma'(x) & = \sigma(x) (1-\sigma(x))
+\end{align}
+
+Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/Sigmoid.png}
+  \caption{Sigmoid 函数及其导数的图像}
+  \label{fig:sigmoid}
+\end{figure}
+
+由图~\ref{fig:sigmoid}~中的蓝色曲线可知，Sigmoid 函数为 S 形，
+将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。由图~\ref{fig:sigmoid}~中
+的红色曲线可知，在输入值较大或较小时，Sigmoid 函数的导数趋近于 0，这个性质可能导
+致~\ref{subsec:gradient-vanish-explosion}~小节提到的梯度消失，从而导致网络无法正
+常训练。
+
+\subsection{线性整流函数(ReLU)}
+
+线性整流函数（Rectifier Linear Unit）是目前应用广泛的激活函数，其形式如公
+式~\ref{equ:ReLU}~所示：
+
+\begin{equation}
+  \label{equ:ReLU}
+  \mathrm{ReLU}(x) = \left\{
+    \begin{array}{lr}
+      x & x > 0 \\
+      0 & x \leq 0 \\
+    \end{array}
+  \right.
+\end{equation}
+
+ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，ReLU 在 $x > 0$ 时对
+应的导数始终为 1，不会出现梯度消失现象；但当 $x \leq 0$ 时梯度始终为 0，同样会导
+致梯度消失。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/ReLU.png}
+  \caption{ReLU 的图像}
+  \label{fig:ReLU}
+\end{figure}
+
 \section{反向传播算法}
 考虑一个神经网络中的某个全连接层 $Y = XW + b$，设网络的 loss 为 $L$，根据链式法
-则，有如下关系~\rc{2017-FC-BP}：
+则，有如下关系~\citerb{2017-FC-BP}：
 
 \begin{align}
   \label{equ:bp-fc}
@@ -14,23 +70,20 @@
 \end{align}
 
 上面三个式子中，$\frac{\partial L}{\partial X}$ 是为了继续进行反向传播，因为上一
-层参数导数的计算需要依赖该值；$\frac{\partial L}{\partial W}$ 和 $\frac{\partial
+层参数导数的计算依赖该值；$\frac{\partial L}{\partial W}$ 和 $\frac{\partial
   L}{\partial b}$ 即更新参数时需要的梯度。前向计算完成后，逐层向后计算 loss 对每
 一层输入($X$)和参数($W, \, b$)的梯度。
 
 \subsection{梯度消失和梯度爆炸}
+\label{subsec:gradient-vanish-explosion}
 根据链式法则，对于深层神经网络，其浅层参数的梯度与之后所有层输出对输入梯度的乘积
 相关。直观理解，如果梯度都小于 1，相乘后的值很小，导致梯度消失；反之如果梯度都大
 于 1，相乘后的值很大，导致梯度爆炸。
 
-梯度消失的
+梯度消失的一个典型原因是使用了 Sigmoid 函数，具体原因请见~\ref{subsec:Sigmoid}小节中的分析。
 
-梯度爆炸的解决方法包括：
-
-\begin{enumerate}
-  \item 使用梯度裁剪（Gradient Clipping），当梯度的值超过一定阈值时，将其设为阈
-    值的值，避免出现值过大的情况。
-\end{enumerate}
+梯度爆炸的一个简单直接的解决方法是梯度裁剪（Gradient Clipping），即当梯度的值超过
+一定阈值时，将其设为阈值的值，避免出现梯度过大的情况。
 
 \chapter{卷积神经网络}
 
@@ -39,8 +92,8 @@
 \subsection{分组卷积}
 
 分组卷积（Group Convolution，GC）在最早的 AlexNet 中就已经应用，但当时应用的原因是 GPU 计算能力不足，只能
-将标准卷积拆成 2 个分组卷积~\rc{2012-AlexNet}。分组卷积和标准卷积的对比如
-图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所示~\rc{2019-Diff-Conv}：
+将标准卷积拆成 2 个分组卷积~\citerb{2012-AlexNet}。分组卷积和标准卷积的对比如
+图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所示~\citerb{2019-Diff-Conv}：
 
 \begin{figure}[ht]
   \centering
@@ -77,7 +130,7 @@
 \subsection{深度可分离卷积}
 
 深度可分离卷积（Depthwise Separable Convolution，DSC）如图~\ref{fig:ds-conv}~所
-示~\rc{2019-Diff-Conv}：
+示~\citerb{2019-Diff-Conv}：
 
 \begin{figure}[ht]
   \centering
@@ -88,20 +141,20 @@
 
 深度可分离卷积的步骤包括分层卷积和逐点卷积两部分，计算量为标准卷积计算量的 $ 1 /
 C_{\mathrm{in}} + 1/k^2 $，$k$ 为分层卷积的卷积核大小。
-当 channel 数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\rc{2017-MobileNet-v1}。
+当 channel 数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\citerb{2017-MobileNet-v1}。
 
 \subsection{反卷积}
 
 反卷积(Deconvolution)，有时也称转置卷积(Transposed Convolution)，是一种特殊的卷积
 形式。反卷积的具体步骤是，先通过补 0 扩大输入图像的尺寸，再进行标准卷积。反卷积的
 作用是将卷积后尺寸较小的 feature map 恢复到与输入大小相同的尺寸。 需要特别说明的
-是，反卷积虽然可以恢复尺寸，\textbf{但不能保证恢复后的数值与输入相同}~\rc{2016-Guide-Conv}。
+是，反卷积虽然可以恢复尺寸，\textbf{但不能保证恢复后的数值与输入相同}~\citerb{2016-Guide-Conv}。
 
 \section{感受野}
 
 感受野（Receptive Field，RF） 是指卷积神经网络中某一层的一个像素，会受到多少个输
 入数据像素的影响。直观上理解，就是该像素能看到多大范围的输入层像
-素~\rc{2017-Guide-to-RF-cal}。具体的计算方法为：
+素~\citerb{2017-Guide-to-RF-cal}。具体的计算方法为：
 \begin{align}
 \label{equ:rf-cal}
 j_{\mathrm {out}} & = j_{\mathrm{in}} \times s \\
@@ -111,7 +164,7 @@ r_{\mathrm {out}} & = r_{\mathrm{in}} + (k-1) \times j_{\mathrm{in}}
 其中 $j$ 为 jump，相当于每一层的 stride；s 为卷积的 stride，k 为卷积的 kernel
 size，r 即感受野。利用 \eqref{equ:rf-cal} 即可计算各层的感受野。
 
-经典网络 VGG-16 各层感受野的详细计算可以参考~\rc{2018-VGG-16-RF-cal}。
+经典网络 VGG-16 各层感受野的详细计算可以参考~\citerb{2018-VGG-16-RF-cal}。
 
 %%% Local Variables:
 %%% TeX-master: "../master"
