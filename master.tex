@@ -48,6 +48,9 @@
 \setlist[enumerate]{label={\arabic*.},leftmargin=2.5em,align=left,topsep=0em,itemsep=-0.5em,labelsep=-0.5em,  before=\vspace{2pt},after=\vspace{2pt}}
 \setlist[itemize]{leftmargin=2.5em,align=left,topsep=0em,itemsep=-0.5em,labelsep=-0.5em,  before=\vspace{2pt},after=\vspace{2pt}}
 
+% 引用参考文献时提高位置
+\newcommand{\rc}[1]{\raisebox{1pt}{\cite{#1}}}
+
 \begin{document}
 \frontmatter
 \begin{titlepage}
@@ -59,7 +62,7 @@
 
 \vspace{12cm}
 
-{\large Tommy} \\[1cm]
+{\large 江浩} \\[1cm]
 {\large \today}
 
 \end{center}
@@ -76,6 +79,9 @@
 
 \input{chapters/chapter1}
 \input{chapters/chapter2}
+\input{chapters/chapter3}
+\input{chapters/chapter4}
+\input{chapters/chapter5}
 
 \bibliographystyle{thubib}
 \bibliography{refs}

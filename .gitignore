@@ -12,3 +12,4 @@ master.pdf
 *_latexmk
 
 auto/
+*.DS_Store

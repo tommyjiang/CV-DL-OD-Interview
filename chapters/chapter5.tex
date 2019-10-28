@@ -1,0 +1,70 @@
+\part{目标检测}
+\chapter{基本概念}
+
+\section{指标}
+
+\subsection{交并比}
+交并比（Intersection over Union，IoU）
+
+\section{非极大值抑制}
+
+非极大值抑制（Non maximum suppression，NMS）是一种后处理方法，其作用是保证一个待
+检测物体只有一个检测框与之对应，更直观地理解其实是极大值保留，即只保留（置信度）
+是极大值的检测框。图~\ref{fig:nms}~给出了一个具体示例\rc{2018-NMS}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/NMS.png}
+  \caption{NMS 示例}
+  \label{fig:nms}
+\end{figure}
+
+\subsection{传统 NMS}
+
+传统 NMS 算法的具体流程是，先根据分数对所有检测框进行排序，然后从分高到分低遍历所有检
+测框，如果高分检测框与低分检测框的 IoU 大于一定阈值，则将低分检测框删掉，后续遍
+历时不再处理，如图~\ref{fig:nms-algo}~中的红框。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/目标检测/Soft-NMS.pdf}
+  \caption{NMS 和 Soft NMS 算法流程}
+  \label{fig:nms-algo}
+\end{figure}
+
+\subsection{Soft NMS}
+
+传统 NMS 算法需要选择合适的两个检测框的 IoU 阈值，否则阈值太低会导致误检，而阈值
+太高又会导致漏检。Soft NMS 的基本思想是根据两个检测框的 IoU，降低低分检测框的分
+数，但并不直接将其删除，具体形式如图~\ref{fig:nms-algo}~中的绿框~\rc{2017-Soft-NMS}。
+
+\subsection{Softer NMS}
+文献~\rc{2018-Softer-NMS}~中在 Soft NMS 的基础上提出了 Softer NMS，具体流程
+如图~\ref{fig:softer-nms}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/目标检测/Softer-NMS.pdf}
+  \caption{Softer NMS 算法流程}
+  \label{fig:softer-nms}
+\end{figure}
+
+由图~\ref{fig:softer-nms}~可知，Softer NMS 在 Soft NMS 基础上，加入了 var voting
+的部分，其具体步骤是：
+
+\begin{enumerate}
+  \item 对任一检测框，计算所有分数低于该框的检测框与其的 IoU。
+  \item 根据 IoU 和每个检测框的不确定度 $\sigma$，修正该检测框的位置，其中 IoU
+    越大，$ \sigma $ 越小，则相应的权重越高。
+\end{enumerate}
+
+\chapter{两阶段方法}
+
+\chapter{单阶段方法}
+
+\chapter{Anchor Free 方法}
+
+
+%%% Local Variables:
+%%% TeX-master: "../master"
+%%% End:
