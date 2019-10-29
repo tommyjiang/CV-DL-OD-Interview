@@ -6,7 +6,7 @@
 \subsection{交并比}
 交并比（Intersection over Union，IoU）
 
-\section{非极大值抑制}
+\section{非极大值抑制（NMS）}
 
 非极大值抑制（Non maximum suppression，NMS）是一种后处理方法，其作用是保证一个待
 检测物体只有一个检测框与之对应，更直观地理解其实是极大值保留，即只保留（置信度）
@@ -59,6 +59,42 @@
 \end{enumerate}
 
 \chapter{两阶段方法}
+\section{R-CNN 系列}
+\label{sec:R-CNN}
+
+\subsection{Fast R-CNN}
+\label{subsec:Fast-R-CNN}
+
+Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一次，不需要像 R-CNN 中
+将所有 proposal 对应的图片区域先 resize 再进行前传，因此可以大大提升训练和测试速
+度\citerb{2015-Fast-RCNN}。
+
+\paragraph{网络结构} 
+
+Fast R-CNN 的网络结构如~\ref{fig:Fast-RCNN}~所示，前面是统一的 CNN backbone，对于
+每个 proposal，将其投射到 feature map 再经过 RoI pooling 层得到尺寸为 $h \times
+w$ 的 RoI，再经过两个全连接层得到 RoI feature，再经过全连接层 + Softmax 层的分类
+器得到分类分数，同时 RoI feature 也会经过全连接层得到回归变换值。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/Fast-RCNN.pdf}
+  \caption{Fast R-CNN 网络结构}
+  \label{fig:Fast-RCNN}
+\end{figure}
+
+\paragraph{RoI Pooling 层}
+
+RoI 即 Region of Interest，中文为感兴趣区域。
+
+\paragraph{Loss 函数}
+
+\paragraph{正负样本}
+
+\paragraph{训练}
+
+\subsection{Faster R-CNN}
+\label{subsec:Faster-R-CNN}
 
 \chapter{单阶段方法}
 
@@ -67,47 +103,101 @@
 
 \subsection{YOLO v1}
 \label{subsec:YOLOv1}
-YOLO v1 将检测问题全部用回归问题描述，没有任何分类的部分。
+YOLO v1 是目标检测单阶段方法的开创性工作之一，文中将检测问题刻画为回归问题，没有
+任何分类的部分\citerb{2015-YOLO-v1}。
 
-\subsubsection{检测方法}
-YOLO v1 的检测方法如下：
+\paragraph{检测方法}
 
 \begin{enumerate}
   \item 将整张图片划分为 $S \times S$ 个网格，每个网格预测 $ B $ 个检测框和 $ C $
   个条件概率 $ \mathrm{Pr}(\mathrm{Class_i}|\mathrm{Object}) $。
-  \item 每个 bounding box 共包括 5 个值 $x, y, w, h$ 和 confidence。其中 $x, y$为中
-  心位置，$w, h$ 为长和宽(相对图片而言)，confidence 为$\mathrm{Pr}(\mathrm{Object}) \times
-  \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，inference 时直接将 confidence
-  乘以该网格对应的条件概率得到最终的分数。因此网络最终的输出维度为 $ S \times S
-  \times (B \times 5 + C) $。
+  \item 每个检测框共包括 5 个值 $x, y, w, h$ 和 confidence。其中 $x, y$为中心位
+  置，$w, h$ 为长和宽(相对图片而言)，confidence 为$\mathrm{Pr}(\mathrm{Object})
+  \times \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，inference 时直接
+  将 confidence乘以该网格对应的条件概率得到最终的分数。网络的输出维度为 $ S
+  \times S \times (B \times 5 + C) $。
 \end{enumerate}
 
+\paragraph{Backbone}
 
-\subsubsection{Backbone}
-YOLO v1 的 backbone 没有采用改造的经典分类网络，而是采用结构为 24 个卷积层 + 2 个
-全连接层的自己设计的网络。训练时，先将前 20 个卷积层 + 平均池化层组成的网络
-在 ImageNet 数据集上进行预训练，输入尺寸为 $224 \times 224$，在检测时将尺寸扩大
-为 $448 \times 448$。
+YOLO v1 的 backbone 没有采用改造后的经典分类网络，而是采用结构为 24 个卷积层 + 2
+个全连接层的自定义网络。训练时，先将前 20 个卷积层 + 平均池化层组成的网络
+在 ImageNet 数据集上进行预训练，输入尺寸为 $224 \times 224$，在检测时将输入尺寸扩
+大为 $448 \times 448$。与此同时，为避免过拟合，第一个全连接层后加了一个 $p=0.5$
+的 dropout 层。
 
-\subsubsection{Loss 函数}
+\paragraph{Loss 函数}
 
-YOLO v1 使用的 loss 函数为：
 \begin{align}
   \label{equ:yolo-v1-loss}
   \begin{split}
-    L = & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left (x_i - \hat{x}_i \right )^2 + \left (y_i - \hat{y}_i \right )^2 \right ] + \\
-    & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right)^2 + \left (\sqrt{h_i} - \sqrt{\hat{h}_i} \right )^2 \right ] + \\
-    & \, \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left( C_i - \hat{C}_i \right)^2 + \\
-    & \, \lambda_{\mathrm{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{noobj}} \left( C_i - \hat{C}_i \right)^2 + \\
-    & \, \sum_{i=0}^{S^2} \mathds{1}_{i}^{\mathrm{obj}} \sum_{c \in \mathrm{classes}} \left( p_i(c) - \hat{p}_i(c) \right)^2
+    L = & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left (x_i - \hat{x}_i \right )^2 + \left (y_i - \hat{y}_i \right )^2 \right ] \\
+    & \, + \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right)^2 + \left (\sqrt{h_i} - \sqrt{\hat{h}_i} \right )^2 \right ]  \\
+    & \, + \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left( C_i - \hat{C}_i \right)^2  \\
+    & \, + \lambda_{\mathrm{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{noobj}} \left( C_i - \hat{C}_i \right)^2  \\
+    & \, + \sum_{i=0}^{S^2} \mathds{1}_{i}^{\mathrm{obj}} \sum_{c \in \mathrm{classes}} \left( p_i(c) - \hat{p}_i(c) \right)^2
   \end{split}
 \end{align}
 
+\begin{enumerate}
+  \item Loss 函数共包括三部分：前两项是第一部分，是检测框位置的 loss；中间两项是
+    第二部分，是检测框分数的 loss；最后一项是第三部分，是网格类别概率的 loss。所
+    有的 loss 均为 $L_2$ 形式。
+  \item 检测框位置 loss 权重 $\lambda_{\mathrm{coord}}$ 提高到 5，同时将不含 GT 的
+    网格中检测框分数 loss 的权重 $\lambda_{\mathrm{noobj}}$ 降为 0.5。
+  \item 只有与 GT IoU 最大的检测框才会产生检测框位置 loss，只有网格中包含 GT 中
+    心才产生网格类别概率 loss。
+\end{enumerate}
+
 \subsection{YOLO v2}
 \label{subsec:YOLOv2}
+YOLO v2 在 YOLO v1 的基础上做了一系列改进\citerb{2016-YOLO-v2}：
+
+\begin{enumerate}
+  \item 引入 BN：所有卷积层都加入 BN 层，由于 BN 层有正则化作用，因此可以去掉
+    dropout 层。
+  \item 改变预训练尺寸：YOLO v1 中预训练时图片输入尺寸为 $224 \times 224$，而检
+    测时图片的输入尺寸为 $448 \times 448$，v2 中将预训练时的输入尺寸也改为 $448
+    \times 448$，但网络实际的输入尺寸为 $416 \times 416$。
+  \item 引入 anchor：参考 Faster R-CNN \cite{2015-Faster-RCNN}，YOLO v2 中同样引
+    入 anchor 的概念，即网络的输出为 anchor 到 GT 的变换，同时每个 anchor 分别预
+    测类别概率和前景分数，而不是一个网格只预测一个类别概率，这样就可以避免 v1 中
+    每个网格只能预测一个类别的问题。
+  \item Anchor 尺寸聚类：利用 k-means 算法将 GT 聚类，得到 k 个 anchor 尺寸的先
+    验。聚类时距离定义为 $d = 1 - \mathrm{IoU}(\mathrm{box}, \mathrm{centroid})$。
+  \item 预测相对位置：YOLO v2 输出的检测框的坐标是相对网格的偏差，而非与
+    Faster R-CNN 中相同的变换，这样可以将 anchor 的中心限制在该网格内。在网络输
+    出后加入 sigmoid 函数即可实现将任意输入压缩至 0 到 1 之间。
+  \item 特征融合：将尺寸为 $26 \times 26$ 的 feature map 与尺寸为 $13 \times 13$
+    的 feature map 进行融合，具体方法是将 $26 \times 26 \times 512$ 的 feature
+    map 变换为 $13 \times 13 \times 2048$，再和 $13 \times 13$ 的 feature map 拼
+    接。
+  \item 多尺度训练：训练时采用多尺度训练，即图片输入尺寸为 320 到 608 之间，步长
+    为 32 的随机数。
+  \item 新的 backbone：采用新的 backbone Darknet-19，包含 19 个卷积层和 5 个最大
+    池化层。
+\end{enumerate}
 
 \subsection{YOLO v3}
 \label{subsec:YOLOv3}
+YOLO v3 在 YOLO v2 的基础上做了部分改进\citerb{2018-YOLO-v3}：
+
+\begin{enumerate}
+  \item Anchor loss 的计算：每一个 GT 分配与其 IoU 最大的 anchor，该 anchor 对应的
+    前景分数为 1，如果不是 IoU 最大的 anchor 且与某个 GT 的 IoU 大于 0.5，则
+    该 anchor 会被忽略，即不产生前景分数 loss。同时，没有 GT 匹配的 anchor 也不产生
+    检测框位置和类别 loss，只计算前景分数 loss。
+  \item Loss 类型：将 Softmax loss 改为多个 sigmoid loss，一个 anchor 可以同时对
+    应多个类别。
+  \item 多尺度特征融合：采用类似 FPN\cite{2016-FPN} 的结构，将深层小尺寸 feature
+    map 进行上采样后，与浅层大尺寸 feature map 相加，作为新的 feature map，文
+    中共有 3 个尺度。
+  \item Anchor 按尺度分配：YOLO v3 中共有 9 种尺寸的 anchor，根据大小分配到不同的
+    尺度。
+  \item 新的 backbone：采用新的 backbone Darknet-53，包含 53 个卷积层，top-5 精
+    度与 ResNet-152 相当，速度快 1 倍。
+\end{enumerate}
+
 
 \section{SSD 系列}
 \label{sec:SSD}

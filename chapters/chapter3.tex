@@ -5,7 +5,7 @@
 \section{激活函数}
 
 激活函数的作用是为神经网络引入非线性因素，如果没有激活函数，无论神经网络有多少层，
-输出总为输入的线性函数，因此网络的拟合能力十分有限。
+输出总为输入的线性函数，因此网络的拟合能力将会十分有限。
 
 \subsection{Sigmoid 函数}
 \label{subsec:Sigmoid}
@@ -58,6 +58,30 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，Re
   \label{fig:ReLU}
 \end{figure}
 
+\section{损失函数}
+
+\subsection{交叉熵损失函数}
+
+\subsection{$L_1$ 损失函数}
+
+\subsection{$L_2$ 损失函数}
+
+\subsection{Smooth $L_1$ 损失函数}
+Smooth L1 是 $L_1$ 和 $L_2$ 损失函数的组合，其形式为：
+\begin{equation}
+  \label{equ:SmoothL1}
+  \mathrm{SL}_1(x) = \left\{
+    \begin{array}{lr}
+      |x| & |x| > \alpha \\
+      \frac{1}{\alpha} x^2 & |x| \leq \alpha \\
+    \end{array}
+  \right.
+\end{equation}
+
+由上式可知，Smooth $L_1$ 在 $x$ 的绝对值较小时为 $L_2$ 函数，而在 $x$ 的绝对值较
+大时为 $L_1$ 函数。R-CNN 系列文章中，回归 loss 均使用 Smooth $L_1$ 形
+式\citerb{2015-Fast-RCNN, 2015-Faster-RCNN}。
+
 \section{反向传播算法}
 考虑一个神经网络中的某个全连接层 $Y = XW + b$，设网络的 loss 为 $L$，根据链式法
 则，有如下关系~\citerb{2017-FC-BP}：
@@ -84,6 +108,13 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，Re
 
 梯度爆炸的一个简单直接的解决方法是梯度裁剪（Gradient Clipping），即当梯度的值超过
 一定阈值时，将其设为阈值的值，避免出现梯度过大的情况。
+
+\section{归一化}
+
+\subsection{批归一化}
+\label{sub:BN}
+
+批归一化（Batch Normalization，BN）
 
 \chapter{卷积神经网络}
 
