@@ -29,8 +29,8 @@ Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
 由图~\ref{fig:sigmoid}~中的蓝色曲线可知，Sigmoid 函数为 S 形，
 将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。由图~\ref{fig:sigmoid}~中
 的红色曲线可知，在输入值较大或较小时，Sigmoid 函数的导数趋近于 0，这个性质可能导
-致~\ref{subsec:gradient-vanish-explosion}~小节提到的梯度消失，从而导致网络无法正
-常训练。
+致网络出现~\ref{subsec:gradient-vanish-explosion}~小节提到的梯度消失问题，从而导
+致网络无法正常训练。
 
 \subsection{线性整流函数(ReLU)}
 
@@ -53,7 +53,7 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，Re
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/ReLU.png}
+  \includegraphics[width=0.5\textwidth]{images/机器学习和深度学习基础/基本概念/ReLU.png}
   \caption{ReLU 的图像}
   \label{fig:ReLU}
 \end{figure}

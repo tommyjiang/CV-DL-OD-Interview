@@ -62,6 +62,62 @@
 
 \chapter{单阶段方法}
 
+\section{YOLO 系列}
+\label{sec:YOLO}
+
+\subsection{YOLO v1}
+\label{subsec:YOLOv1}
+YOLO v1 将检测问题全部用回归问题描述，没有任何分类的部分。
+
+\subsubsection{检测方法}
+YOLO v1 的检测方法如下：
+
+\begin{enumerate}
+  \item 将整张图片划分为 $S \times S$ 个网格，每个网格预测 $ B $ 个检测框和 $ C $
+  个条件概率 $ \mathrm{Pr}(\mathrm{Class_i}|\mathrm{Object}) $。
+  \item 每个 bounding box 共包括 5 个值 $x, y, w, h$ 和 confidence。其中 $x, y$为中
+  心位置，$w, h$ 为长和宽(相对图片而言)，confidence 为$\mathrm{Pr}(\mathrm{Object}) \times
+  \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，inference 时直接将 confidence
+  乘以该网格对应的条件概率得到最终的分数。因此网络最终的输出维度为 $ S \times S
+  \times (B \times 5 + C) $。
+\end{enumerate}
+
+
+\subsubsection{Backbone}
+YOLO v1 的 backbone 没有采用改造的经典分类网络，而是采用结构为 24 个卷积层 + 2 个
+全连接层的自己设计的网络。训练时，先将前 20 个卷积层 + 平均池化层组成的网络
+在 ImageNet 数据集上进行预训练，输入尺寸为 $224 \times 224$，在检测时将尺寸扩大
+为 $448 \times 448$。
+
+\subsubsection{Loss 函数}
+
+YOLO v1 使用的 loss 函数为：
+\begin{align}
+  \label{equ:yolo-v1-loss}
+  \begin{split}
+    L = & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left (x_i - \hat{x}_i \right )^2 + \left (y_i - \hat{y}_i \right )^2 \right ] + \\
+    & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right)^2 + \left (\sqrt{h_i} - \sqrt{\hat{h}_i} \right )^2 \right ] + \\
+    & \, \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left( C_i - \hat{C}_i \right)^2 + \\
+    & \, \lambda_{\mathrm{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{noobj}} \left( C_i - \hat{C}_i \right)^2 + \\
+    & \, \sum_{i=0}^{S^2} \mathds{1}_{i}^{\mathrm{obj}} \sum_{c \in \mathrm{classes}} \left( p_i(c) - \hat{p}_i(c) \right)^2
+  \end{split}
+\end{align}
+
+\subsection{YOLO v2}
+\label{subsec:YOLOv2}
+
+\subsection{YOLO v3}
+\label{subsec:YOLOv3}
+
+\section{SSD 系列}
+\label{sec:SSD}
+
+\subsection{SSD}
+\label{subsec:SSD}
+
+\subsection{DSSD}
+\label{subsec:DSSD}
+
 \chapter{Anchor Free 方法}
 
 

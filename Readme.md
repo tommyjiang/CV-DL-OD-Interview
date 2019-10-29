@@ -1,6 +1,6 @@
 # CV-DL-OD-Interview
 
-计算机视觉深度学习目标检测方向的面经及解答。
+计算机视觉深度学习目标检测方向的面经及解答。感谢 [ThuThesis](https://github.com/xueruini/thuthesis) 提供的模板。
 
 ## 概率
 
