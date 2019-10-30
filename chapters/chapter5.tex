@@ -36,7 +36,14 @@
 
 传统 NMS 算法需要选择合适的两个检测框的 IoU 阈值，否则阈值太低会导致误检，而阈值
 太高又会导致漏检。Soft NMS 的基本思想是根据两个检测框的 IoU，降低低分检测框的分
-数，但并不直接将其删除，具体形式如图~\ref{fig:nms-algo}~中的绿框~\citerb{2017-Soft-NMS}。
+数，但并不直接将其删除，具体形式如图~\ref{fig:nms-algo}~中的绿
+框~\citerb{2017-Soft-NMS}。其中 $f(iou(M, b_i))$ 的形式为：
+
+\begin{equation}
+f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
+\end{equation}
+
+即两个框的 IoU 越大，分数较低框的分数降低的越多。
 
 \subsection{Softer NMS}
 文献~\citerb{2018-Softer-NMS}~中在 Soft NMS 的基础上提出了 Softer NMS，具体流程
@@ -85,11 +92,44 @@ w$ 的 RoI，再经过两个全连接层得到 RoI feature，再经过全连接�
 
 \paragraph{RoI Pooling 层}
 
-RoI 即 Region of Interest，中文为感兴趣区域。
+RoI 全称为 Region of Interest，中文可译为感兴趣区域。RoI Pooling 层的作用是将大小不一
+的proposal 统一转化为 $h \times w$ 的尺寸，作为后续全连接层的输入。全连接层要求输
+入为固定的尺寸，因此 RoI Pooling 对任意尺寸的输入都输出相同尺寸的输出。
 
 \paragraph{Loss 函数}
 
+Fast R-CNN 的 loss 为多任务 loss，包括分类和回归两部分，具体形式为：
+
+\begin{align}
+  L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\ 
+    & = -\mathrm{log}\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
+\end{align}
+
+上式中计算了所有样本的分类 loss 和正样本的回归 loss。其中回归真值 $t^u$ 的计算方
+法为\citerb{2013-RCNN}：
+\begin{align}
+  t_x & = (G_x - P_x) / P_w \\
+  t_y & = (G_y - P_y) / P_h \\
+  t_w & = \mathrm{log} (G_w/P_w) \\
+  t_h & = \mathrm{log} (G_h/P_h)
+\end{align}
+
+上式中，$G$ 和 $P$ 分别代表 Ground Truth 和 Proposal 对应的值，因此 $t$ 相当于二
+者之间的一种变换关系，Fast R-CNN 网络回归部分输出的 $v$ 与 $t$ 一样，\textbf{也是
+  变换关系，而非直接预测检测框的位置}。回归部分采用 Smooth $L_1$ 形式 loss 的原
+因，原文中解释是对偏差较大的点的敏感性低，因此不容易出现梯度爆炸问题，网络更容易
+训练。
+
 \paragraph{正负样本}
+分类部分计算 loss 时需要判断 proposal 的正负样本属性，具体标准为：
+
+\begin{itemize}
+  \item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
+  \item 负样本：与所有 GT 的最大 0.1 $\leq$ IoU $ < $ 0.5。
+\end{itemize}
+
+文中解释负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（Hard Example Mining，
+HEM），因为 IoU 小于 0.1 的 proposal 可以认为是简单样本，训练时只用较难的样本。
 
 \paragraph{训练}
 
