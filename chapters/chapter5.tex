@@ -3,8 +3,14 @@
 
 \section{指标}
 
-\subsection{交并比}
-交并比（Intersection over Union，IoU）
+\subsection{交并比（IoU）}
+交并比（Intersection over Union，IoU）是衡量两个矩形接近程度的一种指标，其定义为：
+
+\begin{equation}
+\end{equation}
+
+\subsection{mAP}
+mAP 全称为 Mean Average Precision，中文一般不进行翻译。
 
 \section{非极大值抑制（NMS）}
 
@@ -78,10 +84,11 @@ Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一�
 
 \paragraph{网络结构} 
 
-Fast R-CNN 的网络结构如~\ref{fig:Fast-RCNN}~所示，前面是统一的 CNN backbone，对于
-每个 proposal，将其投射到 feature map 再经过 RoI pooling 层得到尺寸为 $h \times
-w$ 的 RoI，再经过两个全连接层得到 RoI feature，再经过全连接层 + Softmax 层的分类
-器得到分类分数，同时 RoI feature 也会经过全连接层得到回归变换值。
+Fast R-CNN 的网络结构如图~\ref{fig:Fast-RCNN}~所示，前面是统一的 CNN backbone，对
+于每个 proposal，将其投射到 feature map 再经过 RoI pooling 层得到尺寸为 $h
+\times w$ 的 RoI，再经过两个全连接层得到 RoI feature，再经过全连接层 + Softmax 层
+的分类器得到分类分数（共 $C+1$ 类，多一个背景类），同时 RoI feature 也会经过全连
+接层得到回归变换值（$t_x, t_y, t_w, t_h$四个值）。
 
 \begin{figure}[ht]
   \centering
@@ -99,7 +106,6 @@ RoI 全称为 Region of Interest，中文可译为感兴趣区域。RoI Pooling 
 \paragraph{Loss 函数}
 
 Fast R-CNN 的 loss 为多任务 loss，包括分类和回归两部分，具体形式为：
-
 \begin{align}
   L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\ 
     & = -\mathrm{log}\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
@@ -116,25 +122,98 @@ Fast R-CNN 的 loss 为多任务 loss，包括分类和回归两部分，具体�
 
 上式中，$G$ 和 $P$ 分别代表 Ground Truth 和 Proposal 对应的值，因此 $t$ 相当于二
 者之间的一种变换关系，Fast R-CNN 网络回归部分输出的 $v$ 与 $t$ 一样，\textbf{也是
-  变换关系，而非直接预测检测框的位置}。回归部分采用 Smooth $L_1$ 形式 loss 的原
-因，原文中解释是对偏差较大的点的敏感性低，因此不容易出现梯度爆炸问题，网络更容易
-训练。
+  变换关系，而非直接预测检测框的位置}。回归部分采用 Smooth $L_1$ loss 的原因，原
+文中解释是对偏差较大的点的敏感性低，因此不容易出现梯度爆炸问题，网络更容易训练。
 
 \paragraph{正负样本}
-分类部分计算 loss 时需要判断 proposal 的正负样本属性，具体标准为：
+计算分类 loss 时需要判断 proposal 的正负样本属性，具体标准为：
 
 \begin{itemize}
-  \item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
-  \item 负样本：与所有 GT 的最大 0.1 $\leq$ IoU $ < $ 0.5。
+  \item 正样本：与任一 GT 的 IoU $ \geq $ 0.5。
+  \item 负样本：与所有 GT 的最大 IoU 在 $ [0.1, 0.5) $ 区间。
 \end{itemize}
 
 文中解释负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（Hard Example Mining，
 HEM），因为 IoU 小于 0.1 的 proposal 可以认为是简单样本，训练时只用较难的样本。
 
 \paragraph{训练}
+训练时每个 batch 包含 2 张图，每张图取 64 个 proposal，相当于每个 batch 有 128
+个 proposal，其中正负样本比例为 1:3。
 
 \subsection{Faster R-CNN}
 \label{subsec:Faster-R-CNN}
+
+Faster R-CNN 是目标检测领域最经典的论文之一，文中提出了候选区域提取网络（Region
+Proposal Network，RPN），可以直接利用 CNN 生成 proposal 以替代 selective search
+等方法，同时通过共享 backbone，将 RPN 和 Fast R-CNN 合并成一个统一的 end-to-end
+的网络，相比 Fast R-CNN 大幅提高了训练和测试速度。
+
+\paragraph{RPN 网络结构} 
+RPN 网络最开始是一的 CNN backbone，经过一个 $3 \times 3$ 的卷积层得到 feature
+map，然后分别用一个 $1 \times 1$ 的卷积层 + Softmax 层的分类器得到分类分数（只
+有\textbf{两类}，即前景类和背景类），同时再用一个 $1 \times 1$ 的卷积层得
+到 anchor 到 GT 的变换（$t_x, t_y, t_w, t_h$四个值）。Faster R-CNN 最终的网络结构
+是两个共享 backbone 的 RPN 和 Fast R-CNN 的组合。
+
+\paragraph{RPN 网络 loss 函数} 
+RPN 网络的 loss 函数和 Fast R-CNN 网络的非常类似，都包括分类和回归两项，区别
+是 Fast R-CNN 一般为多分类，用 softmax loss；而 RPN 网络只是二分类，可以直接用交
+叉熵 loss。
+
+\paragraph{RPN 网络正负样本} 
+RPN 计算分类 loss 时需要判断 anchor 的正负样本属性，具体标准为：
+
+\begin{itemize}
+  \item 正样本：与任一 GT 的 IoU $\geq$ 0.7。
+  \item 负样本：与所有 GT 的最大 IoU $ \leq $ 0.3。
+  \item 忽略样本：与所有 GT 的最大 IoU 在 $[0.3, 0.7]$。
+\end{itemize}
+
+训练时每个 batch 包含 1 张图的 256 个 anchor，其中正负样本比例为 1:1。如果正样本
+数不足 128，用负样本填充，保证一个 batch 的 anchor 数为 256。
+
+\paragraph{训练方法}
+
+Faster R-CNN 的训练方法一般包括 4 步交替训练法和近似联合训练法，主要介绍 4 步交
+替训练法的具体步骤：
+
+\begin{enumerate}
+  \item Backbone 采用 pretrain model 权重，训练 RPN。
+  \item Backbone 采用 pretrain model 权重，利用第 1 步 RPN 生成的 proposal，训练 Fast R-CNN。
+  \item Backbone 采用第 2 步得到的权重，固定 backbone，只 fine tune RPN 新增的层。
+  \item Backbone 采用第 2 步得到的权重，固定 backbone，只 fine tune Fast R-CNN 新增的层。
+\end{enumerate}
+
+通过以上四步即可得到 RPN 和 Fast R-CNN 共享 backbone 的 Faster R-CNN 网络。
+
+\paragraph{RPN 后处理}
+由于 RPN 生成的 proposal 有大量的重复区域，因此需要先进行后处理才能作为 Fast
+R-CNN 的输入，后处理的步骤为：
+
+\begin{enumerate}
+  \item 取生成的分数最高的 top $N_{\mathrm{pre}}$ 个 proposal。
+  \item 给定 IoU 阈值，对第 1 步的所有 proposal 做 NMS。
+  \item 取第 2 步 NMS 之后分数最高的 top $N_{\mathrm{post}}$ 个 proposal。
+\end{enumerate}
+
+需要强调的是，后处理得到 proposal 后，RPN 的分数就不需要了，proposal 正负样本的
+判断与 RPN 分数无关，\textbf{只与其与 GT 的 IoU 有关}。
+
+\section{FPN}
+\label{sec:FPN}
+
+FPN 的核心思想是融合不同尺寸的 feature 得到 feature 金字塔，FPN 及不同方法的对比
+如图~\ref{fig:FPN}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/FPN.pdf}
+  \caption{FPN 与其他方法对比}
+  \label{fig:FPN}
+\end{figure}
+
+\begin{itemize}
+\end{itemize}
 
 \chapter{单阶段方法}
 
@@ -234,10 +313,9 @@ YOLO v3 在 YOLO v2 的基础上做了部分改进\citerb{2018-YOLO-v3}：
     中共有 3 个尺度。
   \item Anchor 按尺度分配：YOLO v3 中共有 9 种尺寸的 anchor，根据大小分配到不同的
     尺度。
-  \item 新的 backbone：采用新的 backbone Darknet-53，包含 53 个卷积层，top-5 精
-    度与 ResNet-152 相当，速度快 1 倍。
+  \item 新的 backbone：采用新的 backbone Darknet-53，包含 53 个卷积层，其 top-5
+    精度与 ResNet-152 相当，速度快 1 倍。
 \end{enumerate}
-
 
 \section{SSD 系列}
 \label{sec:SSD}
@@ -245,10 +323,53 @@ YOLO v3 在 YOLO v2 的基础上做了部分改进\citerb{2018-YOLO-v3}：
 \subsection{SSD}
 \label{subsec:SSD}
 
+SSD 是目标检测单阶段方法的经典工作之一，直观上可以将 SSD 看成多分类 + 多 feature
+map 预测的 RPN\cite{2015-SSD}。
+
+\paragraph{网络结构} 
+SSD 网络的 backbone 采用 VGG-16，其后接了若干卷积层。检测 head 是一个 $3 \times
+3$ 的卷积层，分别接在不同尺寸的 feature map 上，即进行多尺度预测。
+
+\paragraph{Loss 函数}
+与 Fast R-CNN 相同。
+
+\paragraph{正负样本} 
+SSD 中引入了和 anchor 类似的 default box，其正负样本的标准为：
+
+\begin{itemize}
+\item 正样本：包括两类，第一类是 GT 对应的 IoU 的 default box，第二类是与 GT 的
+  最大 IoU $ \geq 0.5 $。 
+\item 负样本：与 GT 的最大 IoU $ < 0.5 $。
+\end{itemize}
+
+\paragraph{Default box 尺寸} 
+SSD 使用了多尺度预测，不同尺寸 feature map 上的 default box 也采用了不同的预设尺
+寸，这部分原文和源代码不一致，简单的原则是尺寸大的浅层 feature map 上的 default
+box 尺寸小，反之尺寸大。具体请参考
+\href{https://github.com/weiliu89/caffe/blob/ssd/examples/ssd/ssd_pascal.py}{这里}。
+
+\paragraph{训练} 
+SSD 训练时的正负样本比为 1:3，在训练时使用了难样本挖掘（HEM），即只选择 loss 最高
+的负样本进行计算。
+
 \subsection{DSSD}
 \label{subsec:DSSD}
 
+\section{RetinaNet 系列}
+
+\subsection{RetinaNet}
+\label{sub:RetinaNet}
+
 \chapter{Anchor Free 方法}
+
+\section{CornerNet}
+\label{sec:CornerNet}
+
+\section{ExtremeNet}
+\label{sec:ExtremeNet}
+
+\section{CenterNet}
+\label{sec:CenterNet}
 
 
 %%% Local Variables:
