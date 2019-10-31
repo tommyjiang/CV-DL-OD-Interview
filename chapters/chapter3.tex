@@ -4,16 +4,17 @@
 
 \section{激活函数}
 
-激活函数的作用是为神经网络引入非线性因素，如果没有激活函数，无论神经网络有多少层，
-输出总为输入的线性函数，因此网络的拟合能力将会十分有限。
+激活函数的作用是引入非线性因素，提升神经网络的拟合能力。如果没有激活函数，无论神
+经网络有多少层，输出总为输入的线性函数，因此网络的拟合能力将会十分有限。
 
 \subsection{Sigmoid 函数}
 \label{subsec:Sigmoid}
 
-Sigmoid 函数的原函数和导数如公式~\ref{equ:sigmoid}~所示：
+Sigmoid 函数的原函数和导数为：
 \begin{align}
   \label{equ:sigmoid}
   \sigma(x) & = \frac{1}{1 + e^{-x}} \\
+  \label{equ:sigmoid-d}
   \sigma'(x) & = \sigma(x) (1-\sigma(x))
 \end{align}
 
@@ -26,7 +27,7 @@ Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
   \label{fig:sigmoid}
 \end{figure}
 
-由图~\ref{fig:sigmoid}~中的蓝色曲线可知，Sigmoid 函数为 S 形，
+由图~\ref{fig:sigmoid}~中的蓝色曲线可知，Sigmoid 函数的形状与字母 S 类似，可以
 将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。由图~\ref{fig:sigmoid}~中
 的红色曲线可知，在输入值较大或较小时，Sigmoid 函数的导数趋近于 0，这个性质可能导
 致网络出现~\ref{subsec:gradient-vanish-explosion}~小节提到的梯度消失问题，从而导
@@ -34,8 +35,7 @@ Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
 
 \subsection{线性整流函数(ReLU)}
 
-线性整流函数（Rectifier Linear Unit）是目前应用广泛的激活函数，其形式如公
-式~\ref{equ:ReLU}~所示：
+线性整流函数（Rectifier Linear Unit）是目前应用广泛的激活函数，其形式为：
 
 \begin{equation}
   \label{equ:ReLU}
@@ -81,6 +81,37 @@ Smooth L1 是 $L_1$ 和 $L_2$ 损失函数的组合，其形式为：
 由上式可知，Smooth $L_1$ 在 $x$ 的绝对值较小时为 $L_2$ 函数，而在 $x$ 的绝对值较
 大时为 $L_1$ 函数。R-CNN 系列文章中，回归 loss 均使用 Smooth $L_1$ 形
 式\citerb{2015-Fast-RCNN, 2015-Faster-RCNN}。
+
+\subsection{Focal loss}
+
+Focal loss 是由文献\citerb{2017-RetinaNet}中提出，用于解决目标检测中正负样本不平
+衡的问题。一般而言，只要样本存在类别不平衡，都可以尝试引入 focal loss 解决，相当
+于进行了难样本挖掘（HEM）。
+
+Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:focal-loss}~所示：
+\begin{equation}
+  \label{equ:focal-loss}
+  \mathrm{FL}(p_{\mathrm{t}}) = - \alpha_t (1-p_{\mathrm{t}})^{\gamma} \mathrm{log}(p_{\mathrm{t}})
+\end{equation}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/Focal-Loss.pdf}
+  \caption{Focal loss 的图像（$\alpha_t = 1$）}
+  \label{fig:focal-loss}
+\end{figure}
+
+图~\ref{fig:focal-loss}~中，$\gamma = 0$ 的蓝色曲线即传统的交叉熵 loss，可以认为
+是 focal loss 的一个特例。其他颜色的曲线分别表示 $\gamma$ 取不同数值时的 focal
+loss。Focal loss 中两个参数的具体作用是：
+
+\begin{itemize}
+  \item $\alpha_t$：用于平衡不同类别样本的权重，一般所有类别对应的 $\alpha_t$ 之
+    和为 1。
+  \item $\gamma$：用于平衡难易样本的权重，$\gamma$ 越大，则简单样本的等效权重越
+    小。例如 $\gamma = 2$ 时，$p = 0.9$ 的样本，focal loss 的值比交叉熵 loss 的
+    值小 100 倍，而 $p = 0.968$ 的样本则小 1000 倍。
+\end{itemize}
 
 \section{反向传播算法}
 考虑一个神经网络中的某个全连接层 $Y = XW + b$，设网络的 loss 为 $L$，根据链式法

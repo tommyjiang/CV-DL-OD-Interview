@@ -5,8 +5,9 @@
 
 \subsection{交并比（IoU）}
 交并比（Intersection over Union，IoU）是衡量两个矩形接近程度的一种指标，其定义为：
-
 \begin{equation}
+  \label{equ:IoU}
+  \mathrm{IoU} = \frac{\mathrm{Intersection}(A, B)}{\mathrm{union}(A, B)}
 \end{equation}
 
 \subsection{mAP}
@@ -44,7 +45,6 @@ mAP 全称为 Mean Average Precision，中文一般不进行翻译。
 太高又会导致漏检。Soft NMS 的基本思想是根据两个检测框的 IoU，降低低分检测框的分
 数，但并不直接将其删除，具体形式如图~\ref{fig:nms-algo}~中的绿
 框~\citerb{2017-Soft-NMS}。其中 $f(iou(M, b_i))$ 的形式为：
-
 \begin{equation}
 f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \end{equation}
@@ -395,7 +395,42 @@ SSD 训练时的正负样本比为 1:3，在训练时使用了难样本挖掘（
 \label{sub:RetinaNet}
 
 RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster R-CNN、SSD 和 FPN 中
-的精华，同时结合新颖的 focal loss，扭转了当时比较普遍的双阶段准、单阶段快的观点。
+的精华，同时提出新颖的 focal loss，性能超过了当时的两阶段模型，一举扭转了当时比较
+流行的目标检测模型双阶段准、单阶段快的观点\citerb{2017-RetinaNet}。
+
+\paragraph{Focal loss 的应用}
+RetinaNet 训练时分类部分的 loss 采用 focal loss，扫参结果 $\alpha = 0.25, \gamma
+= 2$ 时效果最好。由于正样本数量很少，因此对分类器的初始化也做了调整，将最后一个
+卷积层的偏置的初值设为 $-\mathrm{log}((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
+原文中取为 0.01。应用 focal loss 后，所有 anchor 都参与计算 loss，不再需要进行采
+样。
+
+\paragraph{Anchor 参数}
+RetinaNet 同样采用了 FPN 结构，分别从 $P_3$ 到 $P_7$ 五个尺度进行预测，对应的
+anchor 面积为 $32^2$ 到 $512^2$。每个尺度上有三个长宽比例和三种不同尺寸 anchor
+的组合，共 9 种 anchor。
+
+\paragraph{正负样本}
+正负样本判断标准如下：
+\begin{itemize}
+\item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
+\item 负样本：与所有 GT 的最大 IoU $ < $ 0.4。
+\item 忽略样本：与所有 GT 的最大 IoU 在 $[0.4, 0.5)$。
+\end{itemize}
+
+\paragraph{分类 head}
+在 FPN 得到的 channel 数为 $C$ 的 feature map 上，先接 4 个 channel 数为 $C$ 的
+$3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 \times 3$ 的
+卷积，其中 $K$ 为类别数，$A$ 为 anchor 数，最后再接 sigmoid 层得到最终的分数。
+
+\paragraph{回归 head}
+回归 head 与分类 head 的基本相同，除了最后不会接 sigmoid，因为回归部分可能输出负
+值。此外，回归 head 只输出一个变换关系，而非每个类别输出一个变换关系。需要说明的
+是，回归 head 和分类 head 虽然结构相同，但并不共享参数。
+
+\paragraph{Inference}
+Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前 1000 个结果，再进行
+阈值为 0.5 的 NMS 得到最终结果。
 
 \chapter{Anchor Free 方法}
 
