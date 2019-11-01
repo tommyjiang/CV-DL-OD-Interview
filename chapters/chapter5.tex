@@ -164,9 +164,10 @@ RPN 网络的 loss 函数和 Fast R-CNN 网络的非常类似，都包括分类�
 RPN 计算分类 loss 时需要判断 anchor 的正负样本属性，具体标准为：
 
 \begin{itemize}
-  \item 正样本：与任一 GT 的 IoU $\geq$ 0.7。
+  \item 正样本：与任一 GT 的 IoU $ \geq $ 0.7，以及在所有 anchor 中与某个 GT 的 IoU
+    最大。
   \item 负样本：与所有 GT 的最大 IoU $ \leq $ 0.3。
-  \item 忽略样本：与所有 GT 的最大 IoU 在 $[0.3, 0.7]$。
+  \item 忽略样本：与所有 GT 的最大 IoU 在 $(0.3, 0.7)$ 区间。
 \end{itemize}
 
 训练时每个 batch 包含 1 张图的 256 个 anchor，其中正负样本比例为 1:1。如果正样本
@@ -178,10 +179,11 @@ Faster R-CNN 的训练方法一般包括 4 步交替训练法和近似联合训�
 替训练法的具体步骤：
 
 \begin{enumerate}
-  \item Backbone 采用 pretrain model 权重，训练 RPN。
-  \item Backbone 采用 pretrain model 权重，利用第 1 步 RPN 生成的 proposal，训练 Fast R-CNN。
-  \item Backbone 采用第 2 步得到的权重，固定 backbone，只 fine tune RPN 新增的层。
-  \item Backbone 采用第 2 步得到的权重，固定 backbone，只 fine tune Fast R-CNN 新增的层。
+  \item Backbone 采用 pretrain model 权重初始化，训练 RPN。
+  \item Backbone 采用 pretrain model 权重初始化，利用第 1 步 RPN 生成的 proposal，训练 Fast R-CNN。
+  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，只 fine tune RPN 新增的层。
+  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，利用第 3 步生成的
+    proposal，只 fine tune Fast R-CNN 新增的层。
 \end{enumerate}
 
 通过以上四步即可得到 RPN 和 Fast R-CNN 共享 backbone 的 Faster R-CNN 网络。
@@ -248,6 +250,20 @@ map 的通道数相同，再将二者进行 element-wise 相加，再经过一�
 Fast R-CNN 应用 FPN 时，主要需要根据 proposal 的尺寸分配不同 scale，利用 $ k =
 \lfloor k_0 + \mathrm{log}_2 ( \sqrt{wh}/224 ) \rfloor$，即根据 proposal 的面积将
 其分配到不同尺度的 feature map，面积越大分配的 feature map 越深，反之越浅。
+
+\section{Faster R-CNN 的改进}
+\label{sec:faster-improve}
+
+\subsection{RoI Pooling 层的改进}
+\subsubsection{Mask R-CNN}
+
+\subsection{检测 head 的改进}
+
+\subsubsection{R-FCN}
+
+\subsubsection{Light-Head R-CNN}
+
+\subsubsection{Double-Head R-CNN}
 
 \chapter{单阶段方法}
 
