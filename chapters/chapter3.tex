@@ -83,10 +83,9 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
 
 \subsection{Focal loss}
 
-文献\citerb{2017-RetinaNet}提出 Focal loss，用于解决目标检测中正负样本不平
-衡的问题。一般而言，只要样本存在类别不平衡，都可以尝试引入 focal loss 解决，通过
-降低简单样本的权重，focal loss 在一定程度上相当于难样本挖掘（Hard Negative
-Mining，HEM）。
+文献\citerb{2017-RetinaNet}提出 focal loss，用于解决目标检测中正负样本不平衡的问
+题，该 loss 在存在样本不平衡的其他问题中也有不错的表现。Focal loss 通过降低简单样
+本的权重，在一定程度上相当于难样本挖掘（Hard Negative Mining，HEM）。
 
 Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:focal-loss}~所示：
 \begin{equation}
@@ -139,14 +138,15 @@ loss。Focal loss 中两个参数的具体作用是：
 
 \subsection{梯度消失和梯度爆炸}
 \label{subsec:gradient-vanish-explosion}
-根据链式法则，对于深层神经网络，其浅层参数的梯度与之后所有层输出对输入梯度的乘积
-相关。直观理解，如果梯度都小于 1，相乘后的值很小，导致梯度消失；反之如果梯度都大
-于 1，相乘后的值很大，导致梯度爆炸。
+根据链式法则，对于深层神经网络，浅层参数的梯度与之后所有层输出对输入梯度的乘积
+相关。直观理解，如果梯度都小于 1，相乘后的值很小，会导致梯度消失；反之如果梯度都大
+于 1，相乘后的值很大，会导致梯度爆炸。
 
-梯度消失的一个典型原因是使用了 Sigmoid 函数，具体原因请见~\ref{subsec:Sigmoid}小节中的分析。
+梯度消失的一个典型原因是激活层使用了 Sigmoid 函数，具体原因请
+见~\ref{subsec:Sigmoid}小节中的分析。
 
-梯度爆炸的一个简单直接的解决方法是梯度裁剪（Gradient Clipping），即当梯度的值超过
-一定阈值时，将其设为阈值的值，避免出现梯度过大的情况。
+梯度爆炸的一个简单的解决方法是梯度裁剪（Gradient Clipping），即设定一个阈值，当梯
+度值大于阈值时，使其等于阈值，这样即可避免梯度过大。
 
 \section{归一化}
 
@@ -154,22 +154,24 @@ loss。Focal loss 中两个参数的具体作用是：
 \label{sub:BN}
 
 批归一化（Batch Normalization，BN）是文献\citerb{2015-BN}中提出的一种归一化方法，
-BN 的好处包括：
+BN 的作用包括：
 
 \begin{enumerate}
-  \item 降低深层神经网络的训练难度，训练时可以使用更大的学习率，同时不需要特别严
-    格的初始化方法。
-  \item 相当于引入了正则项，加入 BN 后可以去掉作为正则
-    的 dropout 层，\hyperref[subsec:YOLOv2]{YOLOv2} 就是一个典型的例子。
-  \item 加快神经网络训练速度，与不加 BN 的网络相比，加入 BN 后的网络训练时间减少
-    10 倍以上。
+  \item 降低深层神经网络的训练难度。训练时可以使用更大的学习率，同时不需要特别谨
+    慎地对网络参数进行初始化。
+  \item 防止过拟合。BN 一定程度上相当于引入了正则项，网络中加入 BN 后可以去
+    掉 dropout 层，\hyperref[subsec:YOLOv2]{YOLOv2} 就是一个典型的例子。
+  \item 加快神经网络训练速度。加入 BN 后网络的训练时间减少 10 倍以上。
 \end{enumerate}
 
-\paragraph{BN 的形式}
-BN 包括归一化和线性变换两部分，其中归一化是为了减少上层网络参数变化导致的输入变
-化，线性变换部分是为了增加 BN 层的表达能力，如果没有线性变换部分，BN 层的输出将
-始终为均值为 0，方差为 1 的分布，无法体现上层网络参数变化对其的影响。
+文献\citerb{2015-BN}中提出 BN 有效的原因是其减少了神经网络的内部协同变化
+（Internal Covariate Shift，ICS），但有文献论证 BN 并不能减少 ICS，其提升性能的原
+因是使 loss 变得更平滑\citerb{2018-BN-help-opt}。
 
+\paragraph{BN 的形式}
+BN 包括归一化和线性变换两部分。其中归一化是为了减少上层网络参数变化导致对输入的影
+响；线性变换部分是为了增加 BN 层的表达能力，如果没有线性变换部分，BN 层的输出将始
+终为均值为 0，方差为 1 的分布，无法体现上层网络参数变化对其的影响。
 \begin{align}
   \label{equ:BN}
   \mu_{\mathcal{B}} & = \frac{1}{m} \sum_{i=1}^{m} x_i \\
@@ -179,27 +181,27 @@ BN 包括归一化和线性变换两部分，其中归一化是为了减少上�
 \end{align}
 
 \begin{itemize}
-  \item 上式中 $m$ 为一个 batch 的样本数，即上式中期望和方差计算的是一个 batch 的统
-  计量。实际应用中，训练时有时会采用滑动平均计算均值和方差，即同时考虑历
-  史 batch 和本 batch 的统计量，例如 Caffe 中的 \href{https://bit.ly/2JBY7aw}{BN
-    层}。测试时，\textbf{使用训练时保存的统计量}，不再需要每个 batch 单独计算均值和方差。
+\item 上式中 $m$ 为一个 batch 的样本数，即期望和方差计算的都是一个 batch 的统计量。
+  实际应用中，训练时可以采用滑动平均的方法计算均值和方差，即同时考虑历史 batch 和
+  当前 batch 的统计量，例如 Caffe 中的
+  \href{https://bit.ly/2JBY7aw}{BN层}。测试时，\textbf{使用训练时保存的均值和方
+    差}，不需要每个 batch 都重新计算。
   \item BN 层中有两个需要学习的参数，即线性变换的参数 $\gamma$ 和 $\beta$，这两
     个参数的初值分别为 1 和 0。
 \end{itemize}
 
 \paragraph{CNN 中的 BN}
 \begin{itemize}
-  \item 卷积层后面的 BN 的均值和方差的计算：计算的是一个 batch 中 $m$ 个样本对应的
-    同一个 feature map 的均值和方差。如果一个 batch 对应的卷积层输出维度为 $m
-    \times C \times H \times W$，则只计算 feature map 个数即 $C$ 个均值和方差，
-    不同的 feature map 利用对应的均值和方差进行归一化。
-  \item BN 的位置：文献~\citerb{2015-BN}~中给出的标准结构是\textbf{卷积
-    层-BN-ReLU}，即 BN 层加在卷积层之后，ReLU 之前。
-  \item 卷积层的偏置 $b$：由于 BN 会减去输入的均值，因此可以省略卷积层的偏置，因为偏
-    置对输入的影响也会体现在均值上，加不加偏置结果是一样的。
-  \item 测试时对卷积层和 BN 层进行合并：由于卷积层和 BN 层都是线性变换，且测试
-    时BN 层使用的均值和方差均为已知量，因此可以将二者合并以提升计算速度，具体参数
-    计算方法可以参考文献\citerb{2017-DSSD}。
+  \item 卷积层之后 BN 均值和方差的计算方法：计算的是一个 batch 中 $m$ 个样本对应的
+    同一个 feature map 上所有点的均值和方差。如果一个 batch 对应的卷积层的输出维度
+    为 $m \times C \times H \times W$，则只计算通道数 $C$ 个均值和方差，不同
+    的 feature map 利用对应的均值和方差进行归一化。
+  \item BN 的位置：文献~\citerb{2015-BN}~中给出的结构是\textbf{卷积层-BN-ReLU}，
+    即 BN 层加在卷积层之后，ReLU 之前。
+  \item 卷积层的偏置 $b$：由于 BN 中包含减均值的操作，因此可以省略卷积层的偏置。
+  \item 测试时将卷积层和 BN 层进行合并：由于卷积层和 BN 层都是线性变换，且测试
+    时 BN 层使用的均值和方差均为训练时保存的结果，因此可以将二者合并以提升计算速
+    度，合并后参数的计算方法可以参考文献\citerb{2017-DSSD}。
 \end{itemize}
 
 \chapter{卷积神经网络}
@@ -208,9 +210,10 @@ BN 包括归一化和线性变换两部分，其中归一化是为了减少上�
 
 \subsection{分组卷积}
 
-分组卷积（Group Convolution，GC）在最早的 AlexNet 中就已经应用，但当时应用的原因是 GPU 计算能力不足，只能
-将标准卷积拆成 2 个分组卷积~\citerb{2012-AlexNet}。分组卷积和标准卷积的对比如
-图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所示~\citerb{2019-Diff-Conv}：
+分组卷积（Group Convolution，GC）在 AlexNet 中就已经有应用，但当时的背景是 GPU 计
+算能力不足，只能将标准卷积拆成 2 个分组卷积~\citerb{2012-AlexNet}。分组卷积和标准
+卷积的对比如图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所
+示~\citerb{2019-Diff-Conv}：
 
 \begin{figure}[ht]
   \centering
@@ -226,23 +229,23 @@ BN 包括归一化和线性变换两部分，其中归一化是为了减少上�
   \label{fig:group-conv}
 \end{figure}
 
-由以上两图可知，分组卷积的具体步骤是：
+分组卷积的具体步骤是：
 
 \begin{enumerate}
-  \item 将输入拆分成 $g$ 组，每组数据的尺寸与输入相同，均为 $H_{\mathrm{in}}
-    \times W_{\mathrm{in}}$，但每组的 channel 数均为输入的 $ 1/g $，即 channel
-    数为 $ C_{\mathrm{in}} / g $。
-  \item 对拆分后的 $g$ 组数据分别进行标准卷积，每一组数据对应的输出的 channel 数
+  \item 将输入按通道拆分成 $g$ 组，每组数据的尺寸与输入相同，均为 $H_{\mathrm{in}}
+    \times W_{\mathrm{in}}$，通道数均为输入的 $ 1/g $，即 $
+    C_{\mathrm{g}} = C_{\mathrm{in}} / g $。
+  \item 分别对拆分后的 $g$ 组数据进行标准卷积，每一组数据对应的输出的通道数
     均为 $ C_{\mathrm{out}}/g $。
-  \item 将 $g$ 组数据的输出结果进行 concat，得到 channel 数为 $C_{\mathrm{out}}$
+  \item 将 $g$ 组数据的输出结果进行拼接，得到通道数为 $C_{\mathrm{out}}$
     的输出。
 \end{enumerate}
 
-由以上分析可知，与标准卷积相比，分组卷积的计算量约为其 $ 1 / g^2 $，即组数越多，
-计算量越小。
+分组卷积可以节省计算量，适用于对计算速度要求较高的模块。参数相同的情况下，分组卷
+积的计算量约为标准卷积的 $ 1 / g^2 $，组数越多，计算量越小。
 
 分层卷积（Depthwise Convolution，DW）是分组卷积的一种特例，指的是组数 $g$ 与 输
-入数据的 channel 数 $C_{\mathrm{in}}$ 相同的卷积，即每组卷积的输入只有 1 个 channel。
+入数据通道数 $C_{\mathrm{in}}$ 相同的卷积，即每组卷积的输入只有 1 个通道。
 
 \subsection{深度可分离卷积}
 
@@ -258,9 +261,10 @@ BN 包括归一化和线性变换两部分，其中归一化是为了减少上�
 
 深度可分离卷积的步骤包括分层卷积和逐点卷积两部分，计算量为标准卷积计算量的 $ 1 /
 C_{\mathrm{in}} + 1/k^2 $，$k$ 为分层卷积的卷积核大小。
-当 channel 数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\citerb{2017-MobileNet-v1}。
+当通道数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\citerb{2017-MobileNet-v1}。
 
 \subsection{反卷积}
+\label{subsec:deconv}
 
 反卷积(Deconvolution)，有时也称转置卷积(Transposed Convolution)，是一种特殊的卷积
 形式。反卷积的具体步骤是，先通过补 0 扩大输入图像的尺寸，再进行标准卷积。反卷积的
