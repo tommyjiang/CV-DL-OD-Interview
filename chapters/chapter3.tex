@@ -4,21 +4,19 @@
 
 \section{激活函数}
 
-激活函数的作用是引入非线性因素，提升神经网络的拟合能力。如果没有激活函数，无论神
-经网络有多少层，输出总为输入的线性函数，因此网络的拟合能力将会十分有限。
+激活函数的作用是为神经网络引入非线性因素，提升网络的拟合能力。如果没有激活函数，
+无论神经网络有多少层，输出总为输入的线性函数，因此网络的拟合能力将会十分有限。
 
 \subsection{Sigmoid 函数}
 \label{subsec:Sigmoid}
 
-Sigmoid 函数的原函数和导数为：
+Sigmoid 函数及其导数的形式和图像如下：
 \begin{align}
   \label{equ:sigmoid}
   \sigma(x) & = \frac{1}{1 + e^{-x}} \\
   \label{equ:sigmoid-d}
   \sigma'(x) & = \sigma(x) (1-\sigma(x))
 \end{align}
-
-Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
 
 \begin{figure}[ht]
   \centering
@@ -27,15 +25,17 @@ Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
   \label{fig:sigmoid}
 \end{figure}
 
-由图~\ref{fig:sigmoid}~中的蓝色曲线可知，Sigmoid 函数的形状与字母 S 类似，可以
-将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。由图~\ref{fig:sigmoid}~中
-的红色曲线可知，在输入值较大或较小时，Sigmoid 函数的导数趋近于 0，这个性质可能导
-致网络出现~\ref{subsec:gradient-vanish-explosion}~小节提到的梯度消失问题，从而导
-致网络无法正常训练。
+\begin{itemize}
+\item 图~\ref{fig:sigmoid}~中蓝色曲线为 Sigmoid 函数，其形状与字母 S 类似，可以
+  将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。由
+\item 图~\ref{fig:sigmoid}~中红色曲线为 Sigmoid 函数的导数，在输入值较大或较小
+  时，Sigmoid 函数的导数趋近于 0，这个性质可能引发\hyperref[subsec:gradient-vanish-explosion]{梯度消失}问题，导致网络无法正常训练。
+\end{itemize}
+
 
 \subsection{线性整流函数(ReLU)}
 
-线性整流函数（Rectifier Linear Unit）是目前应用广泛的激活函数，其形式为：
+线性整流函数（Rectifier Linear Unit，ReLU）是目前应用广泛的激活函数，其形式为：
 
 \begin{equation}
   \label{equ:ReLU}
@@ -48,8 +48,7 @@ Sigmoid 函数的图像如图~\ref{fig:sigmoid}~所示：
 \end{equation}
 
 ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，ReLU 在 $x > 0$ 时对
-应的导数始终为 1，不会出现梯度消失现象；但当 $x \leq 0$ 时梯度始终为 0，同样会导
-致梯度消失。
+应的导数始终为 1，不会导致梯度消失；但当 $x \leq 0$ 时梯度始终为 0，同样会导致梯度消失。
 
 \begin{figure}[ht]
   \centering
@@ -67,7 +66,7 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，Re
 \subsection{$L_2$ 损失函数}
 
 \subsection{Smooth $L_1$ 损失函数}
-Smooth L1 是 $L_1$ 和 $L_2$ 损失函数的组合，其形式为：
+Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式为：
 \begin{equation}
   \label{equ:SmoothL1}
   \mathrm{SL}_1(x) = \left\{
@@ -78,15 +77,16 @@ Smooth L1 是 $L_1$ 和 $L_2$ 损失函数的组合，其形式为：
   \right.
 \end{equation}
 
-由上式可知，Smooth $L_1$ 在 $x$ 的绝对值较小时为 $L_2$ 函数，而在 $x$ 的绝对值较
-大时为 $L_1$ 函数。R-CNN 系列文章中，回归 loss 均使用 Smooth $L_1$ 形
-式\citerb{2015-Fast-RCNN, 2015-Faster-RCNN}。
+由上式可知，Smooth $L_1$ 损失函数在 $x$ 绝对值较小时为 $L_2$ 函数，而在 $x$ 绝对
+值较大时为 $L_1$ 函数。在目标检测的\hyperref[sec:R-CNN]{两阶段方法}中，回归 loss
+一般使用 Smooth $L_1$ 损失函数。
 
 \subsection{Focal loss}
 
-Focal loss 是由文献\citerb{2017-RetinaNet}中提出，用于解决目标检测中正负样本不平
-衡的问题。一般而言，只要样本存在类别不平衡，都可以尝试引入 focal loss 解决，相当
-于进行了难样本挖掘（HEM）。
+文献\citerb{2017-RetinaNet}提出 Focal loss，用于解决目标检测中正负样本不平
+衡的问题。一般而言，只要样本存在类别不平衡，都可以尝试引入 focal loss 解决，通过
+降低简单样本的权重，focal loss 在一定程度上相当于难样本挖掘（Hard Negative
+Mining，HEM）。
 
 Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:focal-loss}~所示：
 \begin{equation}
@@ -106,14 +106,22 @@ Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:foca
 loss。Focal loss 中两个参数的具体作用是：
 
 \begin{itemize}
-  \item $\alpha_t$：用于平衡不同类别样本的权重，一般所有类别对应的 $\alpha_t$ 之
+  \item $\alpha_t$：用于平衡不同类别样本的权重，一般正负样本对应的 $\alpha_t$ 之
     和为 1。
-  \item $\gamma$：用于平衡难易样本的权重，$\gamma$ 越大，则简单样本的等效权重越
-    小。例如 $\gamma = 2$ 时，$p = 0.9$ 的样本，focal loss 的值比交叉熵 loss 的
-    值小 100 倍，而 $p = 0.968$ 的样本则小 1000 倍。
+  \item $\gamma$：用于平衡难易样本的权重，$\gamma$ 越大，简单样本的权重越小。例
+    如 $\gamma = 2$ 时，预测值 $p = 0.9$ 的样本，focal loss 的值要比交叉熵 loss
+    的值小 100 倍。
 \end{itemize}
 
+\section{优化方法}
+\label{sec:opt}
+
 \section{反向传播算法}
+神经网络的训练实际上是一个不断调整网络参数，从而减小损失函数的过程。对网络参数的
+优化需要先得到损失函数 $L$ 对神经网络中各参数 $\omega$ 的导数，利用该值计算参
+数 $\omega$ 的调整值。反向传播算法利用链式法则，由后向前逐层计算 $L$ 对各参
+数$\omega$ 的导数，是神经网络训练的一个关键环节。
+
 考虑一个神经网络中的某个全连接层 $Y = XW + b$，设网络的 loss 为 $L$，根据链式法
 则，有如下关系~\citerb{2017-FC-BP}：
 
@@ -145,7 +153,54 @@ loss。Focal loss 中两个参数的具体作用是：
 \subsection{批归一化}
 \label{sub:BN}
 
-批归一化（Batch Normalization，BN）
+批归一化（Batch Normalization，BN）是文献\citerb{2015-BN}中提出的一种归一化方法，
+BN 的好处包括：
+
+\begin{enumerate}
+  \item 降低深层神经网络的训练难度，训练时可以使用更大的学习率，同时不需要特别严
+    格的初始化方法。
+  \item 相当于引入了正则项，加入 BN 后可以去掉作为正则
+    的 dropout 层，\hyperref[subsec:YOLOv2]{YOLOv2} 就是一个典型的例子。
+  \item 加快神经网络训练速度，与不加 BN 的网络相比，加入 BN 后的网络训练时间减少
+    10 倍以上。
+\end{enumerate}
+
+\paragraph{BN 的形式}
+BN 包括归一化和线性变换两部分，其中归一化是为了减少上层网络参数变化导致的输入变
+化，线性变换部分是为了增加 BN 层的表达能力，如果没有线性变换部分，BN 层的输出将
+始终为均值为 0，方差为 1 的分布，无法体现上层网络参数变化对其的影响。
+
+\begin{align}
+  \label{equ:BN}
+  \mu_{\mathcal{B}} & = \frac{1}{m} \sum_{i=1}^{m} x_i \\
+  \sigma_{\mathcal{B}}^2 & = \frac{1}{m} \sum_{i=1}^{m} (x_i-\mu_{\mathcal{B}})^2 \\
+  \hat{x}_i & = \frac{x_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}} \\
+  y_i & = \gamma \hat{x}_i + \beta
+\end{align}
+
+\begin{itemize}
+  \item 上式中 $m$ 为一个 batch 的样本数，即上式中期望和方差计算的是一个 batch 的统
+  计量。实际应用中，训练时有时会采用滑动平均计算均值和方差，即同时考虑历
+  史 batch 和本 batch 的统计量，例如 Caffe 中的 \href{https://bit.ly/2JBY7aw}{BN
+    层}。测试时，\textbf{使用训练时保存的统计量}，不再需要每个 batch 单独计算均值和方差。
+  \item BN 层中有两个需要学习的参数，即线性变换的参数 $\gamma$ 和 $\beta$，这两
+    个参数的初值分别为 1 和 0。
+\end{itemize}
+
+\paragraph{CNN 中的 BN}
+\begin{itemize}
+  \item 卷积层后面的 BN 的均值和方差的计算：计算的是一个 batch 中 $m$ 个样本对应的
+    同一个 feature map 的均值和方差。如果一个 batch 对应的卷积层输出维度为 $m
+    \times C \times H \times W$，则只计算 feature map 个数即 $C$ 个均值和方差，
+    不同的 feature map 利用对应的均值和方差进行归一化。
+  \item BN 的位置：文献~\citerb{2015-BN}~中给出的标准结构是\textbf{卷积
+    层-BN-ReLU}，即 BN 层加在卷积层之后，ReLU 之前。
+  \item 卷积层的偏置 $b$：由于 BN 会减去输入的均值，因此可以省略卷积层的偏置，因为偏
+    置对输入的影响也会体现在均值上，加不加偏置结果是一样的。
+  \item 测试时对卷积层和 BN 层进行合并：由于卷积层和 BN 层都是线性变换，且测试
+    时BN 层使用的均值和方差均为已知量，因此可以将二者合并以提升计算速度，具体参数
+    计算方法可以参考文献\citerb{2017-DSSD}。
+\end{itemize}
 
 \chapter{卷积神经网络}
 

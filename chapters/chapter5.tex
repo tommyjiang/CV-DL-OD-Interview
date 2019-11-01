@@ -133,8 +133,8 @@ Fast R-CNN 的 loss 为多任务 loss，包括分类和回归两部分，具体�
   \item 负样本：与所有 GT 的最大 IoU 在 $ [0.1, 0.5) $ 区间。
 \end{itemize}
 
-文中解释负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（Hard Example Mining，
-HEM），因为 IoU 小于 0.1 的 proposal 可以认为是简单样本，训练时只用较难的样本。
+文中解释负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（HEM），因为 IoU 小于 0.1
+的 proposal 可以认为是简单样本，训练时只用较难的样本。
 
 \paragraph{训练}
 训练时每个 batch 包含 2 张图，每张图取 64 个 proposal，相当于每个 batch 有 128
@@ -293,8 +293,8 @@ YOLO v1 的 backbone 没有采用改造后的经典分类网络，而是采用�
 \end{align}
 
 \begin{enumerate}
-  \item Loss 函数共包括三部分：前两项是第一部分，是检测框位置的 loss；中间两项是
-    第二部分，是检测框分数的 loss；最后一项是第三部分，是网格类别概率的 loss。所
+  \item Loss 函数共包括三部分：第一部分包括前两项，是检测框位置的 loss；第二部分包
+    括中间两项，是检测框分数的 loss；第三部分包括最后一项，是网格类别概率的 loss。所
     有的 loss 均为 $L_2$ 形式。
   \item 检测框位置 loss 权重 $\lambda_{\mathrm{coord}}$ 提高到 5，同时将不含 GT 的
     网格中检测框分数 loss 的权重 $\lambda_{\mathrm{noobj}}$ 降为 0.5。
@@ -307,8 +307,8 @@ YOLO v1 的 backbone 没有采用改造后的经典分类网络，而是采用�
 YOLO v2 在 YOLO v1 的基础上做了一系列改进\citerb{2016-YOLO-v2}：
 
 \begin{enumerate}
-  \item 引入 BN：所有卷积层都加入 BN 层，由于 BN 层有正则化作用，因此可以去掉
-    dropout 层。
+  \item 引入 BN：所有卷积层之后都加入 BN 层，由于 BN 层有正则化作用，因此可以去掉
+    YOLOv1 中全连接层之后的 dropout 层。
   \item 改变预训练尺寸：YOLO v1 中预训练时图片输入尺寸为 $224 \times 224$，而检
     测时图片的输入尺寸为 $448 \times 448$，v2 中将预训练时的输入尺寸也改为 $448
     \times 448$，但网络实际的输入尺寸为 $416 \times 416$。
