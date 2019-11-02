@@ -15,6 +15,7 @@
 \usepackage{tikz} % 画图宏包
 \usepackage{booktabs} % 表格宏包
 \usepackage{dsfont} % 数字粗体宏包
+\usepackage{titlesec} % 字体大小设置宏包
 
 % 宏包设置
 % 页眉页脚样式
@@ -37,6 +38,10 @@
 \usepackage{enumitem}
 \setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=0pt}
 \setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=0pt}
+% 字体大小设置
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
 
 % tcolorbox 样式设置
 \newtcolorbox{redbox}[2][]{colback=yellow!10,colframe=red!75!black,coltitle=white,fonttitle=\bfseries,fontupper=\kaishu,title=#2,#1,breakable} % 红色

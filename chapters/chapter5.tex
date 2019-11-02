@@ -21,7 +21,7 @@ mAP 全称为 Mean Average Precision，中文一般不进行翻译。
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\textwidth]{images/目标检测/NMS.png}
+  \includegraphics[width=0.8\textwidth]{images/目标检测/NMS.pdf}
   \caption{NMS 示例}
   \label{fig:nms}
 \end{figure}
@@ -83,7 +83,6 @@ Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一�
 度\citerb{2015-Fast-RCNN}。
 
 \paragraph{网络结构} 
-
 Fast R-CNN 的网络结构如图~\ref{fig:Fast-RCNN}~所示，前面是统一的 CNN backbone，对
 于每个 proposal，将其投射到 feature map 再经过 RoI pooling 层得到尺寸为 $h
 \times w$ 的 RoI，再经过两个全连接层得到 RoI feature，再经过全连接层 + Softmax 层
@@ -98,13 +97,11 @@ Fast R-CNN 的网络结构如图~\ref{fig:Fast-RCNN}~所示，前面是统一的
 \end{figure}
 
 \paragraph{RoI Pooling 层}
-
 RoI 全称为 Region of Interest，中文可译为感兴趣区域。RoI Pooling 层的作用是将大小不一
 的proposal 统一转化为 $h \times w$ 的尺寸，作为后续全连接层的输入。全连接层要求输
 入为固定的尺寸，因此 RoI Pooling 对任意尺寸的输入都输出相同尺寸的输出。
 
 \paragraph{Loss 函数}
-
 Fast R-CNN 的 loss 为多任务 loss，包括分类和回归两部分，具体形式为：
 \begin{align}
   L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\ 
@@ -149,7 +146,7 @@ Proposal Network，RPN），可以直接利用 CNN 生成 proposal 以替代 sel
 的网络，相比 Fast R-CNN 大幅提高了训练和测试速度。
 
 \paragraph{RPN 网络结构} 
-RPN 网络最开始是一的 CNN backbone，经过一个 $3 \times 3$ 的卷积层得到 feature
+RPN 网络最开始是 CNN backbone，经过一个 $3 \times 3$ 的卷积层得到 feature
 map，然后分别用一个 $1 \times 1$ 的卷积层 + Softmax 层的分类器得到分类分数（只
 有\textbf{两类}，即前景类和背景类），同时再用一个 $1 \times 1$ 的卷积层得
 到 anchor 到 GT 的变换（$t_x, t_y, t_w, t_h$四个值）。Faster R-CNN 最终的网络结构
@@ -258,10 +255,60 @@ Fast R-CNN 应用 FPN 时，主要需要根据 proposal 的尺寸分配不同 sc
 \subsubsection{Mask R-CNN}
 
 \subsection{检测 head 的改进}
+Faster R-CNN 中的检测 head 指的是 Fast R-CNN 中每个 RoI 之后接的网络，包括两个全
+连接层，以及后面分类和回归分别对应的两个 $1 \times 1$ 的卷积层。本小节主要介绍对
+Faster R-CNN 的检测 head 进行改进的相关工作。
 
 \subsubsection{R-FCN}
+文献\citerb{2016-R-FCN}中将 Faster R-CNN 中每个 RoI 后面接的检测 head 的全连接层，
+替换为全卷积网络 + Position Sensitive RoI Pooling(PS-RoI) 层 + 全局平均池化层，模
+型速度有2.5-20 倍的提升。
+
+\paragraph{R-FCN 的结构}
+
+\begin{itemize}
+  \item 在 Backbone 得到的 2048 通道的 feature map 之后接一个 $1 \times 1$ 的卷积降
+    为 1024 通道的 feature map，称为 FM-1024。
+  \item 分类 head：FM-1024 后接 $(C+1)k^2$ 通道的 $1 \times 1$ 卷积，得到
+    $(C+1)k^2$ 通道的 feature map，再接 PS-RoI Pooling 层得到 $(C+1) \times k
+    \times k$ 的 feature，再接平均池化得到 $(C+1)$ 维向量，最后接 Softmax 得到
+    $(C+1)$ 个分类分数。 
+  \item 回归 head：与分类 head 类似，FM-1024 后接 $4$ 通道的 $1 \times 1$
+    卷积，得到$4$ 通道的 feature map，再接 PS-RoI Pooling 层得到 $4
+    \times k \times k$ 的 feature，再接平均池化得到 $4$ 维向量，分别对应 $x, y,
+    w, h$ 的变换值。
+\end{itemize}
+
+R-FCN 中，PS-RoI Pooling 所用的 feature map 与 RPN 所用的 feature map 并不是同一
+个。
+
+\paragraph{PS-RoI Pooling 层}
+PS-RoI Pooling 和 RoI Pooling 的过程十分类似，区别在于 PS-RoI 在做 pooling 时，是
+根据 pooling 区域在 RoI 中的位置，选择对应通道 feature map 的对应位置做 pooling，
+而非对所有 feature map 的所有位置都做 pooling。
+
+\paragraph{R-FCN 的损失函数和 RoI 正负样本}
+与 \hyperref[subsec:Fast-R-CNN]{Fast R-CNN} 相同。
 
 \subsubsection{Light-Head R-CNN}
+Light-Head R-CNN 首先分析了影响 Faster R-CNN 和 R-FCN 模型速度的原因\citerb{2017-Light-head}：
+
+\begin{itemize}
+  \item Faster R-CNN：计算量主要集中在每个 RoI sub-network 的两个全连接层。
+  \item R-FCN：计算量主要集中在卷积得到 PS-RoI Pooling 层需要的 $(C+1+4)k^2$ 个
+    feature map。
+\end{itemize}
+
+Light-Head R-CNN 的检测 head 综合借鉴了 Faster R-CNN 和 R-FCN，用通道数较少
+的 feature + pooling + 一个全连接的轻量 head 提高模型速度。三种模型的结构对比如
+图~\ref{fig:light-head}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/Light-Head-R-CNN.pdf}
+  \caption{Faster R-CNN/R-FCN/Light-Head R-CNN 结构对比}
+  \label{fig:light-head}
+\end{figure}
 
 \subsubsection{Double-Head R-CNN}
 
