@@ -287,7 +287,7 @@ PS-RoI Pooling 和 RoI Pooling 的过程十分类似，区别在于 PS-RoI 在�
 根据 pooling 区域在 RoI 中的位置，选择对应通道 feature map 的对应位置做 pooling，
 而非对所有 feature map 的所有位置都做 pooling。
 
-\paragraph{R-FCN 的损失函数和 RoI 正负样本}
+\paragraph{R-FCN 的损失函数和 RoI 正负样本判据}
 与 \hyperref[subsec:Fast-R-CNN]{Fast R-CNN} 相同。
 
 \subsubsection{Light-Head R-CNN}
@@ -295,12 +295,12 @@ Light-Head R-CNN 首先分析了影响 Faster R-CNN 和 R-FCN 模型速度的原
 
 \begin{itemize}
   \item Faster R-CNN：计算量主要集中在每个 RoI sub-network 的两个全连接层。
-  \item R-FCN：计算量主要集中在卷积得到 PS-RoI Pooling 层需要的 $(C+1+4)k^2$ 个
-    feature map。
+  \item R-FCN：计算量主要集中在 PS-RoI Pooling 层需要的 $(C+1+4)k^2$ 个 feature
+    map 之前的卷积，因为 feature map 数量很多。
 \end{itemize}
 
-Light-Head R-CNN 的检测 head 综合借鉴了 Faster R-CNN 和 R-FCN，用通道数较少
-的 feature + pooling + 一个全连接的轻量 head 提高模型速度。三种模型的结构对比如
+Light-Head R-CNN 的检测 head 综合借鉴了 Faster R-CNN 和 R-FCN 的模型，用通道数较
+少的 feature + pooling + 一个全连接的轻量 head 提高模型速度。三种模型的结构对比如
 图~\ref{fig:light-head}~所示：
 
 \begin{figure}[ht]
@@ -310,7 +310,65 @@ Light-Head R-CNN 的检测 head 综合借鉴了 Faster R-CNN 和 R-FCN，用通�
   \label{fig:light-head}
 \end{figure}
 
+\paragraph{Light-head R-CNN 中 PS-RoI pooling 的 feature map}
+通过在 $C_5$ feature map 后加分离卷积得到 PS-RoI pooling 需要的 feature map，即
+加入两个对称的组合卷积分支：
+
+\begin{itemize}
+  \item $k \times 1 \times C_{\mathrm{in}} \times C_{\mathrm{mid}}$ + $1 \times k
+    \times C_{\mathrm{mid}} \times C_{\mathrm{out}}$
+  \item $1 \times k \times C_{\mathrm{in}} \times C_{\mathrm{mid}}$ + $k \times 1
+    \times C_{\mathrm{mid}} \times C_{\mathrm{out}}$
+\end{itemize}
+
+文中卷积核的尺寸非常大，参数 $k=15$，但输出通道数相比 R-FCN 减少很多，只有 $10
+\times k \times k$，其中 $k$ 为 PS-RoI Pooling 的尺寸，而 R-FCN 中则需要 $(C+1)
+\times k \times k$ 个通道的 feature map。
+
+\paragraph{R-CNN 子网络}
+将 Faster R-CNN 中的两个全连接层简化为一个输出为 2048 的全连接层，同时将分类的全
+连接层的输出减少为 4 维，即所有类别共享输出结果，不再单独输出每个类别的结果。
+
 \subsubsection{Double-Head R-CNN}
+Double-head R-CNN 首先分析了两种获得 RoI feature 的方法\citerb{2019-Double-head}：
+
+\begin{itemize}
+  \item RoI pooling 后接两个全连接层，得到维度为 $C_{\mathrm{out}}$ 的 feature。
+  \item RoI pooling 后接两个卷积层，得到通道数为 $C_{\mathrm{out}}$ 的 feature
+    map，再做全局平均池化，得到维度为 $C_{\mathrm{out}}$ 的 feature。
+\end{itemize}
+
+文中经过实验对比分析，发现经过全连接层得到的 feature 更适合分类，而卷积层得到的
+feature 更适合回归。
+
+\paragraph{损失函数}
+Double-head R-CNN 的训练采用 end-to-end 的联合训练，其损失函数为：
+\begin{equation}
+  \label{equ:double-head-loss}
+  \mathcal{L} = \mathcal{L}^{\mathrm{fc}} + \mathcal{L}^{\mathrm{conv}} + \mathcal{L}^{\mathrm{rpn}}
+\end{equation}
+
+其中 $\mathcal{L}^{\mathrm{fc}}, \mathcal{L}^{\mathrm{conv}},
+\mathcal{L}^{\mathrm{rpn}}$ 分别表示全连接 head、卷积 head 和 RPN 的 loss，两个
+head 的 loss 又分别包含分类和回归两部分：
+\begin{align}
+  \label{equ:double-head-fc-loss}
+  \mathcal{L}^{\mathrm{fc}} & = \lambda^{\mathrm{fc}}L_{\mathrm{cls}}^{\mathrm{fc}} + (1-\lambda^{\mathrm{fc}})L_{\mathrm{reg}}^{\mathrm{fc}} \\
+  \label{equ:double-head-conv-loss}
+  \mathcal{L}^{\mathrm{conv}} & = \lambda^{\mathrm{conv}}L_{\mathrm{cls}}^{\mathrm{conv}} + (1-\lambda^{\mathrm{conv}})L_{\mathrm{reg}}^{\mathrm{conv}}
+\end{align}
+
+\paragraph{权重最优值}
+文中经过寻优，得到的权重最优值为 $\lambda^{\mathrm{fc}} = 0.7,
+\lambda^{\mathrm{\mathrm{conv}}} = 0.0$，注意卷积 head 的 feature 完全不学分类，只
+学回归时最优。
+
+\paragraph{分类分数}
+文中对比了四种不同的利用全连接和卷积 feature 分类分数计算最终分类分数的方法，分别
+是$s^{\mathrm{fc}}, (s^{\mathrm{fc}} + s^{\mathrm{conv}})/2,
+\mathrm{max}(s^{\mathrm{fc}}, s^{\mathrm{conv}}), s^{\mathrm{fc}} +
+s^{\mathrm{conv}}(1-s^{\mathrm{fc}})$，四种方法对应的模型性能 差别不大，最后一种
+方法性能最好。
 
 \chapter{单阶段方法}
 
@@ -326,12 +384,13 @@ YOLO v1 是目标检测单阶段方法的开创性工作之一，文中将检测
 
 \begin{enumerate}
   \item 将整张图片划分为 $S \times S$ 个网格，每个网格预测 $ B $ 个检测框和 $ C $
-  个条件概率 $ \mathrm{Pr}(\mathrm{Class_i}|\mathrm{Object}) $。
+    个条件概率 $ \mathrm{Pr}(\mathrm{Class}_i|\mathrm{Object}) $。
   \item 每个检测框共包括 5 个值 $x, y, w, h$ 和 confidence。其中 $x, y$为中心位
-  置，$w, h$ 为长和宽(相对图片而言)，confidence 为$\mathrm{Pr}(\mathrm{Object})
-  \times \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，inference 时直接
-  将 confidence乘以该网格对应的条件概率得到最终的分数。网络的输出维度为 $ S
-  \times S \times (B \times 5 + C) $。
+    置，$w, h$ 为长和宽（相对图片长宽的归一值），
+    confidence 为$\mathrm{Pr}(\mathrm{Object}) \times
+    \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，inference 时直接将 confidence乘
+    以该网格对应的条件概率得到最终的分数。网络的输出维度为 $ S \times S \times (B
+    \times 5 + C) $。
 \end{enumerate}
 
 \paragraph{Backbone}
@@ -524,6 +583,9 @@ Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前
 阈值为 0.5 的 NMS 得到最终结果。
 
 \chapter{Anchor Free 方法}
+自从 Faster R-CNN 引入 anchor 的概念后，几乎所有的目标检测文章中都应用了这一方法，
+但使用 anchor 会引入 anchor 个数和尺寸等超参，增加了调参工作量。Anchor free 检测
+方法不需要使用 anchor，是目标检测的一个新方向。
 
 \section{CornerNet}
 \label{sec:CornerNet}
