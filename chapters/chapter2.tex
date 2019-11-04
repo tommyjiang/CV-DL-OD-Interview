@@ -1,2 +1,107 @@
 \part{数据结构和算法}
 
+\chapter{数据结构}
+
+\section{栈}
+栈是先进后出的基本数据结构，实际上程序在递归调用时都需要使用栈，但这种情况一般由
+编译器隐式完成。
+
+\subsection{括号相关}
+括号是典型的满足先进后出特点的一种结构，所以括号相关的题目一般都可以用栈来解决。
+相关题目：
+
+% LC 301. Remove Invalid Parentheses(Stack + BFS)
+
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/longest-valid-parentheses/}{LeetCode 32. Longest Valid Parentheses}
+  \item
+    \href{https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/}{LeetCode
+      921. Minimum Add to Make Parentheses Valid}
+  \item
+    \href{https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/}{LeetCode
+      1249. Minimum Remove to Make Valid Parentheses}
+\end{itemize}
+
+以下题目也与括号有关，但需要利用哈希表存储对应层级的信息：
+
+\begin{itemize}
+\item
+  \href{https://leetcode.com/problems/score-of-parentheses/}{LeetCode 856. Score of Parentheses}
+\item
+  \href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LeetCode
+    1190. Reverse Substrings Between Each Pair of Parentheses}
+\end{itemize}
+
+\section{队列}
+
+\section{优先队列}
+
+\section{链表}
+
+\section{哈希表}
+
+\section{树}
+
+\section{图}
+
+\section{前缀树}
+\section{线段树}
+
+\chapter{算法}
+\section{遍历}
+\subsection{深度优先搜索}
+
+\subsection{广度优先搜索}
+
+\subsection{最优优先搜索}
+
+\section{并查集}
+
+\section{动态规划}
+
+\section{贪心}
+
+\section{二分查找}
+二分查找的典型应用场景包括：
+
+\begin{itemize}
+  \item 在有序序列（数组、矩阵等）中查找某个值。
+  \item 在一定范围内查找满足某个条件的最大/最小值。
+\end{itemize}
+
+\subsection{有序序列查找}
+
+\subsection{范围查找}
+以下题目可以直接写出二分的判断条件：
+
+\begin{itemize}
+  \label{lc:bs-range-general}
+  \item
+    \href{https://leetcode.com/problems/split-array-largest-sum/}{LeetCode 410. Split Array Largest Sum}
+  \item
+    \href{https://leetcode.com/problems/koko-eating-bananas/}{LeetCode 875. Koko Eating Bananas}
+  \item
+    \href{https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/}{LeetCode
+      1011. Capacity To Ship Packages Within D Days}
+\end{itemize}
+
+以下题目需要结合一定的数学推导写判断条件：
+
+\begin{itemize}
+  \label{lc:bs-range-math}
+  \item
+    \href{https://leetcode.com/problems/nth-magical-number/}{LeetCode 878. Nth
+      Magical Number}
+  \item
+    \href{https://leetcode.com/problems/ugly-number-iii/}{LeetCode 1201. Ugly
+      Number III}：LeetCode 878 扩展版，两个数变为三个数。
+
+\end{itemize}
+
+\section{滑动窗口}
+
+
+%%% Local Variables:
+%%% TeX-master: "../master"
+%%% End:

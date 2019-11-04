@@ -589,12 +589,142 @@ Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前
 
 \section{CornerNet}
 \label{sec:CornerNet}
+CornerNet 是 anchor free 方法的代表作之一\citerb{2018-CornerNet}，与传统目标检测
+预测目标框位置和长/宽不同，CornerNet 直接预测左上/右下角点及配对关系。
+
+\paragraph{CornerNet 网络结构}
+CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-network}~和图~\ref{fig:CornerNet-network}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/CornerNet-网络结构.pdf}
+  \caption{CornerNet 网络结构}
+  \label{fig:CornerNet-network}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/CornerNet-预测模块.pdf}
+  \caption{CornerNet 的预测模块}
+  \label{fig:CornerNet-network}
+\end{figure}
+
+网络的三个输出分别为：
+
+\begin{itemize}
+  \item 角点 heatmap：尺寸为原图下采样 stride 等于 n 的 heatmap，每个类
+    别 1 个，heatmap上的值在 $[0, 1]$ 之间。
+  \item 角点配对 embedding：用于左上/右下间角点的配对，要求两个角点的 embedding
+    值小于一定阈值，所有类别共享相同的 embedding。
+  \item 角点精修 offset：输出角点坐标的修正量，所有类别共享相同的 offset。
+\end{itemize}
+
+\paragraph{Corner Pooling 层}
+Corner Pooling 层是 CornerNet 中为了提取 feature map 上左上和右下点提出的一种新
+的池化层。以左上点的 corner pooling 为例，从该点出发，分别向右/向下找到本行/本列
+最大值，将二者相加作为该点的值。实际计算时，可以由右向左、由下向上分别计算，这样
+只需保留当前最大值。
+
+\paragraph{损失函数}
+CornerNet 的损失函数包括三个输出对应的损失函数：
+\begin{equation}
+  \label{eq:cornernet-loss}
+  L = L_{\mathrm{det}} + \gamma L_{\mathrm{off}} + (\alpha L_{\mathrm{pull}} + \beta L_{\mathrm{push}}) 
+\end{equation}
+
+\begin{itemize}
+  \item heatmap 损失函数 $L_{\mathrm{det}}$：类似 focal loss 形式，但 focal loss
+    中 label 只有 0 和 1 两种，而 CornerNet 中 label 是 $[0, 1]$ 区间的连续值：
+    \begin{equation}
+      \label{equ:cornernet-det-loss}
+      L_{\mathrm{det}} = -\frac{1}{N} \sum_{c=1}^{C} \sum_{i=1}^{H} \sum_{j=1}^{W}
+      \left\{
+        \begin{array}{lr}
+           (1-p_{cij})^{\alpha}\mathrm{log}\,(p_{cij}) & y_{cij} = 1 \\
+           (1-y_{cij})^{\beta} (1-p_{cij})^{\alpha} \mathrm{log}\,(p_{cij}) & y_{cij} < 1 \\
+        \end{array}
+      \right.
+    \end{equation}
+    上式中 $y_{cij}$ 的值在 GT 左上/右下角点为 1，但并非除角点外均为 0，而是存在一
+    个衰减系数 $e^{-\frac{9(x^2+y^2)}{2\sigma^2}}$，其中 $\sigma$ 的确定方法为：
+    在角点附近该范围以内的点组成的方框与 GT 的 IoU 均大于 0.3。 
+  \item offset 损失函数 $L_{\mathrm{off}}$：stride 为 n 时，输入上的点 $(x, y)$
+    对应的值为 $( \lfloor \frac{x}{n} \rfloor, \lfloor \frac{y}{n} \rfloor)$，
+    offset 部分的真值 $\mathbf{o}_k = \left( \frac{x}{n} - \lfloor \frac{x}{n}
+      \rfloor, \frac{y}{n} - \lfloor \frac{y}{n} \rfloor \right)$，loss 采用
+    Smooth $L_1$ loss。
+  \item embedding 损失函数 $(\alpha L_{\mathrm{pull}} + \beta
+    L_{\mathrm{push}})$：类似 triplet loss，同一 GT 的 embedding 尽可能小，不
+    同 GT 的尽可能大：
+    \begin{align}
+      \label{equ:cornernet-em-loss-pull}
+      L_{\mathrm{pull}} & = \frac{1}{N} \sum_{k=1}^{N} \left[ (e_{t_k} - e_k)^2 + (e_{b_k} - e_k)^2 \right] \\
+      \label{equ:cornernet-em-loss-push}
+      L_{\mathrm{push}} & = \frac{1}{N(N-1)} \sum_{k=1}^{N} \sum_{\substack{j=1 \\ j \neq k}}^{N} \mathrm{max} (0, 1-|e_k-e_j|)
+    \end{align}
+\end{itemize}
+
+Offset 和 embedding loss 只在 GT 的角点位置才计算，其他位置均为 0。
+
+\paragraph{CornerNet 的测试}
+\begin{itemize}
+  \item 获得角点：先对 heatmap 做 $3 \times 3$ 的 max pooling，然后挑选所有类
+    别 heatmap 中 top 100 的左上点和右下点。
+  \item 精修角点：利用 offset 精修角点位置。
+  \item 获得左上/右下点对：利用 embedding 计算点对，筛掉 embedding 相差大于 0.5
+    或两个角点不属于同一个类别的点对，获得最终结果，最终分数为左上/右下角点
+    heatmap 对应点的平均值。
+\end{itemize}
 
 \section{ExtremeNet}
 \label{sec:ExtremeNet}
+ExtremeNet\citerb{2019-ExtremeNet}借鉴了 CornerNet 的思想，预测的是四个方向上的极值
+点和中心点。
+
+\paragraph{ExtremeNet 网络结构}
+ExtremeNet 沿用了 CornerNet 中预测 heatmap 和 offset map 的结构，共预测上、下、
+左、右及中心 5 个 heatmap，以及除中心外共 $4 \times 2$ 个 offset map。正负样本及
+loss 也和 CornerNet 相同。
+
+\paragraph{极值点的组合}
+CenterNet 中利用 embedding 信息关联左上/右下角点，ExtremeNet 中获得极值点组合的
+方法是：
+
+\begin{itemize}
+  \item 获得上/下/左/右 heatmap 局部极值点：局部极值点满足的条件是值大
+    于 $\tau_p=0.1$，且在周围 $3 \times 3$ 的区域内为最大值。
+  \item 计算中心点：枚举所有局部极值点组合，计算中心点坐标，其对应的 heatmap 值需
+    要大于 $\tau_c=0.1$。
+\end{itemize}
+
+\paragraph{Ghost box 抑制}
+Ghost box 是指包含多个较小检测框的大的检测框，文中提出一种抑制 ghost box 的方法，
+如果一个检测框内部包含检测框的分数之和大于其自身分数的 3 倍，则将其分数除以 2，
+这个做法类似 Soft NMS。
+
+\paragraph{边缘增强}
+找到局部极值点后，分别沿水平/竖直方向找到单调递减的最外点，然后更新局部极值点的
+值，$\tilde{Y}_m = \hat{Y}_m + \lambda_{\mathrm{aggr}}\sum_{i=i_0}^{i_1}Y_i^m$，
+其中 $\lambda_{\mathrm{aggr}}=0.1$。
 
 \section{CenterNet}
 \label{sec:CenterNet}
+
+CenterNet 和 ExtremeNet 类似，都出自 UT Austin 的 Zhou Xingyi，且同样借
+鉴 CornerNet 的思路，但不再预测角点及其组合，而是直接预测中心点和物体的长和
+宽\citerb{2019-CenterNet}。
+
+\paragraph{CenterNet 网络结构和损失函数}
+CenterNet 沿用了 CornerNet 中预测 heatmap 和 offset map 的结构，每个类别预测一个
+中心点的 heatmap 及长和宽两个方向的 offset。此外还多预测长和宽方向检测框的尺寸，
+除中心点 heatmap 外，offset 和尺寸所有类别共享同一个，loss 均为 Smooth $L_1$
+loss，总的 loss 为：
+\begin{equation}
+  \label{equ:extreme-net-loss}
+  L_{\mathrm{det}} = L_k + \lambda_{\mathrm{size}}L_{\mathrm{size}} + \lambda_{\mathrm{off}}L_{\mathrm{off}}
+\end{equation}
+
+其中 $\lambda_{\mathrm{size}}=0.1, \lambda_{\mathrm{off}}=1$。
 
 
 %%% Local Variables:
