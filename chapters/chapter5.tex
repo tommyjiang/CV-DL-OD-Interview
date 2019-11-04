@@ -154,8 +154,8 @@ map，然后分别用一个 $1 \times 1$ 的卷积层 + Softmax 层的分类器�
 是两个共享 backbone 的 RPN 和 Fast R-CNN 的组合。
 
 \paragraph{RPN 网络 loss 函数}
-RPN 网络的 loss 函数和 Fast R-CNN 网络的非常类似，都包括分类和回归两项，区别
-是 Fast R-CNN 一般为多分类，用 softmax loss；而 RPN 网络只是二分类，可以直接用交
+RPN 网络的 loss 函数和 Fast R-CNN 网络的非常类似，都包括分类和回归两项。二者的区别
+是：Fast R-CNN 一般为多分类，用 softmax loss；而 RPN 网络为二分类，可以直接用交
 叉熵 loss。
 
 \paragraph{RPN 网络正负样本}
@@ -254,6 +254,25 @@ Fast R-CNN 应用 FPN 时，主要需要根据 proposal 的尺寸分配不同 sc
 
 \subsection{RoI Pooling 层的改进}
 \subsubsection{Mask R-CNN}
+Mask R-CNN 主要研究的是分割任务，但提出了 RoI Align 层，可以看做是更精细的 RoI
+pooling 层，因此对检测任务的性能也有提升\citerb{2017-Mask-RCNN}。
+
+\paragraph{RoI Pooling 和 RoI Align}
+
+\begin{itemize}
+  \item RoI Pooling：计算时有两次取整：第一次是计算 RoI 在 feature map 上的坐标
+    时，将原坐标除以 stride 得到的小数取整；第二次是将 $H \times W$ 的 RoI 转化为 $h
+    \times w$ 的尺寸时，$H/h$ 和 $W/w$ 得到的小数取整。
+  \item RoI Align：对比 RoI Pooling，两次都不取整，保留小数，采用双线性插值计算
+    对应像素的值，具体如图~\ref{fig:roi-align}~所示。
+\end{itemize}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{images/目标检测/RoI-Align.png}
+  \caption{RoI Align 示意图}
+  \label{fig:roi-align}
+\end{figure}
 
 \subsection{检测 head 的改进}
 Faster R-CNN 中的检测 head 指的是 Fast R-CNN 中每个 RoI 之后接的网络，包括两个全
@@ -396,11 +415,11 @@ YOLO v1 是目标检测单阶段方法的开创性工作之一，文中将检测
 
 \paragraph{Backbone}
 
-YOLO v1 的 backbone 没有采用改造后的经典分类网络，而是采用结构为 24 个卷积层 + 2
-个全连接层的自定义网络。训练时，先将前 20 个卷积层 + 平均池化层组成的网络
+YOLO v1 的 backbone 没有以经典分类网络为基础，而是采用自己设计的结构为 24 个卷积
+层 + 2 个全连接层的自定义网络。训练时，先将前 20 个卷积层 + 平均池化层组成的网络
 在 ImageNet 数据集上进行预训练，输入尺寸为 $224 \times 224$，在检测时将输入尺寸扩
-大为 $448 \times 448$。与此同时，为避免过拟合，第一个全连接层后加了一个 $p=0.5$
-的 dropout 层。
+大为 $448 \times 448$。与此同时，为避免过拟合，第一个全连接层后加了一
+个 $p=0.5$的 dropout 层。
 
 \paragraph{Loss 函数}
 
