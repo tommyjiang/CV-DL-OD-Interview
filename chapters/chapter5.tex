@@ -272,7 +272,7 @@ Faster R-CNN 的检测 head 进行改进的相关工作。
   \item 分类 head：FM-1024 后接 $(C+1)k^2$ 通道的 $1 \times 1$ 卷积，得到
     $(C+1)k^2$ 通道的 feature map，再接 PS-RoI Pooling 层得到 $(C+1) \times k
     \times k$ 的 feature，再接平均池化得到 $(C+1)$ 维向量，最后接 Softmax 得到
-    $(C+1)$ 个分类分数。 
+    $(C+1)$ 个分类分数。
   \item 回归 head：与分类 head 类似，FM-1024 后接 $4$ 通道的 $1 \times 1$
     卷积，得到$4$ 通道的 feature map，再接 PS-RoI Pooling 层得到 $4
     \times k \times k$ 的 feature，再接平均池化得到 $4$ 维向量，分别对应 $x, y,
@@ -629,7 +629,7 @@ Corner Pooling 层是 CornerNet 中为了提取 feature map 上左上和右下�
 CornerNet 的损失函数包括三个输出对应的损失函数：
 \begin{equation}
   \label{eq:cornernet-loss}
-  L = L_{\mathrm{det}} + \gamma L_{\mathrm{off}} + (\alpha L_{\mathrm{pull}} + \beta L_{\mathrm{push}}) 
+  L = L_{\mathrm{det}} + \gamma L_{\mathrm{off}} + (\alpha L_{\mathrm{pull}} + \beta L_{\mathrm{push}})
 \end{equation}
 
 \begin{itemize}
@@ -647,7 +647,7 @@ CornerNet 的损失函数包括三个输出对应的损失函数：
     \end{equation}
     上式中 $y_{cij}$ 的值在 GT 左上/右下角点为 1，但并非除角点外均为 0，而是存在一
     个衰减系数 $e^{-\frac{9(x^2+y^2)}{2\sigma^2}}$，其中 $\sigma$ 的确定方法为：
-    在角点附近该范围以内的点组成的方框与 GT 的 IoU 均大于 0.3。 
+    在角点附近该范围以内的点组成的方框与 GT 的 IoU 均大于 0.3。
   \item offset 损失函数 $L_{\mathrm{off}}$：stride 为 n 时，输入上的点 $(x, y)$
     对应的值为 $( \lfloor \frac{x}{n} \rfloor, \lfloor \frac{y}{n} \rfloor)$，
     offset 部分的真值 $\mathbf{o}_k = \left( \frac{x}{n} - \lfloor \frac{x}{n}
