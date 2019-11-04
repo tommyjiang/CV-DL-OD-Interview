@@ -32,11 +32,9 @@ Sigmoid 函数及其导数的形式和图像如下：
   时，Sigmoid 函数的导数趋近于 0，这个性质可能引发\hyperref[subsec:gradient-vanish-explosion]{梯度消失}问题，导致网络无法正常训练。
 \end{itemize}
 
-
 \subsection{线性整流函数(ReLU)}
 
 线性整流函数（Rectifier Linear Unit，ReLU）是目前应用广泛的激活函数，其形式为：
-
 \begin{equation}
   \label{equ:ReLU}
   \mathrm{ReLU}(x) = \left\{
@@ -60,6 +58,8 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。由图中可看出，Re
 \section{损失函数}
 
 \subsection{交叉熵损失函数}
+
+\subsection{Softmax 损失函数}
 
 \subsection{$L_1$ 损失函数}
 
@@ -150,7 +150,7 @@ loss。Focal loss 中两个参数的具体作用是：
 
 \section{归一化}
 
-\subsection{批归一化}
+\subsection{批归一化（BN）}
 \label{sub:BN}
 
 批归一化（Batch Normalization，BN）是文献\citerb{2015-BN}中提出的一种归一化方法，
@@ -204,8 +204,30 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
     度，合并后参数的计算方法可以参考文献\citerb{2017-DSSD}。
 \end{itemize}
 
-\subsection{组归一化}
+\subsection{组归一化（GN）}
 \label{sub:GN}
+
+文献\citerb{2018-GN}中提出了组归一化（Group Normalization，GN）方法，主要解决 BN
+在 batch 样本较少时性能不佳的问题。
+
+\paragraph{GN 的形式}
+不同归一化方法的对比如图~\ref{fig:all-norm}~所示：
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/GN.pdf}
+  \caption{不同归一化方法对比}
+  \label{fig:all-norm}
+\end{figure}
+
+\begin{itemize}
+  \item BN：一个 batch 内不同样本，对同一个通道的 feature map 做归一化，共有通道
+    数 $C$ 个均值和方差。
+  \item LN：同一样本，对所有通道的 feature map 做归一化，共有 batch 样本数 $N$
+    个均值和方差。
+  \item GN：同一样本，对按组划分通道的 feature map 做归一化，共有 batch 样本数乘
+    以组数 $N \times G$ 个均值和方差。一般 $G$ 取 32，LN 可看做 GN 中 $G=1$ 的特
+    例。
+\end{itemize}
 
 \chapter{卷积神经网络}
 
@@ -244,7 +266,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
     的输出。
 \end{enumerate}
 
-分组卷积可以节省计算量，适用于对计算速度要求较高的模块。参数相同的情况下，分组卷
+分组卷积可以节省计算量，因此在轻量型网络中得到广泛应用。参数相同的情况下，分组卷
 积的计算量约为标准卷积的 $ 1 / g^2 $，组数越多，计算量越小。
 
 分层卷积（Depthwise Convolution，DW）是分组卷积的一种特例，指的是组数 $g$ 与 输

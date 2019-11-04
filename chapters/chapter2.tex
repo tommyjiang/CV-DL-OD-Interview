@@ -6,11 +6,12 @@
 栈是先进后出的基本数据结构，实际上程序在递归调用时都需要使用栈，但这种情况一般由
 编译器隐式完成。
 
-\subsection{括号相关}
-括号是典型的满足先进后出特点的一种结构，所以括号相关的题目一般都可以用栈来解决。
-相关题目：
+\subsection{括号题目}
+括号是典型的满足先进后出特点的一种结构，所以和括号相关的题目一般都可以利用栈来解
+决，例如以下题目：
 
 % LC 301. Remove Invalid Parentheses(Stack + BFS)
+% LC 678. Valid Parenthesis String(min/max count)
 
 \begin{itemize}
   \item
@@ -23,7 +24,7 @@
       1249. Minimum Remove to Make Valid Parentheses}
 \end{itemize}
 
-以下题目也与括号有关，但需要利用哈希表存储对应层级的信息：
+以下题目需要利用哈希表存储不同层级括号间的信息：
 
 \begin{itemize}
 \item
@@ -32,6 +33,10 @@
   \href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LeetCode
     1190. Reverse Substrings Between Each Pair of Parentheses}
 \end{itemize}
+
+\subsection{计算器题目}
+
+\subsection{文本解析题目}
 
 \section{队列}
 
@@ -44,6 +49,29 @@
 \section{树}
 
 \section{图}
+
+\subsection{拓扑排序}
+拓扑排序是指将一个有向无环图（Directed Acyclic Graph，DAG）G 中的所有顶点排成一个
+线性序列，使得对任意一对顶点 $u, v$，若边 $(u, v) \in G$，则在序列中 $u$ 出现
+在 $v$ 之前。
+
+拓扑排序相关题目：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/course-schedule/}{LeetCode 207. Course Schedule}
+  \item
+    \href{https://leetcode.com/problems/course-schedule-ii/}{LeetCode 210. Course Schedule II}
+  \item
+    \href{https://leetcode.com/problems/alien-dictionary}{LeetCode 269. Alien Dictionary}
+  \item
+    \href{https://leetcode.com/problems/sequence-reconstruction}{LeetCode 444.
+      Sequence Reconstruction}
+  \item
+    \href{https://leetcode.com/problems/parallel-courses}{LeetCode 1136. Parallel Courses}
+  \item
+    \href{https://leetcode.com/problems/sort-items-by-groups-respecting-dependencies/}{LeetCode
+      1203. Sort Items by Groups Respecting Dependencies}
+\end{itemize}
 
 \section{前缀树}
 \section{线段树}
@@ -59,6 +87,21 @@
 \section{并查集}
 
 \section{动态规划}
+
+\subsection{一维动态规划}
+
+\subsection{二维动态规划}
+二维动态规划的一个典型场景是字符串的公共或回文子串问题：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/longest-palindromic-subsequence/}{LeetCode
+      516. Longest Palindromic Subsequence}：可转化为求字符串与其自身倒序的 LCS，
+    即转化为 LeetCode 1143。
+  \item
+    \href{https://leetcode.com/problems/longest-common-subsequence/}{LeetCode 1143. Longest Common Subsequence}
+  \item
+    \href{https://leetcode.com/problems/palindrome-removal/}{LeetCode 1246. Palindrome Removal}
+\end{itemize}
 
 \section{贪心}
 
@@ -92,7 +135,7 @@
   \label{lc:bs-range-math}
   \item
     \href{https://leetcode.com/problems/nth-magical-number/}{LeetCode 878. Nth
-      Magical Number}
+      Magical Number}：容斥原理。
   \item
     \href{https://leetcode.com/problems/ugly-number-iii/}{LeetCode 1201. Ugly
       Number III}：LeetCode 878 扩展版，两个数变为三个数。
@@ -100,6 +143,16 @@
 \end{itemize}
 
 \section{滑动窗口}
+
+\section{数学}
+
+这部分题目一般都是考察数学功底，需要一定的数学基础和推导计算才能完成：
+
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/check-if-it-is-a-good-array/}{LeetCode.
+      1250. Check If It Is a Good Array}：裴蜀定理。
+\end{itemize}
 
 
 %%% Local Variables:
