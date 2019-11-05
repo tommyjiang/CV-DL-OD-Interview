@@ -390,6 +390,42 @@ head 的 loss 又分别包含分类和回归两部分：
 s^{\mathrm{conv}}(1-s^{\mathrm{fc}})$，四种方法对应的模型性能 差别不大，最后一种
 方法性能最好。
 
+\subsection{Cascade 方法}
+\label{sub:cascade}
+
+\subsubsection{Cascade R-CNN}
+\label{subsub:cascade-rcnn}
+
+Cascade 方法是指利用多个阶段实现检测的方法。其实所有的两阶段方法都属于广义的
+Cascade 方法，因为两阶段方法一般都分为生成 proposal 的第一阶段和精修 proposal 的
+第二阶段。
+
+Cascade R-CNN 拓展了 Faster R-CNN 的两阶段，在 Fast R-CNN 之后又接了两个检测
+head，同时训练时后级 head 的正样本判据更为严格，提升了模型性能\citerb{2017-Cascade-RCNN}。
+
+\paragraph{简单提高正负样本 IoU 阈值的问题}
+Fast 和 Faster R-CNN 中，RoI 的正负样本判据均为与 GT 的 IoU 大于 0.5，0.5 实际上
+是一个相当松的阈值，但简单提高正负样本的 IoU 阈值会导致以下两个问题：
+
+\begin{itemize}
+  \item 提高阈值后正样本数量急剧减少，会导致严重的过拟合。
+  \item 检测器对阈值附近的样本的修正效果最好，高阈值加低质量输入同样无法提高性能。
+\end{itemize}
+
+\paragraph{Cascade R-CNN 网络结构}
+Cascade R-CNN 与 Faster R-CNN 的对比如图~\ref{fig:Cascade-RCNN}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/Cascade-R-CNN.pdf}
+  \caption{Cascade R-CNN 与 Faster R-CNN 的对比}
+  \label{fig:Cascade-RCNN}
+\end{figure}
+
+Cascade R-CNN 与 Faster R-CNN 相比，多了两个检测 head，即 H2 和 H3。训练时，H1、
+H2、H3 对应的正负样本 IoU 阈值分别取为 0.5、0.6 和 0.7，由于每个 head 输出的结果
+相比输入都会有改善，相当于逐级微调得到最终的高质量检测框。
+
 \chapter{单阶段方法}
 
 \section{YOLO 系列}
