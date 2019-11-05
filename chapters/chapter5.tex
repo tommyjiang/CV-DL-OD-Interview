@@ -639,6 +639,58 @@ $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 
 Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前 1000 个结果，再进行
 阈值为 0.5 的 NMS 得到最终结果。
 
+\section{LapNet}
+LapNet 的思路与传统的检测网络有明显的区别，表现出良好的速度和精度的均衡，如
+图~\ref{fig:LapNet}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.6\textwidth]{images/目标检测/LapNet.pdf}
+  \caption{LapNet 与其他检测方法对比}
+  \label{fig:LapNet}
+\end{figure}
+
+\paragraph{LapNet 网络结构}
+主体网络仍然借鉴 FPN 的思路，即采用 bottom-up + 横向连接 + top-down 的结构得到信
+息融合的不同尺寸的 feature map。和一般的检测方法不同，并不在这些不同尺寸的
+feature map 上加检测 head，而是用卷积 + 上采样得到最大尺寸的多个 feature map，将
+它们拼在一起，再接检测 head。其输出与 RetinaNet 类似，但回归部分是的维度为
+$4 K \times A$，而非 RetinaNet 的 $4A$，因为 LapNet 每个类别都有各自的 anchor，
+所以每个类别都需要单独输出，输出的同样是 anchor 到 GT 的变换。
+
+\paragraph{LapNet 中的 PONO map}
+PONO（Per-Object Normalized Overlap）是 LapNet 中的核心概念，其具体的计算方法为：
+
+\begin{itemize}
+  \item 计算 anchor 对应的 GT 及 overlap 值：以一个 map 为例，遍历其上个点，计算
+    该点对应的 anchor 与所有 GT 的 IoU，得到 IoU 最大值及对应的 GT，即为该点的值
+    及对应的 GT。
+  \item 计算 PONO 值：对任一 GT，计算所有对应该 GT 点的最大值，以此为基准对该 GT
+    对应的所有点做标准化，则最大值点变为 1，其他点的值为该点原值/最大值。
+\end{itemize}
+
+\paragraph{LapNet 损失函数}
+LapNet 的损失函数包括回归 loss、分类 loss 和正则化 loss 三部分，即：
+
+\begin{itemize}
+  \item 回归 loss：采用 IoU 的 $L_2$ loss，即 $\mathcal{L}_{\mathrm{loc}} =
+    \left \| 1 - \mathrm{IoU}(B_{\mathrm{GT}, B_{\mathrm{DT}}}) \right\|$，且只
+    在 PONO map 大于 0.5 的点计算该 loss，其他点为 0。
+  \item 分类 loss：采用交叉熵 loss，即
+    $\mathcal{L}_{\mathrm{cls}}=\mathrm{BCE}(P, \hat{P})$，其中 $\hat{P}$ 的值在
+    PONO map 与该点 IoU 乘积大于 0.5 时为 1，其他情况为 0。
+  \item 正则化 loss：对不同类别、不同 anchor 回归和分类 loss 权重的正则项。
+\end{itemize}
+
+总 loss 形式为：
+\begin{align}
+  \mathcal{L} = & \frac{\lambda_{\mathrm{loc}}}{N^+}\sum_c \sum_a \lambda_{\mathrm{loc}}^{c,a} \sum_{i, j}\mathcal{L}_{\mathrm{loc}}(c,a,i,j) \, + \\
+                & \frac{\lambda_{\mathrm{cls}}}{N}\sum_c \sum_a \lambda_{\mathrm{cls}}^{c,a} \sum_{i, j}\mathcal{L}_{\mathrm{cls}}(c,a,i,j) \, + \\
+                & \mathrm{log}\frac{1}{\lambda_{\mathrm{cls}}} + \mathrm{log}\frac{1}{\lambda_{\mathrm{loc}}} + \frac{1}{KA}\sum_{c}\sum_{a}\left( \mathrm{log}\frac{1}{\lambda_{\mathrm{cls}}^{c,a}} + \mathrm{log}\frac{1}{\lambda_{\mathrm{loc}}^{c,a}} \right)
+\end{align}
+
+其中 $N^+$ 为 anchor 正样本数，$N$ 为总 pixel 数。
+
 \chapter{Anchor Free 方法}
 自从 Faster R-CNN 引入 anchor 的概念，其后几乎所有的目标检测文章中都应用了这一方
 法，但基于 anchor 的方法会有以下几个问题\citerb{2019-FCOS}：
