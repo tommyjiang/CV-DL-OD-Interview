@@ -639,9 +639,27 @@ $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 
 Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前 1000 个结果，再进行
 阈值为 0.5 的 NMS 得到最终结果。
 
-\section{LapNet}
-LapNet 的思路与传统的检测网络有明显的区别，表现出良好的速度和精度的均衡，如
-图~\ref{fig:LapNet}~所示：
+\section{其他}
+
+\subsection{RefineDet}
+RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，同时综合吸收了单阶段和两
+阶段目标检测的优点\citerb{2017-RefineDet}。
+
+\paragraph{RefineDet 网络结构}
+主要包括 ARM、ODM 和 TCB 三个模块。
+\begin{itemize}
+  \item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数高于
+    0.99 的负样本 anchor 训练时不再送给 ODM，测试时也会扔掉。
+  \item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
+  \item TCB：类似 FPN，结构比 FPN 略复杂。
+\end{itemize}
+
+\paragraph{RefineDet 损失函数}
+ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的损失函数，总损失函数为二者之和。
+
+\subsection{LapNet}
+LapNet 的思路与传统的检测网络有明显的区别，其特点是体现了良好的速度和精度的均衡，
+如图~\ref{fig:LapNet}~所示：
 
 \begin{figure}[ht]
   \centering

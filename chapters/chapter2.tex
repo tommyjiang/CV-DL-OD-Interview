@@ -15,13 +15,13 @@
 
 \begin{itemize}
   \item
-    \href{https://leetcode.com/problems/longest-valid-parentheses/}{LeetCode 32. Longest Valid Parentheses}
-  \item
     \href{https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/}{LeetCode
       921. Minimum Add to Make Parentheses Valid}
   \item
     \href{https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/}{LeetCode
       1249. Minimum Remove to Make Valid Parentheses}
+  \item
+    \href{https://leetcode.com/problems/longest-valid-parentheses/}{LeetCode 32. Longest Valid Parentheses}
 \end{itemize}
 
 以下题目需要利用哈希表存储不同层级括号间的信息：
@@ -62,12 +62,12 @@
   \item
     \href{https://leetcode.com/problems/course-schedule-ii/}{LeetCode 210. Course Schedule II}
   \item
-    \href{https://leetcode.com/problems/alien-dictionary}{LeetCode 269. Alien Dictionary}
+    \href{https://leetcode.com/problems/parallel-courses}{LeetCode 1136. Parallel Courses(Premium)}
   \item
     \href{https://leetcode.com/problems/sequence-reconstruction}{LeetCode 444.
       Sequence Reconstruction}
   \item
-    \href{https://leetcode.com/problems/parallel-courses}{LeetCode 1136. Parallel Courses(Premium)}
+    \href{https://leetcode.com/problems/alien-dictionary}{LeetCode 269. Alien Dictionary}
   \item
     \href{https://leetcode.com/problems/sort-items-by-groups-respecting-dependencies/}{LeetCode
       1203. Sort Items by Groups Respecting Dependencies}
@@ -79,6 +79,7 @@
 \chapter{算法}
 \section{遍历}
 \subsection{深度优先搜索}
+% LC 39. Combination Sum
 
 \subsection{广度优先搜索}
 
@@ -89,16 +90,17 @@
 \section{动态规划}
 
 \subsection{一维动态规划}
+% LC 91. Decode ways
 
 \subsection{二维动态规划}
 二维动态规划的一个典型场景是字符串的公共或回文子串问题：
 \begin{itemize}
   \item
+    \href{https://leetcode.com/problems/longest-common-subsequence/}{LeetCode 1143. Longest Common Subsequence}
+  \item
     \href{https://leetcode.com/problems/longest-palindromic-subsequence/}{LeetCode
       516. Longest Palindromic Subsequence}：可转化为求字符串与其自身倒序的 LCS，
     即转化为 LeetCode 1143。
-  \item
-    \href{https://leetcode.com/problems/longest-common-subsequence/}{LeetCode 1143. Longest Common Subsequence}
   \item
     \href{https://leetcode.com/problems/palindrome-removal/}{LeetCode 1246. Palindrome Removal}
 \end{itemize}
@@ -127,6 +129,8 @@
   \item
     \href{https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/}{LeetCode
       1011. Capacity To Ship Packages Within D Days}
+  \item
+    \href{https://leetcode.com/problems/divide-chocolate}{LeetCode 1231. Divide Chocolate}
 \end{itemize}
 
 以下题目需要结合一定的数学推导写判断条件：
@@ -144,9 +148,20 @@
 
 \section{滑动窗口}
 
+滑动窗口有时也叫双指针，一般是用 l 和 r 两个变量记录起始、结束位置，根据条件更新
+结果或调整 l 和 r 的值。
+
+\begin{itemize}
+\item
+  \href{https://leetcode.com/problems/longest-palindromic-substring/}{LeetCode
+    5. Longest Palindromic Substring}
+\end{itemize}
+
 \section{数学}
 
-这部分题目一般都是考察数学功底，需要一定的数学基础和推导计算才能完成：
+这部分题目一般都是考察数学功底，需要一定的数学基础和推导计算才能完成。
+
+对数学基础有要求的题目：
 
 \begin{itemize}
   \item
