@@ -27,10 +27,10 @@
 以下题目需要利用哈希表存储不同层级括号间的信息：
 
 \begin{itemize}
-\item
-  \href{https://leetcode.com/problems/score-of-parentheses/}{LeetCode 856. Score of Parentheses}
-\item
-  \href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LeetCode
+  \item
+    \href{https://leetcode.com/problems/score-of-parentheses/}{LeetCode 856. Score of Parentheses}
+  \item
+    \href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LeetCode
     1190. Reverse Substrings Between Each Pair of Parentheses}
 \end{itemize}
 
@@ -70,7 +70,7 @@
     \href{https://leetcode.com/problems/alien-dictionary}{LeetCode 269. Alien Dictionary}
   \item
     \href{https://leetcode.com/problems/sort-items-by-groups-respecting-dependencies/}{LeetCode
-      1203. Sort Items by Groups Respecting Dependencies}
+      1203. Sort Items by Groups Respecting Dependencies}：双层拓扑排序
 \end{itemize}
 
 \section{前缀树}
@@ -102,7 +102,7 @@
       516. Longest Palindromic Subsequence}：可转化为求字符串与其自身倒序的 LCS，
     即转化为 LeetCode 1143。
   \item
-    \href{https://leetcode.com/problems/palindrome-removal/}{LeetCode 1246. Palindrome Removal}
+    \href{https://leetcode.com/problems/palindrome-removal/}{LeetCode 1246. Palindrome Removal(Premium)}
 \end{itemize}
 
 \section{贪心}
@@ -142,7 +142,7 @@
       Magical Number}：容斥原理。
   \item
     \href{https://leetcode.com/problems/ugly-number-iii/}{LeetCode 1201. Ugly
-      Number III}：LeetCode 878 扩展版，两个数变为三个数。
+      Number III}：LeetCode 878 升级版，两个数变为三个数。
 
 \end{itemize}
 
@@ -151,10 +151,32 @@
 滑动窗口有时也叫双指针，一般是用 l 和 r 两个变量记录起始、结束位置，根据条件更新
 结果或调整 l 和 r 的值。
 
+两指针异向滑动，一般用于解决回文问题：
 \begin{itemize}
-\item
-  \href{https://leetcode.com/problems/longest-palindromic-substring/}{LeetCode
+  \item
+    \href{https://leetcode.com/problems/longest-palindromic-substring/}{LeetCode
     5. Longest Palindromic Substring}
+\end{itemize}
+
+两指针同向滑动，典型问题是求满足条件的最长子串：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/max-consecutive-ones-iii/}{LeetCode 1004. Max Consecutive Ones III}
+  \item
+    \href{https://leetcode.com/problems/longest-repeating-character-replacement/}{LeetCode
+      424. Longest Repeating Character Replacement}：LeetCode 1004 升级版，0/1 变为 26 个大写字母。
+  \item
+    \href{https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters}{LeetCode
+      159. Longest Substring with At Most Two Distinct Characters(Premium)}
+  \item
+    \href{https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters}{LeetCode
+      340. Longest Substring with At Most K Distinct Characters(Premium)}：LeetCode 159
+    升级版，2 个不同字母变为 k 个不同字母。
+  \item
+    \href{https://leetcode.com/problems/subarrays-with-k-different-integers}{LeetCode
+    992. Subarrays with K Different Integers}：要求的是正好 k 个，可以转化为最多
+  k 个 - 最多 k-1 个，类似 LeetCode 340。
+  
 \end{itemize}
 
 \section{数学}
