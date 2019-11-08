@@ -93,7 +93,7 @@
 % LC 91. Decode ways
 
 \subsection{二维动态规划}
-二维动态规划的一个典型场景是字符串的公共或回文子串问题：
+二维动态规划的一个典型场景是字符串的公共/回文子串和编辑距离问题：
 \begin{itemize}
   \item
     \href{https://leetcode.com/problems/longest-common-subsequence/}{LeetCode 1143. Longest Common Subsequence}
@@ -103,6 +103,15 @@
     即转化为 LeetCode 1143。
   \item
     \href{https://leetcode.com/problems/palindrome-removal/}{LeetCode 1246. Palindrome Removal(Premium)}
+  \item
+    \href{https://leetcode.com/problems/edit-distance/}{LeetCode 72. Edit Distance}
+  \item
+    \href{https://leetcode.com/problems/one-edit-distance}{LeetCode 161. One
+      Edit Distance}：与 LeetCode 72 类似，只需要判断是否为 1。
+  \item
+    \href{https://leetcode.com/problems/minimum-ascii-delete-sum-for-two-strings/}{LeetCode
+      712. Minimum ASCII Delete Sum for Two Strings}：LeetCode 72 升级版，只允许
+    删除操作，同时代价不再为 1，而是字符的 ASCII 值。
 \end{itemize}
 
 \section{贪心}
@@ -116,6 +125,15 @@
 \end{itemize}
 
 \subsection{有序序列查找}
+二分查找的基本题型：
+
+二分查找的变形题型：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/search-in-rotated-sorted-array/}{LeetCode
+      33. Search in Rotated Sorted Array}：判断 left/right 和 mid 值的关系，得到
+    有序部分，判断 target 是否在有序范围，重新查找。
+\end{itemize}
 
 \subsection{范围查找}
 以下题目可以直接写出二分的判断条件：
@@ -176,6 +194,10 @@
     \href{https://leetcode.com/problems/subarrays-with-k-different-integers}{LeetCode
     992. Subarrays with K Different Integers}：要求的是正好 k 个，可以转化为最多
   k 个 - 最多 k-1 个，类似 LeetCode 340。
+  \item
+    \href{https://leetcode.com/problems/get-equal-substrings-within-budget/}{LeetCode
+      1208. Get Equal Substrings Within Budget}：转化为和不超过 k 的最长子数组
+
   
 \end{itemize}
 
