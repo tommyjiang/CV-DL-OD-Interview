@@ -10,7 +10,6 @@
 括号是典型的满足先进后出特点的一种结构，所以和括号相关的题目一般都可以利用栈来解
 决，例如以下题目：
 
-% LC 301. Remove Invalid Parentheses(Stack + BFS)
 % LC 678. Valid Parenthesis String(min/max count)
 
 \begin{itemize}
@@ -40,7 +39,18 @@
 
 \section{队列}
 
-\section{优先队列}
+\section{优先队列（堆）}
+优先队列的适用场合是在插入/删除频繁的数组中获得最小值，一个典型的实现是堆。优先
+队列也是在难题中应用广泛的一种数据结构。
+
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/design-a-leaderboard}{LeetCode 1244.
+      Design A Leader board}：堆的直接应用，也可以使用快排获得前 k 大的数。
+  \item
+    \href{https://leetcode.com/problems/minimum-cost-to-connect-sticks}{LeetCode
+      1167. Minimum Cost to Connect Sticks}：维护小顶堆。
+\end{itemize}
 
 \section{链表}
 
@@ -74,16 +84,46 @@
 \end{itemize}
 
 \section{前缀树}
+
 \section{线段树}
 
 \chapter{算法}
 \section{遍历}
 \subsection{深度优先搜索}
 % LC 39. Combination Sum
+深度优先搜索（Depth First Search，DFS）的应用非常广泛，基于递归的方法相当于程序
+实现 DFS + 回溯，此外在树和图的遍历中也有普遍应用。
+
+深度优先搜索 + 回溯题目：
 
 \subsection{广度优先搜索}
+广度优先搜索（Breath First Search，BFS）一般用在求最少次数/最短路径等问题中。
+
+最少次数：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/remove-invalid-parentheses/}{LeetCode 301. Remove Invalid Parentheses}
+\end{itemize}
+
+最短路径：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/shortest-path-in-binary-matrix/}{LeetCode
+      1091. Shortest Path in Binary Matrix}：八方向连通最短路径。
+\end{itemize}
 
 \subsection{最优优先搜索}
+最优优先搜索是 DFS 和 BFS 的推广，一般通过维护最优堆进行搜索，在搜索时更新最优堆。
+DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
+
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/swim-in-rising-water/}{LeetCode 778. Swim in Rising Water}
+  \item
+    \href{https://leetcode.com/problems/path-with-maximum-minimum-value}{LeetCode
+      1102. Path With Maximum Minimum Value}：与 LeetCode 778 相同。
+\end{itemize}
+
 
 \section{并查集}
 
@@ -196,9 +236,23 @@
   k 个 - 最多 k-1 个，类似 LeetCode 340。
   \item
     \href{https://leetcode.com/problems/get-equal-substrings-within-budget/}{LeetCode
-      1208. Get Equal Substrings Within Budget}：转化为和不超过 k 的最长子数组
+      1208. Get Equal Substrings Within Budget}：转化为和不超过 k 的最长子数组。
+  \item
+    \href{https://leetcode.com/problems/minimum-size-subarray-sum/}{LeetCode
+      209. Minimum Size Subarray Sum}：和不小于 k 的最短子数组。
+\end{itemize}
 
-  
+\section{前缀和}
+前缀和（Prefix Sum）可以认为是线段树的简化版，在数组不频繁更新的情况下，可以利用
+前缀和在 O(1) 时间，O(n) 空间的条件下获得数组在某一范围内的和。
+
+前缀和 + 哈希相关题目：
+\begin{itemize}
+  \item
+    \href{https://leetcode.com/problems/subarray-sum-equals-k/}{LeetCode 560. Subarray Sum Equals K}
+  \item
+    \href{https://leetcode.com/problems/count-number-of-nice-subarrays/}{LeetCode
+      1248. Count Number of Nice Subarrays}
 \end{itemize}
 
 \section{数学}
@@ -213,6 +267,14 @@
       1250. Check If It Is a Good Array}：裴蜀定理。
 \end{itemize}
 
+% 待分类
+% 排列
+% 31. Next Permutation
+%
+% DFS/BFS
+% 1245. Tree Diameter
+% 动态规划
+% 1239. Maximum Length of a Concatenated String with Unique Characters
 
 %%% Local Variables:
 %%% TeX-master: "../master"
