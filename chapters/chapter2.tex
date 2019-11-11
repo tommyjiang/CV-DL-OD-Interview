@@ -162,12 +162,32 @@ DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
   \item
     \href{https://leetcode.com/problems/minimum-ascii-delete-sum-for-two-strings/}{LeetCode
       712. Minimum ASCII Delete Sum for Two Strings}：LeetCode 72 升级版，只允许
-    删除操作，同时代价不再为 1，而是字符的 ASCII 值。
+    删除操作，同时代价变为字符的 ASCII 值。
+  \item
+    \href{https://leetcode.com/problems/regular-expression-matching/}{LeetCode
+      10. Regular Expression Matching}：分析 s[i:] 和 t[j:] 的匹配，单独考虑字符
+    为 * 的情况。
 \end{itemize}
 
 \section{贪心}
-贪心可以看做一种特殊的动态规划，即局部最优解一定是全局最优解，相当于动态规
-划时每次无需考虑其他分支，只选择局部最优解即可。
+贪心可以看做一种特殊的动态规划，即局部最优解一定是全局最优解，因此贪心算法不断选
+择局部最优解以构造全局最优解。
+
+\subsection{区间选择问题}
+区间选择问题是贪心算法的经典应用场景，每个区间的权重均相同时才能应用贪心算法，若
+不同则需要使用动态规划求解。
+
+\begin{itemize}
+  \item 
+    \href{https://leetcode.com/problems/meeting-rooms-ii}{LeetCode 253. Meeting
+      Rooms II}
+  \item
+    \href{https://leetcode.com/problems/non-overlapping-intervals/}{LeetCode
+      435. Non-overlapping Intervals}
+  \item
+    \href{https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/}{LeetCode
+      452. Minimum Number of Arrows to Burst Balloons}
+\end{itemize}
 
 最小生成树 Kruskal 算法：
 \begin{itemize}
