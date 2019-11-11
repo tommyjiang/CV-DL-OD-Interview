@@ -391,6 +391,52 @@ head 的 loss 又分别包含分类和回归两部分：
 s^{\mathrm{conv}}(1-s^{\mathrm{fc}})$，四种方法对应的模型性能 差别不大，最后一种
 方法性能最好。
 
+\subsubsection{Grid R-CNN}
+Grid R-CNN 中借鉴了 CornerNet 的思路，改进了 Faster R-CNN 中的回归 head，利
+用 FCN 输出的 $N \times N$ 个heatmap 确定检测框的位置\citerb{2018-Grid-R-CNN}。
+
+\paragraph{Grid R-CNN 网络结构}
+如图~\ref{fig:Grid-RCNN}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/目标检测/Grid-R-CNN.pdf}
+  \caption{Grid R-CNN 网络结构}
+  \label{fig:Grid-RCNN}
+\end{figure}
+
+Grid R-CNN 对每个 RoI 输出 $N \times N$ 个点的 feature map，再利用这些点计算检测
+框的位置。回归 head 的具体结构是：
+
+\begin{itemize}
+  \item $14 \times 14$ 的 RoI feature 后接 8 个 $3 \times 3$ 分离卷积，再接两个反卷
+    积，得到 $N \times N \times 56 \times 56$ 的 feature map，分别对应 RoI 检测框
+    的 $N \times N$ 个点。
+  \item 一阶特征融合模块：将上一步得到的 feature map 再接 3 个 $5 \times 5$ 的卷
+    积，考虑与其 $L_1$ 距离为 1 的相邻点对应的 feature map，做 element-wise 和。
+  \item 二阶特征融合模块：与一阶类似，在一阶融合得到的 feature map 上继续将
+    $L_1$ 距离为 2 的相邻点对应的 feature map 做 element-wise 和。
+\end{itemize}
+
+\paragraph{扩张区域映射}
+RoI 可能不包括 GT 的角点，在做映射时使用如下公式：
+\begin{align}
+  \label{equ:yolo-v1-loss}
+  \begin{split}
+    I_x' = & P_x + \frac{4H_{x} - w_o}{2w_o} w_p  \\
+    I_y' = & P_y + \frac{4H_{y} - h_o}{2h_o} h_p 
+  \end{split}
+\end{align}
+
+相当于将映射对应的区域扩大到了原 RoI 的 4 倍。
+
+\paragraph{损失函数和正负样本}
+heatmap 损失函数为交叉熵 loss，GT 角点及其上下左右四个点组成的十字型为正样本，其
+余点为负样本。
+
+\paragraph{检测框位置的确定}
+采用每条边上三个点的加权平均确定位置，权重为回归 head 输出的分数。
+
 \subsection{Cascade 方法}
 \label{sub:cascade}
 
