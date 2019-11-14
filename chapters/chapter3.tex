@@ -115,6 +115,42 @@ loss。Focal loss 中两个参数的具体作用是：
 \section{优化方法}
 \label{sec:opt}
 
+\subsection{梯度下降（GD）和随机梯度下降（SGD）}
+梯度下降方法属于一阶优化算法，利用函数的一阶导数信息，即梯度是函数值上升最快的方
+向，因此选择负梯度方向即函数值下降最快的方向更新参数：
+\begin{equation}
+  \boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} - \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta})
+\end{equation}
+
+根据上式中梯度计算时使用样本数的不同，梯度下降法又可分为：
+\begin{itemize}
+  \item 批梯度下降：使用全部样本计算梯度。
+  \item 随机梯度下降：使用单个样本计算梯度。
+  \item Mini-batch 梯度下降：使用部分样本（例如 8、16、32 个样本）计算梯度。目前
+    应用最为广泛，有时也被称为随机梯度下降。
+\end{itemize}
+
+\subsection{带动量的随机梯度下降}
+带动量的随机梯度下降的作用是训练时，梯度方向相同时加速，梯度改变方向时减速：
+\begin{align}
+  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}) \\ 
+  \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - v_t
+\end{align}
+
+\subsection{Nesterov 方法}
+Nesterov 方法是对带动量的随机梯度下降的改进，计算梯度时不用 $\theta$ 而用
+$\theta - \gamma_{t-1}$:
+\begin{align}
+  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}-\gamma v_{t-1}) \\ 
+  \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - v_t
+\end{align}
+
+\subsection{Adagrad 方法}
+Adagrad 是对随机梯度下降的改进，将参数对应梯度除以历史梯度累积和的开方：
+\begin{equation}
+  \boldsymbol{\theta}_{t} = \boldsymbol{\theta}_{t-1} - \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta})/(G_t + \epsilon)
+\end{equation}
+
 \section{反向传播算法}
 神经网络的训练实际上是一个不断调整网络参数，从而减小损失函数的过程。对网络参数的
 优化需要先得到损失函数 $L$ 对神经网络中各参数 $\omega$ 的导数，利用该值计算参

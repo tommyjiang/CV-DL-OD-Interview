@@ -61,35 +61,96 @@
 \end{itemize}
 
 \section{链表}
+链表相关问题一般都需要新建一个哨兵节点（Dummy node），哨兵节点的下一节点为当前链
+表头节点，以简化边界处理。
+
+\subsection{翻转}
+
+\subsection{删除节点}
 
 \section{哈希表}
 
 \section{树}
+\subsection{树的遍历}
+树的遍历同样包括深度优先和广度优先两种，其中深度优先又包括前序（中、左、右）、中
+序（左、中、右）、后序（右、左、中）三种，指的是父节点相对子节点的遍历顺序。
+
+\begin{itemize}
+\item 树的 DFS 遍历：
+  \href{https://leetcode.com/problems/binary-tree-preorder-traversal}
+  {前序遍历（LC 144）}，
+  \href{https://leetcode.com/problems/binary-tree-inorder-traversal}
+  {中序遍历（LC 94）}和
+  \href{https://leetcode.com/problems/binary-tree-postorder-traversal}
+  {后序遍历（LC 145）}。
+
+\item 树的 BFS 遍历：
+  \href{https://leetcode.com/problems/binary-tree-postorder-traversal}
+  {层次遍历（LC 102）}，相关问题
+  \href{https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal}
+  {LC 103}，
+  \href{https://leetcode.com/problems/binary-tree-right-side-view}
+  {LC 199}。
+
+\item 根据遍历结果重构树：
+  \href{https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal}
+  {前序+中序重构（LC 105）}，
+  \href{https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal}
+  {中序+后序重构（LC 106）}，
+  \href{https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal}
+  {前序+后序重构（LC 889）}。
+\end{itemize}
+
+二叉搜索树（Binary Search Tree，BST）是一种特殊的二叉树，整棵树满足父节点大于左
+子节点且小于右子节点。
+
+二叉搜索树的 API：
+\begin{itemize}
+  \item 查找。 
+  \item 插入。
+  \item 删除。
+\end{itemize}
+
+\begin{itemize}
+\item BST 中序遍历的性质：BST 中序遍历的结果为从小到大的有序数组，利用这个性质可
+  以解决
+  \href{https://leetcode.com/problems/validate-binary-search-tree}
+  {LC 98}，
+  \href{https://leetcode.com/problems/binary-search-tree-iterator}
+  {LC 173}，
+  \href{https://leetcode.com/problems/kth-smallest-element-in-a-bst}
+  {LC 230}。
+\item BST 前序、后序性质：根据 BST 前序或后序遍历结果可以直接重构 BST，
+  \href{https://leetcode.com/problems/construct-binary-search-tree-from-preorder-traversal}
+  {根据前序遍历结果重构 BST（LC 1008）}，LC 上暂时还没有根据后序遍历结果重构 BST
+  的题目。
+\end{itemize}
+
+树的问题一般可以利用递归解决，其中参数一般与父节点及祖先相关，返回值一般与子节点
+及后代相关。
+\begin{itemize}
+\item 最低公共祖先（Lowest Common Ancestors，LCA）问题：
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree}
+  {二叉树中两节点的 LCA（LC 236）}，
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves}
+  {二叉树最深节点的 LCA（LC 1123）}。如果是 BST，可以直接判断当前节点值和待查节
+  点值的关系，
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree}
+  {BST 中两节点的 LCA（LC 235）}。
+\end{itemize}
 
 \section{图}
 
 \subsection{拓扑排序}
 拓扑排序是指将一个有向无环图（Directed Acyclic Graph，DAG）G 中的所有顶点排成一个
 线性序列，使得对任意一对顶点 $u, v$，若边 $(u, v) \in G$，则在序列中 $u$ 出现
-在 $v$ 之前。
-
-拓扑排序相关题目：
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/course-schedule/}{LeetCode 207. Course Schedule}
-  \item
-    \href{https://leetcode.com/problems/course-schedule-ii/}{LeetCode 210. Course Schedule II}
-  \item
-    \href{https://leetcode.com/problems/parallel-courses}{LeetCode 1136. Parallel Courses(Premium)}
-  \item
-    \href{https://leetcode.com/problems/sequence-reconstruction}{LeetCode 444.
-      Sequence Reconstruction}
-  \item
-    \href{https://leetcode.com/problems/alien-dictionary}{LeetCode 269. Alien Dictionary}
-  \item
-    \href{https://leetcode.com/problems/sort-items-by-groups-respecting-dependencies/}{LeetCode
-      1203. Sort Items by Groups Respecting Dependencies}：双层拓扑排序
-\end{itemize}
+在 $v$ 之前。相关题目包括
+\href{https://leetcode.com/problems/course-schedule/}{LC 207}，
+\href{https://leetcode.com/problems/course-schedule-ii/}{LC 210}，
+\href{https://leetcode.com/problems/parallel-courses}{LC 1136}，
+\href{https://leetcode.com/problems/sequence-reconstruction}{LC 444}，
+\href{https://leetcode.com/problems/alien-dictionary}{LC 269}，
+\href{https://leetcode.com/problems/sort-items-by-groups-respecting-dependencies/}{LC 1203}。
 
 \section{前缀树}
 
@@ -325,8 +386,6 @@ DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
 %
 % DFS/BFS
 % 1245. Tree Diameter
-% 动态规划
-% 1239. Maximum Length of a Concatenated String with Unique Characters
 
 %%% Local Variables:
 %%% TeX-master: "../master"
