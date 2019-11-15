@@ -4,9 +4,11 @@ class TreeNode:
         self.left = None
         self.right = None
 
+
 class BST:
     def __init__(self, root=None):
         self.root = None
+
 
     def search(self, val):
         node = self.root
@@ -20,6 +22,7 @@ class BST:
                 node = node.left
 
         return False
+
 
     def insert(self, val):
         if not self.root:
@@ -43,6 +46,7 @@ class BST:
 
         return True
 
+
     def delete(self, val):
         node = self.search(val)
         if not node:
@@ -51,6 +55,7 @@ class BST:
         else:
             self._delete(val, self.root)  # also search from root
             return True
+
 
     def _delete(self, val, node):
         if not node:
@@ -72,15 +77,52 @@ class BST:
 
         return node
 
-    def inorder(self, node):
+
+    def inorder_recur(self, node):
         if not node:
             return
-        self.inorder(node.left)
+        self.inorder_recur(node.left)
         print(node.val)
-        self.inorder(node.right)
+        self.inorder_recur(node.right)
 
-    def print(self):
-        self.inorder(self.root)
+
+    def inorder_iter(self):
+        node = self.root
+        s = []
+
+        while node or s:
+            while node:
+                s.append(node)
+                node = node.left
+
+            if s:
+                node = s.pop()
+                print(node.val)
+                node = node.right
+
+
+    def print_inorder(self):
+        # self.inorder_recur(self.root)
+        self.inorder_iter()
+
+
+    def preorder_iter(self):
+        node = self.root
+        s = []
+
+        while node or s:
+            while node:
+                print(node.val)
+                s.append(node)
+                node = node.left
+
+            if s:
+                node = s.pop()
+                node = node.right
+
+    def print_preorder(self):
+        self.preorder_iter()
+
 
     def successor_root(self, val):
         node = self.root
@@ -94,6 +136,7 @@ class BST:
                 node = node.right
 
         return res
+
 
     def successor_parent(self, val):
         node = self.search(val)
@@ -113,13 +156,15 @@ class BST:
                         node = node.p
                 return None
 
+
 a = BST()
 a.insert(3)
 a.insert(1)
 a.insert(2)
 a.insert(4)
-print(a.search(1))
-print(a.search(-1))
-a.successor_root(3)
-a.delete(4)
-a.print()
+a.print_inorder()
+a.print_preorder()
+# print(a.search(1))
+# print(a.search(-1))
+# a.successor_root(3)
+# a.delete(4)

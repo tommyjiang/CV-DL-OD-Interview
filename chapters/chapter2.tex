@@ -51,15 +51,6 @@
 优先队列的适用场合是在插入/删除频繁的数组中获得最小值，一个典型的实现是堆。优先
 队列也是在难题中应用广泛的一种数据结构。
 
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/design-a-leaderboard}{LeetCode 1244.
-      Design A Leader board}：堆的直接应用，也可以使用快排获得前 k 大的数。
-  \item
-    \href{https://leetcode.com/problems/minimum-cost-to-connect-sticks}{LeetCode
-      1167. Minimum Cost to Connect Sticks}：维护小顶堆。
-\end{itemize}
-
 \section{链表}
 链表相关问题一般都需要新建一个哨兵节点（Dummy node），哨兵节点的下一节点为当前链
 表头节点，以简化边界处理。
@@ -71,7 +62,9 @@
 \section{哈希表}
 
 \section{树}
-\subsection{树的遍历}
+
+\subsection{一般二叉树}
+\paragraph{树的遍历}
 树的遍历同样包括深度优先和广度优先两种，其中深度优先又包括前序（中、左、右）、中
 序（左、中、右）、后序（右、左、中）三种，指的是父节点相对子节点的遍历顺序。
 
@@ -101,18 +94,44 @@
   {前序+后序重构（LC 889）}。
 \end{itemize}
 
+\paragraph{典型问题}
+树的典型问题一般可以利用递归解决，其中参数一般与父节点及祖先相关，返回值一般与子
+节点及后代相关。
+\begin{itemize}
+\item 最低公共祖先（Lowest Common Ancestors，LCA）问
+  题：
+  包括
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree}
+  {二叉树任意两节点（LC 236）}，
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves}
+  {二叉树最深节点（LC 1123）}以及
+  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree}
+  {BST 两节点（LC 235）}。
+  如果树中节点有指向父节点的指针，则可将 LCA 问题转化为两个链表的第一个公共节点问题。
+\end{itemize}
+
+\subsection{二叉搜索树}
+
 二叉搜索树（Binary Search Tree，BST）是一种特殊的二叉树，整棵树满足父节点大于左
 子节点且小于右子节点。
 
-BST 的 API：
+\paragraph{BST 的主要 API}
 \begin{itemize}
-  \item 查找\href{https://leetcode.com/problems/search-in-a-binary-search-tree}{LC 700}。
-  \item 插入\href{https://leetcode.com/problems/insert-into-a-binary-search-tree}{LC 701}。
-  \item 删除\href{https://leetcode.com/problems/delete-node-in-a-bst}{LC 450}。
-  \item 后继。包括给定根节点和值查找后继\href{https://leetcode.com/problems/inorder-successor-in-bst}{LC 285}，和给定当前节点（带父指针）查找后继\href{https://leetcode.com/problems/inorder-successor-in-bst-ii}{LC 510}。
+  \item 查找
+    （\href{https://leetcode.com/problems/search-in-a-binary-search-tree}{LC
+      700}）。
+  \item 插入
+    （\href{https://leetcode.com/problems/insert-into-a-binary-search-tree}{LC
+      701}）。
+  \item 删除（\href{https://leetcode.com/problems/delete-node-in-a-bst}{LC 450}）。
+  \item 后继。包括给定根节点和值查找后继
+    （\href{https://leetcode.com/problems/inorder-successor-in-bst}{LC 285}），
+    和给定当前节点（带父指针）查找后继
+    （\href{https://leetcode.com/problems/inorder-successor-in-bst-ii}{LC 510}）。
   \item 前驱。与后继类似。
 \end{itemize}
 
+\paragraph{BST 的遍历性质}
 \begin{itemize}
 \item BST 中序遍历的性质：BST 中序遍历的结果为从小到大的有序数组，利用这个性质可
   以解决
@@ -126,19 +145,6 @@ BST 的 API：
   \href{https://leetcode.com/problems/construct-binary-search-tree-from-preorder-traversal}
   {根据前序遍历结果重构 BST（LC 1008）}，LC 上暂时还没有根据后序遍历结果重构 BST
   的题目。
-\end{itemize}
-
-树的问题一般可以利用递归解决，其中参数一般与父节点及祖先相关，返回值一般与子节点
-及后代相关。
-\begin{itemize}
-\item 最低公共祖先（Lowest Common Ancestors，LCA）问题：
-  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree}
-  {二叉树中两节点的 LCA（LC 236）}，
-  \href{https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves}
-  {二叉树最深节点的 LCA（LC 1123）}。如果是 BST，可以直接判断当前节点值和待查节
-  点值的关系，
-  \href{https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree}
-  {BST 中两节点的 LCA（LC 235）}。
 \end{itemize}
 
 \section{图}
@@ -324,8 +330,7 @@ DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
 \begin{itemize}
   \item
     \href{https://leetcode.com/problems/longest-substring-without-repeating-characters/submissions/}{LeetCode
-      3. Longest Substring Without Repeating Characters}：用 dict 记录每个字符的
-    位置，遇到 dict 中存在的字符时，判断更新窗口左边界。
+      3. Longest Substring Without Repeating Characters}
   \item
     \href{https://leetcode.com/problems/max-consecutive-ones-iii/}{LeetCode 1004. Max Consecutive Ones III}
   \item
@@ -344,7 +349,7 @@ DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
   k 个 - 最多 k-1 个，类似 LeetCode 340。
   \item
     \href{https://leetcode.com/problems/get-equal-substrings-within-budget/}{LeetCode
-      1208. Get Equal Substrings Within Budget}：转化为和不超过 k 的最长子数组。
+      1208. Get Equal Substrings Within Budget}：和不超过 k 的最长子数组。
   \item
     \href{https://leetcode.com/problems/minimum-size-subarray-sum/}{LeetCode
       209. Minimum Size Subarray Sum}：和不小于 k 的最短子数组。
@@ -361,25 +366,6 @@ DFS 和 BFS 都可以看成是最优优先搜索的特例。相关问题：
   \item
     \href{https://leetcode.com/problems/count-number-of-nice-subarrays/}{LeetCode
       1248. Count Number of Nice Subarrays}
-\end{itemize}
-
-\section{数学}
-
-这部分题目一般都是考察数学功底，需要一定的数学基础和推导计算才能完成。
-
-需要一定推导：
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/rotate-function/}{LeetCode 396. Rotate
-      Function}：前后项相减写递推关系。
-\end{itemize}
-
-对数学基础有要求的题目：
-
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/check-if-it-is-a-good-array/}{LeetCode
-      1250. Check If It Is a Good Array}：裴蜀定理。
 \end{itemize}
 
 % 待分类
