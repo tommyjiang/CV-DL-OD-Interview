@@ -10,6 +10,7 @@ class BST:
 
     def search(self, val):
         node = self.root
+
         while node:
             if node.val == val:
                 return True
@@ -43,18 +44,19 @@ class BST:
         return True
 
     def delete(self, val):
-        found = self.search(val)
-        if not found:
+        node = self.search(val)
+        if not node:
             print('No such node.')
             return False
         else:
-            self._delete(val, self.root)
+            self._delete(val, self.root)  # also search from root
             return True
 
     def _delete(self, val, node):
         if not node:
             return None
         if node.val == val:
+            # replace node with node.right's left most node
             if node.right:
                 right_left_most = node.right
                 while right_left_most.left:
@@ -80,7 +82,7 @@ class BST:
     def print(self):
         self.inorder(self.root)
 
-    def successor(self, val):
+    def successor_root(self, val):
         node = self.root
         res = None
 
@@ -91,11 +93,25 @@ class BST:
             else:
                 node = node.right
 
-        if res:
-            print(res.val)
-        else:
-            print('None')
         return res
+
+    def successor_parent(self, val):
+        node = self.search(val)
+        if not node:
+            return None
+        else:
+            if node.right:
+                node = node.right
+                while node.right:
+                    node = node.right
+                return node
+            else:
+                while node.p:
+                    if node == node.p.left:
+                        return node.p
+                    else:
+                        node = node.p
+                return None
 
 a = BST()
 a.insert(3)
@@ -104,6 +120,6 @@ a.insert(2)
 a.insert(4)
 print(a.search(1))
 print(a.search(-1))
-a.successor(3)
+a.successor_root(3)
 a.delete(4)
 a.print()

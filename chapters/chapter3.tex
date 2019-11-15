@@ -133,7 +133,7 @@ loss。Focal loss 中两个参数的具体作用是：
 \subsection{带动量的随机梯度下降}
 带动量的随机梯度下降的作用是训练时，梯度方向相同时加速，梯度改变方向时减速：
 \begin{align}
-  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}) \\ 
+  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}) \\
   \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - v_t
 \end{align}
 
@@ -141,7 +141,7 @@ loss。Focal loss 中两个参数的具体作用是：
 Nesterov 方法是对带动量的随机梯度下降的改进，计算梯度时不用 $\theta$ 而用
 $\theta - \gamma_{t-1}$:
 \begin{align}
-  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}-\gamma v_{t-1}) \\ 
+  v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}-\gamma v_{t-1}) \\
   \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - v_t
 \end{align}
 
