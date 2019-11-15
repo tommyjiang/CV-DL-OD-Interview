@@ -163,7 +163,14 @@ Adagrad 方法中，分母上的历史梯度累计和会越来越大，导致当
 RMSProp 方法和 Adadelta 方法类似。
 
 \subsection{Adam 方法}
-
+Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
+\begin{align}
+  m_t & = \beta_1 m_{t-1} + (1-\beta_1) g_t \\
+  v_t & = \beta_2 v_{t-1} + (1-\beta_2) g_t^2 \\
+  \hat{m}_t & = \frac{m_t}{1-\beta_1^t} \\
+  \hat{v}_t & = \frac{v_t}{1-\beta_2^t} \\
+  \boldsymbol{\theta}_{t} & = \boldsymbol{\theta_{t-1}} - \frac{\eta}{\sqrt{\hat{v}_t + \epsilon}}\hat{m}_t
+\end{align}
 
 \section{反向传播算法}
 神经网络的训练实际上是一个不断调整网络参数，从而减小损失函数的过程。对网络参数的
