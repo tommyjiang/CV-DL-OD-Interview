@@ -82,7 +82,7 @@ class BST:
         if not node:
             return
         self.inorder_recur(node.left)
-        print(node.val)
+        print(node.val, end=' ')
         self.inorder_recur(node.right)
 
 
@@ -97,13 +97,13 @@ class BST:
 
             if s:
                 node = s.pop()
-                print(node.val)
+                print(node.val, end=' ')
                 node = node.right
 
 
     def print_inorder(self):
-        # self.inorder_recur(self.root)
         self.inorder_iter()
+        print()
 
 
     def preorder_iter(self):
@@ -112,7 +112,7 @@ class BST:
 
         while node or s:
             while node:
-                print(node.val)
+                print(node.val, end=' ')
                 s.append(node)
                 node = node.left
 
@@ -122,6 +122,32 @@ class BST:
 
     def print_preorder(self):
         self.preorder_iter()
+        print()
+
+
+    def postorder_iter(self):
+        node = self.root
+        s = []
+        left, right = -1, 1
+
+        while node or s:
+            while node:
+                s.append([node, left])
+                node = node.left
+
+            node, tag = s.pop()
+
+            if tag == left:  # left visited
+                s.append([node, right])
+                node = node.right
+            else:
+                print(node.val, end=' ')
+                node = None
+
+
+    def print_postorder(self):
+        self.postorder_iter()
+        print()
 
 
     def successor_root(self, val):
@@ -164,6 +190,7 @@ a.insert(2)
 a.insert(4)
 a.print_inorder()
 a.print_preorder()
+a.print_postorder()
 # print(a.search(1))
 # print(a.search(-1))
 # a.successor_root(3)
