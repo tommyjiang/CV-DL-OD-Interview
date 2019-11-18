@@ -8,42 +8,22 @@
 
 \subsection{括号题目}
 括号是典型的满足先进后出特点的一种结构，所以和括号相关的题目一般都可以利用栈来解
-决，例如以下题目：
-
-% LC 678. Valid Parenthesis String(min/max count)
-
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/}{LeetCode
-      921. Minimum Add to Make Parentheses Valid}
-  \item
-    \href{https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/}{LeetCode
-      1249. Minimum Remove to Make Valid Parentheses}
-  \item
-    \href{https://leetcode.com/problems/longest-valid-parentheses/}{LeetCode 32. Longest Valid Parentheses}
-\end{itemize}
-
-以下题目需要利用哈希表存储不同层级括号间的信息：
-
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/score-of-parentheses/}{LeetCode 856. Score of Parentheses}
-  \item
-    \href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LeetCode
-    1190. Reverse Substrings Between Each Pair of Parentheses}
-\end{itemize}
+决，例如
+\href{https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/}{LC
+  921}，
+\href{https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/}{LC
+  1249}，
+\href{https://leetcode.com/problems/longest-valid-parentheses/}{LC
+  32}，
+\href{https://leetcode.com/problems/score-of-parentheses/}{LC
+  856}，
+\href{https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/}{LC 1190}~等。
 
 \subsection{计算器题目}
 
 \subsection{文本解析题目}
 
-相关题目：
-
-\begin{itemize}
-  \item
-    \href{https://leetcode.com/problems/decode-string/}{LeetCode 394. Decode
-      String}：数字、字母、左右括号分别处理，利用栈记录当前和之前的 string。
-\end{itemize}
+\href{https://leetcode.com/problems/decode-string/}{LC 394}。
 
 \section{队列}
 
@@ -85,9 +65,8 @@
 
 \subsection{一般二叉树}
 \paragraph{树的遍历}
-树的遍历同样包括深度优先和广度优先两种，其中深度优先又包括前序（中、左、右）、中
-序（左、中、右）、后序（左、右、中）三种，指的是父节点相对子节点的遍历顺序。需要
-同时掌握递归和非递归两种写法。
+树的遍历包括深度优先和广度优先两种，其中深度优先遍历又包括前序（中、左、右）、中
+序（左、中、右）、后序（左、右、中）三种。需要同时掌握递归和非递归两种写法。
 
 \begin{itemize}
 \item 树的 DFS 遍历：
@@ -201,8 +180,6 @@
 % LC 39. Combination Sum
 深度优先搜索（Depth First Search，DFS）的应用非常广泛，基于递归的方法相当于程序
 实现 DFS + 回溯，此外在树和图的遍历中也有普遍应用。
-
-深度优先搜索 + 回溯题目：
 
 \subsection{广度优先搜索}
 广度优先搜索（Breath First Search，BFS）一般用在求最少次数/最短路径等问题中。
