@@ -4,6 +4,31 @@
 
 \chapter{轻量模型}
 
+\section{MobileNet 系列}
+
+\section{ShuffleNet 系列}
+\subsection{ShuffleNet v1}
+ShuffleNet v1 的基本单元如图~\ref{fig:shufflenet}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/ShuffleNet.pdf}
+  \caption{ShuffleNet 基本模块}
+  \label{fig:shufflenet}
+\end{figure}
+
+上图中（b）和（c）分别对应 stride = 1 和 stride = 2 的模块，借鉴了 ResNet 中
+Residual block 的结构，具体结构包括：
+
+\begin{itemize}
+  \item 卷积模块：$1 \times 1$ 分组卷积 + Shuffle + $3 \times 3$ 分层卷积 + $1
+    \time 1$ 分组卷积，分层卷积的 stride 与整体 stride 相同（1 或 2）。
+  \item Shortcut 路径：stride = 2 模块为 $3 \times 3$，stride = 2 的平均池化。
+  \item 合并方法：stride = 1 模块为 element-wise 求和，stride = 2 模块为 concat。
+\end{itemize}
+
+\subsection{ShuffleNet v2}
+
 
 %%% Local Variables:
 %%% TeX-master: "../master"
