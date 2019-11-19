@@ -173,8 +173,15 @@
 \end{itemize}
 
 \subsection{割点和割边（桥）}
-图的割点和割边（桥）是指去掉该点或该边后，子图不连通。无向图的割点和割边可以用
-Tarjan 算法解决。
+图的割点和割边（桥）是指去掉该点或该边后，子图不连通。无向图的割点和割边可以
+用Tarjan 算法解决，利用 DFS 访问节点，维护三个数组：当前节点访问次
+序~\texttt{dfs}，DFS后续节点能达到的最小节点序号~\texttt{low}，父节点序
+号~\texttt{parent}，同时还需要统计与每个节点邻接的节点数~\texttt{child}。
+
+\begin{itemize}
+  \item 割边判据：\texttt{low[v] > dfs[u]}。
+  \item 割点判据：根节点且邻接节点数大于 1，或非根节点且~\texttt{low[v] >= dfs[u]}。
+\end{itemize}
 
 \section{前缀树}
 
