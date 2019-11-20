@@ -4,20 +4,24 @@
 \section{指标}
 
 \subsection{交并比（IoU）}
-交并比（Intersection over Union，IoU）是衡量两个矩形接近程度的一种指标，其定义为：
+交并比（Intersection over Union，IoU）是衡量两个矩形位置接近程度的一种指标，其定
+义为：
 \begin{equation}
   \label{equ:IoU}
-  \mathrm{IoU} = \frac{\mathrm{Intersection}(A, B)}{\mathrm{union}(A, B)}
+  \mathrm{IoU} = \frac{\mathrm{Intersection}(A, B)}{\mathrm{Union}(A, B)}
 \end{equation}
 
+IoU 的取值在 0 到 1 之间，越接近 1，说明两个矩形位置越接近。
+
 \subsection{mAP}
-mAP 全称为 Mean Average Precision，中文一般不翻译。
+mAP 全称为 Mean Average Precision。
 
 \section{非极大值抑制（NMS）}
 
-非极大值抑制（Non maximum suppression，NMS）是一种后处理方法，其作用是保证一个待
-检测物体只有一个检测框与之对应，更直观地理解其实是极大值保留，即只保留（置信度）
-是极大值的检测框。图~\ref{fig:nms}~给出了一个具体示例\citerb{2018-NMS}：
+非极大值抑制（Non maximum suppression，NMS）是一种后处理方法，其作用是删除多余的
+检测框，保证一个待检测物体只有一个检测框与之对应。一种更直观地理解是极大值保留，
+即多个检测框重叠较大时，只保留置信度最大的检测框。图~\ref{fig:nms}~给出了 NMS 的一
+个具体示例\citerb{2018-NMS}：
 
 \begin{figure}[ht]
   \centering
@@ -28,9 +32,10 @@ mAP 全称为 Mean Average Precision，中文一般不翻译。
 
 \subsection{传统 NMS}
 
-传统 NMS 算法的具体流程是，先根据分数对所有检测框进行排序，然后从分高到分低遍历所
-有检测框，如果高分检测框与低分检测框的 IoU 大于一定阈值，则将低分检测框删掉，后续
-遍历时不再处理，如图~\ref{fig:nms-algo}~中的红框。
+传统 NMS 算法的具体流程是，先根据分数对所有检测框排序，高分在前，低分在后。然后将
+当前分数最高的检测框加入最终结果，从头往后遍历剩余检测框，如果当前检测框与低分检
+测框的 IoU 大于一定阈值，则将低分检测框删掉，如此循环直到处理完所有框（加入最终
+结果或删除），具体流程如图~\ref{fig:nms-algo}~中的红框所示。
 
 \begin{figure}[ht]
   \centering
@@ -42,15 +47,15 @@ mAP 全称为 Mean Average Precision，中文一般不翻译。
 \subsection{Soft NMS}
 \label{subsec:soft-nms}
 
-传统 NMS 算法需要选择合适的两个检测框的 IoU 阈值，否则阈值太低会导致误检，而阈值
-太高又会导致漏检。Soft NMS 的基本思想是根据两个检测框的 IoU，降低低分检测框的分
-数，但并不直接将其删除。Soft NMS 的具体流程如图~\ref{fig:nms-algo}~中的绿
-框~\citerb{2017-Soft-NMS}，其中 $f(iou(M, b_i))$ 的具体形式为：
+传统 NMS 算法需要选择合适 IoU 阈值，阈值太低会导致误检，而阈值太高又会导致漏
+检。Soft NMS 的基本思想是，两个检测框重叠较大时，降低低分检测框的分数，但并不直接
+将其删除。算法的具体流程如图~\ref{fig:nms-algo}~中的绿框所示~\citerb{2017-Soft-NMS}，
+其中 $f(iou(M, b_i))$ 的形式为：
 \begin{equation}
 f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \end{equation}
 
-即两个框的 IoU 越大，分数较低框的分数降低的越多。
+即两个框的 IoU 越大，低分框的分数降低得越多。
 
 \subsection{Softer NMS}
 文献~\citerb{2018-Softer-NMS}~中在 Soft NMS 的基础上提出了 Softer NMS，具体流程
@@ -67,9 +72,9 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 的部分，其具体步骤是：
 
 \begin{enumerate}
-  \item 对任一检测框，计算所有分数低于该框的检测框与其的 IoU。
+  \item 对任一检测框，计算所有分数低于该框的检测框与该框的 IoU。
   \item 根据 IoU 和每个检测框的不确定度 $\sigma$，修正该检测框的位置，其中 IoU
-    越大，$ \sigma $ 越小，则相应的权重越高。
+    越大，$ \sigma $ 越小，权重越高。
 \end{enumerate}
 
 \chapter{两阶段方法}
@@ -79,9 +84,9 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \subsection{Fast R-CNN}
 \label{subsec:Fast-R-CNN}
 
-Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一次，不需要像 R-CNN 中
-将所有 proposal 对应的图片区域先 resize 再逐个前传，因此可以大大提升训练和测试速
-度\citerb{2015-Fast-RCNN}。
+Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一次，不需要像 R-CNN 中将
+所有 proposal 对应的图片区域先缩放到固定尺寸再逐个前传，因此可以大大提升训练和测
+试速度\citerb{2015-Fast-RCNN}。
 
 \paragraph{网络结构}
 Fast R-CNN 的网络结构如图~\ref{fig:Fast-RCNN}~所示。网络最开始是统一的 CNN
@@ -105,7 +110,7 @@ RoI 的全称是 Region of Interest，中文为感兴趣区域。RoI Pooling 层
 的输出。
 
 \paragraph{损失函数}
-Fast R-CNN 的 loss 为分类加回归的多任务 loss，具体形式为：
+Fast R-CNN 使用分类加回归的多任务 loss，具体形式为：
 \begin{align}
   L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\
     & = -\mathrm{log}\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
@@ -120,11 +125,11 @@ Fast R-CNN 的 loss 为分类加回归的多任务 loss，具体形式为：
   t_h & = \mathrm{log} (G_h/P_h)
 \end{align}
 
-上式中，$G$ 和 $P$ 分别表示 GT 和 Proposal（即 RoI），因此 $t$ 相当于两者之间的一种变换关
-系，Fast R-CNN 网络回归部分输出的 $v$ 与 $t$ 一样，\textbf{也是变换关系，而非直接
-  预测检测框的位置}。回归部分采用 Smooth $L_1$ loss 的原因，是因为与 $L_2$ loss
-相比，该 loss 对偏差较大的点的敏感性低，因此不容易出现梯度爆炸问题，网络更容易训
-练。
+上式中，$G$ 和 $P$ 分别表示 GT 和 Proposal（即 RoI），因此 $t$ 相当于两者之间的一
+种变换关系，Fast R-CNN 网络回归部分输出的 $v$ 与 $t$ 一样，\textbf{也是变换关系，
+  而非直接预测检测框的位置}。回归部分采用 Smooth $L_1$ loss 的原因，是因为
+与 $L_2$ loss 相比，该 loss 对偏差较大点的敏感性低，因此不容易出现梯度爆炸，
+网络更容易训练。
 
 \paragraph{正负样本}
 Proposal 正负样本的判断标准为：
@@ -156,7 +161,7 @@ RPN 网络最开始是 CNN backbone，在 backbone 之后接一个 $3 \times 3$ 
 是两个共享 backbone 的 RPN 和 Fast R-CNN 的组合。
 
 \paragraph{RPN 网络损失函数}
-RPN 网络的损失函数和 Fast R-CNN 非常类似，都包括分类和回归两项。二者的区别
+RPN 网络的 loss 和 Fast R-CNN 非常类似，都包括分类和回归两项。二者的区别
 是：Fast R-CNN 一般为多分类，用 softmax loss；而 RPN 网络为二分类，可以直接用交叉
 熵 loss。
 
@@ -431,7 +436,7 @@ RoI 可能不包括 GT 的角点，在做映射时使用如下公式：
 相当于将映射对应的区域扩大到了原 RoI 的 4 倍。
 
 \paragraph{损失函数和正负样本}
-heatmap 损失函数为交叉熵 loss，GT 角点及其上下左右四个点组成的十字型为正样本，其
+heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点组成的十字型为正样本，其
 余点为负样本。
 
 \paragraph{检测框位置的确定}
@@ -521,9 +526,9 @@ YOLO v1 的 backbone 没有以经典分类网络为基础，而是采用自己�
 \begin{enumerate}
   \item 损失函数可分为三部分：第一部分包括前两项，是检测框位置的 loss；第二部分包
     括中间两项，是检测框分数的 loss；第三部分包括最后一项，是网格类别概率的 loss。所
-    有的 loss 均为 $L_2$ 形式。
-  \item 检测框位置 loss 权重 $\lambda_{\mathrm{coord}}$ 提高到 5，同时将不含 GT 的
-    网格中检测框分数 loss 的权重 $\lambda_{\mathrm{noobj}}$ 降为 0.5。
+    有 loss 均为 $L_2$ 形式。
+  \item 检测框位置的 loss 权重 $\lambda_{\mathrm{coord}}$ 提高到 5，同时将不含 GT 的
+    网格中检测框分数的 loss 权重 $\lambda_{\mathrm{noobj}}$ 降为 0.5。
   \item 只有与 GT IoU 最大的检测框才会产生检测框位置 loss，只有网格中包含 GT 中
     心才产生网格类别概率 loss。
 \end{enumerate}
@@ -609,7 +614,7 @@ box 尺寸小，反之尺寸大，具体请参考\href{https://github.com/weiliu
 
 \paragraph{训练}
 SSD 训练时的正负样本比为 1:3，在训练时使用了难样本挖掘（HEM），即只选择 loss 最高
-的负样本计算 loss。
+的负样本进行计算。
 
 \subsection{DSSD}
 \label{subsec:DSSD}
@@ -655,8 +660,7 @@ RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster
 RetinaNet 训练时分类部分的 loss 采用 focal loss，扫参结果 $\alpha = 0.25, \gamma
 = 2$ 时效果最好。由于正样本数量很少，因此分类器的初始化也做了相应调整，将最后一个
 卷积层的偏置的初值设为 $-\mathrm{log}((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
-文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要采样获得
-batch 对应样本。
+文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要采样。
 
 \paragraph{Anchor 参数}
 RetinaNet 同样采用了 FPN 结构，分别从 $P_3$ 到 $P_7$ 五个尺度进行预测，对应的
@@ -704,7 +708,7 @@ RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收
 \end{itemize}
 
 \paragraph{RefineDet 损失函数}
-ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的损失函数，总损失函数为二者之和。
+ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，总 loss 为二者之和。
 
 \subsection{LapNet}
 LapNet 的思路与传统的检测网络有明显区别，其特点是体现了良好的速度和精度的均衡，
@@ -736,16 +740,16 @@ PONO（Per-Object Normalized Overlap）是 LapNet 中的核心概念，其具体
 \end{itemize}
 
 \paragraph{LapNet 损失函数}
-LapNet 的损失函数包括回归 loss、分类 loss 和正则化 loss 三部分：
+LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 
 \begin{itemize}
-  \item 回归 loss：采用 IoU loss 的 $L_2$ 形式，即 $\mathcal{L}_{\mathrm{loc}} =
+  \item 回归：采用 IoU loss 的 $L_2$ 形式，即 $\mathcal{L}_{\mathrm{loc}} =
     \left \| 1 - \mathrm{IoU}(B_{\mathrm{GT}, B_{\mathrm{DT}}}) \right\|$，且只
-    在 PONO map 大于 0.5 的点计算该 loss。
-  \item 分类 loss：采用交叉熵 loss：
+    在 PONO map 大于 0.5 的点计算损失。
+  \item 分类：采用交叉熵 loss：
     $\mathcal{L}_{\mathrm{cls}}=\mathrm{BCE}(P, \hat{P})$，其中 $\hat{P}$ 的值在
     PONO map 与该点 DT 与 GT 的 IoU 乘积大于 0.5 时为 1，其他情况为 0。
-  \item 正则化 loss：对不同类别、不同 anchor 回归和分类 loss 权重的正则项。
+  \item 正则化：对不同类别、不同 anchor 回归和分类 loss 权重的正则项。
 \end{itemize}
 
 总 loss 形式为：
