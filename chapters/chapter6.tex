@@ -962,17 +962,25 @@ Inference 时检测框的分数为分类分数和中心度的乘积，只取分�
 
 \chapter{专题}
 \section{Scale 问题}
+目标检测的 Scale 问题指的是单个模型需要同时检测不同尺寸的物体，一般而言，模型对小
+物体的检出能力相对较差。
+
+\subsection{Feature map 信息融合}
+对于多尺度 feature map 同时预测的目标检测模型，小物体的检测一般在较浅层的
+feature map 上进行。浅层 feature map 的一个问题是感受野较小，因此上下文语义信息
+较弱。FPN、DSSD、RetinaNet 等模型都引入了 feature map 信息融合，即将深层 feature
+map 上采样或反卷积，再与浅层 feature map 融合，得到尺寸较大同时上下文语义信息更
+强的 feature map 用于最终预测。
 
 \section{损失函数}
-\subsection{检测回归损失函数}
-
-\paragraph{IoU loss}
+\subsection{回归损失函数}
 目标检测的代表性模型 Fast R-CNN 和 YOLO 分别使用了 Smooth $L_1$ 和 $L_2$ 形式的
 损失函数作为回归 loss，但最终评测目标检测模型性能使用的指标一般是检测框与 GT 的
 IoU，二者并不一致。
 
-为解决这个问题，文献\citerb{2016-IoU-loss}中提出 IoU loss，作为目标检测模型回归
-部分的损失函数：
+\paragraph{IoU loss}
+为统一训练 loss 和评测指标，文献\citerb{2016-IoU-loss}中提出 IoU loss 作为目标检
+测模型回归部分的损失函数：
 \begin{equation}
   L_{\mathrm{IoU}} = - \mathrm{ln} (\mathrm{IoU})
 \end{equation}
