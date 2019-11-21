@@ -49,7 +49,7 @@ mAP 全称为 Mean Average Precision。
 
 传统 NMS 算法需要选择合适 IoU 阈值，阈值太低会导致误检，而阈值太高又会导致漏
 检。Soft NMS 的基本思想是，两个检测框重叠较大时，降低低分检测框的分数，但并不直接
-将其删除。算法的具体流程如图~\ref{fig:nms-algo}~中的绿框所示~\citerb{2017-Soft-NMS}，
+将其删除。算法的具体流程如图~\ref{fig:nms-algo}~中的绿框所示\citerb{2017-Soft-NMS}，
 其中 $f(iou(M, b_i))$ 的形式为：
 \begin{equation}
 f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
@@ -58,7 +58,7 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 即两个框的 IoU 越大，低分框的分数降低得越多。
 
 \subsection{Softer NMS}
-文献~\citerb{2018-Softer-NMS}~中在 Soft NMS 的基础上提出了 Softer NMS，具体流程
+文献\citerb{2018-Softer-NMS}~中在 Soft NMS 的基础上提出了 Softer NMS，具体流程
 如图~\ref{fig:softer-nms}~所示：
 
 \begin{figure}[ht]
@@ -743,7 +743,7 @@ PONO（Per-Object Normalized Overlap）是 LapNet 中的核心概念，其具体
 LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 
 \begin{itemize}
-  \item 回归：采用 IoU loss 的 $L_2$ 形式，即 $\mathcal{L}_{\mathrm{loc}} =
+  \item 回归：采用 IoU $L_2$ Loss，即 $\mathcal{L}_{\mathrm{loc}} =
     \left \| 1 - \mathrm{IoU}(B_{\mathrm{GT}, B_{\mathrm{DT}}}) \right\|$，且只
     在 PONO map 大于 0.5 的点计算损失。
   \item 分类：采用交叉熵 loss：
@@ -959,6 +959,47 @@ $L_{\mathrm{pos}}$ 为交叉熵 loss。
 \paragraph{FCOS Inference}
 Inference 时检测框的分数为分类分数和中心度的乘积，只取分类分数大于 0.05 的值生成
 检测框，之后做 NMS 得到最终的检测结果。
+
+\chapter{专题}
+\section{Scale 问题}
+
+\section{损失函数}
+\subsection{检测回归损失函数}
+
+\paragraph{IoU loss}
+目标检测的代表性模型 Fast R-CNN 和 YOLO 分别使用了 Smooth $L_1$ 和 $L_2$ 形式的
+损失函数作为回归 loss，但最终评测目标检测模型性能使用的指标一般是检测框与 GT 的
+IoU，二者并不一致。
+
+为解决这个问题，文献\citerb{2016-IoU-loss}中提出 IoU loss，作为目标检测模型回归
+部分的损失函数：
+\begin{equation}
+  L_{\mathrm{IoU}} = - \mathrm{ln} (\mathrm{IoU})
+\end{equation}
+
+\paragraph{GIoU loss}
+IoU loss 的一个致命问题是输出检测框与 GT IoU 为 0 时无法进行优化，为解决这一问题，
+文献\citerb{2019-GIoU-loss} 提出了 GIoU loss：
+\begin{equation}
+  L_{\mathrm{GIoU}} = 1 - \left( \mathrm{IoU} - \frac{C - A \cup B}{C} \right)
+\end{equation}
+
+上式中 A，B 分别为检测框和 GT，C 为二者的最小包络矩形。
+
+\paragraph{Distance-IoU loss}
+文献\citerb{2019-Distance-IoU-loss}中指出 GIoU loss 存在收敛慢和准确性低的问题，
+提出了 Distance IoU 和 Complete IoU 两种 loss：
+\begin{align}
+  \mathcal{L} & = 1 - \mathrm{IoU} + \mathcal{R}(B, B^{gt}) \\
+  \mathcal{R}_{\mathrm{DIoU}} & = \frac{\rho^2(b, b^{\mathrm{gt}})}{c^2} \\
+  \mathcal{R}_{\mathrm{CIoU}} & = \frac{\rho^2(b, b^{\mathrm{gt}})}{c^2} + \alpha v \\
+  v & = \frac{4}{\pi^2}\left( \mathrm{arctan}\frac{w^{\mathrm{gt}}}{h^{\mathrm{gt}}} - \mathrm{arctan}\frac{w}{h} \right) \\
+  \alpha & = \frac{v}{1 - \mathrm{IoU} + v}
+\end{align}
+
+Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐时，收敛速度慢导
+致的精度较差问题。
+
 
 %%% Local Variables:
 %%% TeX-master: "../master"
