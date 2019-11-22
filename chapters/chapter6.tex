@@ -1027,6 +1027,22 @@ Chips 指的是图像金字塔的子图，文中给出了 chips 的选取策略�
 只使用对应 scale 的 GT 进行训练。 
 
 \paragraph{TridentNet 结构}
+TridentNet 的结构如图~\ref{fig:tridentnet}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/TridentNet.pdf}
+  \caption{TridentNet 结构}
+  \label{fig:tridentnet}
+\end{figure}
+
+TridentNet 将 ResNet 最后一个 block 中的 $3 \times 3$ 卷积分别替换成 stride 为
+1、2、3 的空洞卷积，共有三个平行的 branch，这三个 branch 共享参数，但感受野不同。
+
+\paragraph{TridentNet 训练}
+训练时应用 SNIP，每个 branch 都有对应的有效 range，只有 GT 落在有效 range 内才认
+为有效，否则为忽略。RPN 中，anchor 的正负样本根据有效 GT 确定，R-CNN 中，只选择
+在有效 range 内的 proposal。
 
 \section{损失函数}
 \subsection{回归损失函数}
