@@ -593,7 +593,7 @@ map 预测的 RPN\cite{2015-SSD}。
 
 \paragraph{网络结构}
 SSD 网络的 backbone 采用 VGG-16，其后接了若干卷积层。检测 head 是一个 $3 \times
-3$ 的卷积层，分别接在不同尺寸的 feature map 上，以进行多尺度预测。
+3$ 的卷积层，分别接在不同尺寸的 feature map 后面进行多尺度预测。
 
 \paragraph{损失函数}
 与 Fast R-CNN 相同。
@@ -602,15 +602,16 @@ SSD 网络的 backbone 采用 VGG-16，其后接了若干卷积层。检测 head
 SSD 中引入了和 anchor 类似的 default box，其正负样本的标准为：
 
 \begin{itemize}
-\item 正样本：包括两类，第一类是 GT 对应的 IoU 的 default box，第二类是与 GT 的
-  最大 IoU $ \geq 0.5 $。
-\item 负样本：与 GT 的最大 IoU $ < 0.5 $。
+  \item 正样本：包括两类，第一类是某个 GT 对应的 IoU 最大的 default box，第二类是
+    与所有 GT 的最大 IoU $ \geq 0.5 $。
+  \item 负样本：与 GT 的最大 IoU $ < 0.5 $。
 \end{itemize}
 
 \paragraph{Default box 尺寸}
-SSD 使用了多尺度预测，不同尺寸 feature map 上的 default box 也采用了不同的预设尺
-寸，这部分原文和源代码不一致，简单的原则是尺寸大的浅层 feature map 上的 default
-box 尺寸小，反之尺寸大，具体请参考\href{https://github.com/weiliu89/caffe/blob/ssd/examples/ssd/ssd_pascal.py}{源码}。
+SSD 中不同尺寸 feature map 上的 default box 采用了不同的预设尺
+寸，这部分原文和源代码不一致，基本原则是尺寸大的浅层 feature map 上的 default
+box 尺寸小，反之尺寸大，具体请参
+考\href{https://github.com/weiliu89/caffe/blob/ssd/examples/ssd/ssd_pascal.py}{源码}。
 
 \paragraph{训练}
 SSD 训练时的正负样本比为 1:3，在训练时使用了难样本挖掘（HEM），即只选择 loss 最高
@@ -626,17 +627,17 @@ feature map 进行融合以提高模型性能\citerb{2017-DSSD}。
 DSSD 的特征融合模块包括：
 
 \begin{itemize}
-  \item 深层 feature map：先经过 $2 \times 2$ 的\hyperref[subsec:deconv]{反卷积}，
-    再接 $3 \times 3$ 的卷积和 BN，输出通道数为 512。
-  \item 浅层 feature map：先经过一个标准的卷积-BN-ReLU，再接 $3 \times 3$ 的卷积
-    和 BN，输出通道数同样为 512。
+  \item 深层 feature map：先经过 $2 \times 2$ 的反卷积，再接 $3 \times 3$ 的卷积
+    和 BN，输出通道数为 512。
+  \item 浅层 feature map：先经过一个标准的 $3 \times 3$ 卷积-BN-ReLU，再接 $3
+    \times 3$ 的卷积和 BN，输出通道数同样为 512。
   \item 融合：将深层和浅层 feature map 做 element-wise 乘积，再接 ReLU，得到融合
     后的 feature map。
 \end{itemize}
 
 \paragraph{DSSD 对预测模块的改进}
-SSD 中，$3 \times 3$ 卷积的 head 直接接在对应卷积层的 feature map 上，DSSD 中对
-这一部分进行了改进：
+SSD 中，预测模块只有 $3 \times 3$ 卷积，直接接在对应的 feature map 上，DSSD 中对
+这一部分也进行了改进：
 
 \begin{itemize}
   \item 原始 feature map 先经过 3 个 $1 \times 1$ 的卷积，输出通道数分别为 256，
@@ -644,7 +645,7 @@ SSD 中，$3 \times 3$ 卷积的 head 直接接在对应卷积层的 feature map
   \item 原始 feature map 直接经过 1 个输出通道数为 1024 的 $1 \times 1$ 的卷积，
     得到 feature map 2。
   \item 将 feature map 1 和 feature map 2 做 element-wise 求和，得到最终的
-    feature map，之后接 $3 \times 3$ 卷积分别进行分类和回归。
+    feature map，之后再接 $3 \times 3$ 的卷积分别进行分类和回归。
 \end{itemize}
 
 \section{RetinaNet 系列}
@@ -653,13 +654,13 @@ SSD 中，$3 \times 3$ 卷积的 head 直接接在对应卷积层的 feature map
 \label{sub:RetinaNet}
 
 RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster R-CNN、SSD 和 FPN 中
-的精华，同时提出新颖的 focal loss，性能超过了当时的两阶段模型，一举扭转了当时比较
+的精华，同时提出新颖的 focal loss，精度超过了当时的两阶段模型，一举扭转了当时比较
 流行的目标检测模型双阶段准、单阶段快的观点\citerb{2017-RetinaNet}。
 
 \paragraph{Focal loss 的应用}
-RetinaNet 训练时分类部分的 loss 采用 focal loss，扫参结果 $\alpha = 0.25, \gamma
+RetinaNet 网络的分类 loss 采用 focal loss，其中 $\alpha = 0.25, \gamma
 = 2$ 时效果最好。由于正样本数量很少，因此分类器的初始化也做了相应调整，将最后一个
-卷积层的偏置的初值设为 $-\mathrm{log}((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
+卷积层的偏置初值设为 $-\mathrm{log}((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
 文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要采样。
 
 \paragraph{Anchor 参数}
@@ -670,9 +671,9 @@ anchor 面积为 $32^2$ 到 $512^2$。每个尺度上有三个长宽比例和三
 \paragraph{正负样本}
 正负样本判断标准如下：
 \begin{itemize}
-\item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
-\item 负样本：与所有 GT 的最大 IoU $ < $ 0.4。
-\item 忽略样本：与所有 GT 的最大 IoU 在 $[0.4, 0.5)$。
+  \item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
+  \item 负样本：与所有 GT 的最大 IoU $ < $ 0.4。
+  \item 忽略样本：与所有 GT 的最大 IoU 在 $[0.4, 0.5)$。
 \end{itemize}
 
 \paragraph{分类 head}
@@ -682,13 +683,13 @@ $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 
 有尺度的分类 head 均共享参数。
 
 \paragraph{回归 head}
-回归 head 与分类 head 的结构基本相同，但最后不接 sigmoid，因为回归部分的 GT 可能
-为负值。回归 head 所有类别共享相同的输出，而非每个类别单独输出。所有尺度的回归
-head 也同样共享参数。回归 head 和分类 head 虽然结构类似，但并不共享参数。
+回归 head 与分类 head 的结构基本相同，但最后不接 sigmoid，因为回归部分需要输出负
+值。回归 head 所有类别共享相同的输出，而非每个类别单独输出。所有尺度的回归 head 也
+同样共享参数。回归 head 和分类 head 虽然结构类似，但并不共享参数。
 
 \paragraph{Inference}
-Inference 时 FPN 每个尺度分数阈值卡 0.05，然后取分数最高的前 1000 个结果，再进行
-阈值为 0.5 的 NMS 得到最终结果。
+Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然后取分数最高的前 1000
+个结果，再进行阈值为 0.5 的 NMS，得到最终结果。
 
 \section{其他}
 
@@ -974,7 +975,7 @@ map 上采样或反卷积，再与浅层 feature map 融合，得到尺寸较大
 
 \subsection{图像金字塔}
 
-\paragraph{SNIP}
+\subsubsection{SNIP}
 文献\citerb{2017-SNIP}中提出 SNIP（Scale Normalization for Image Pyramids）方法，
 相当于融合改进的多尺度训练和图像金字塔方法：
 
@@ -988,8 +989,44 @@ map 上采样或反卷积，再与浅层 feature map 融合，得到尺寸较大
     选，全部送到 RCNN 中做分类和回归，得到最终的 detection。最终的 detection 只
     有在与图片分辨率对应 scale 范围内的才认为有效，之后利用 Soft NMS 对不同分辨
     率图片生成的 detection 做后处理。
-  \item 高分辨率图片裁剪：使用分辨率为 。
+  \item 高分辨率图片裁剪：为解决分辨率为 1400 $\times$ 2000 的图片占用显存太大的
+    问题，文中将其裁成 1000 $\times$ 1000 的图片，称为 chips。具体实现是每一张
+    图片随机生成 50 个 chips，贪心挑选其中包含物体最多的 chip，不断进行这个过程
+    直到挑出的 chips 包含图中所有物体。
 \end{itemize}
+
+\subsubsection{SNIPER}
+文献\citerb{2018-SNIPER}中延续 SNIP 的思路，提出了图像金字塔的改进版 SNIPER，训
+练时不再使用图像金字塔的原图，而是使用从原图中 crop 得到的 chips 作为训练图片，
+提升模型性能。
+
+\paragraph{Chips 的选取策略}
+Chips 指的是图像金字塔的子图，文中给出了 chips 的选取策略。
+
+\begin{itemize}
+  \item 正样本较多的 chips：将原图缩放到三个尺度，再统一缩放到固定尺寸，然后每隔
+    $d$ 个像素放置 $K \times K$ 的 chips，文中 $d = 32,\,K = 512$。不同尺度的图
+    片有对应的 scale 范围，只有在范围内的 GT 才认为有效，贪心选取包含有效 GT 最
+    多的前 $n$ 个 chip。
+  \item 误检较多、正样本较少的 chips：利用未完全训练的 RPN 生成 proposal，去掉
+    proposal 正样本，选择至少包含 $M$ 个 proposal 负样本的 chips。
+\end{itemize}
+
+\paragraph{SNIPER 的优势}
+\begin{itemize}
+  \item 只选择对应尺度的 GT 作为有效 GT 参与训练，部分解决不同尺度 GT 对模型性能
+    的影响。 
+  \item 负样本相当于做了 HEM，保留了可能出现 FP 的 chip，去掉了简单 chip。
+  \item 训练时可以同时使用 5 个不同尺度图片对应的 chips，batch size 更大，同时可
+    以应用 BN。
+\end{itemize}
+
+\subsubsection{TridentNet}
+文献\citerb{2019-TridentNet}提出双阶段目标检测模型 TridentNet，网络利用多个平行
+且共享参数的空洞卷积 branch 代替原始的卷积，同时结合 SNIP 训练方法，不同 branch
+只使用对应 scale 的 GT 进行训练。 
+
+\paragraph{TridentNet 结构}
 
 \section{损失函数}
 \subsection{回归损失函数}
@@ -997,14 +1034,14 @@ map 上采样或反卷积，再与浅层 feature map 融合，得到尺寸较大
 损失函数作为回归 loss，但最终评测目标检测模型性能使用的指标一般是检测框与 GT 的
 IoU，二者并不一致。
 
-\paragraph{IoU loss}
+\subsubsection{IoU loss}
 为统一训练 loss 和评测指标，文献\citerb{2016-IoU-loss}中提出 IoU loss 作为目标检
 测模型回归部分的损失函数：
 \begin{equation}
   L_{\mathrm{IoU}} = - \mathrm{ln} (\mathrm{IoU})
 \end{equation}
 
-\paragraph{GIoU loss}
+\subsubsection{GIoU loss}
 IoU loss 的一个致命问题是输出检测框与 GT IoU 为 0 时无法进行优化，为解决这一问题，
 文献\citerb{2019-GIoU-loss} 提出了 GIoU loss：
 \begin{equation}
@@ -1013,7 +1050,7 @@ IoU loss 的一个致命问题是输出检测框与 GT IoU 为 0 时无法进行
 
 上式中 A，B 分别为检测框和 GT，C 为二者的最小包络矩形。
 
-\paragraph{Distance-IoU loss}
+\subsubsection{Distance-IoU loss}
 文献\citerb{2019-Distance-IoU-loss}中指出 GIoU loss 存在收敛慢和准确性低的问题，
 提出了 Distance IoU 和 Complete IoU 两种 loss：
 \begin{align}
