@@ -1044,6 +1044,21 @@ TridentNet 将 ResNet 最后一个 block 中的 $3 \times 3$ 卷积分别替换�
 为有效，否则为忽略。RPN 中，anchor 的正负样本根据有效 GT 确定，R-CNN 中，只选择
 在有效 range 内的 proposal。
 
+\subsubsection{CSN}
+文献\citerb{2019-CSN}中提出 CSN 方法，改进了 SNIP scale 超参较多的问题，同时结合
+FPN 多尺度预测，进一步提升小物体的检测性能。 
+
+\paragraph{SNIP 的问题}
+SNIP 先将图片缩放到不同 scale，每个 scale 都有一个有效范围 $[l_s, u_s]$，只有 GT
+落在该范围内才认为有效。有效范围的上下界为超参，需要仔细调整不同 scale 的有效范
+围值才能获得较好的性能，调参工作量大。
+
+\paragraph{CSN 的改进}
+CSN 的有效范围只有两个参数 $[l, r]$，将所有图片按照预先设定的 scale 缩放，只有
+GT 落在有效范围内才认为有效，测试时同样使用图像金字塔，只保留落在有效范围内的预
+测结果，最后融合不同 scale 图片的输出作为最终结果。文中有效范围为 [16, 560]，使
+用 FPN 辅助解决尺度变化大的问题。
+
 \section{损失函数}
 \subsection{回归损失函数}
 目标检测的代表性模型 Fast R-CNN 和 YOLO 分别使用了 Smooth $L_1$ 和 $L_2$ 形式的
