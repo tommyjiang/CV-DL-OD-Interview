@@ -1055,6 +1055,23 @@ feature map 上进行。浅层 feature map 的一个问题是感受野较小，�
 map 上采样或反卷积，再与浅层 feature map 融合，得到尺寸较大同时上下文语义信息更
 强的 feature map 用于最终预测。
 
+\subsubsection{ASFF}
+文献\citerb{2019-ASFF}中提出自适应空间融合（Adaptive Spatial Feature Fusion，
+ASFF）方法，用于融合不同尺度的 feature map 信息。
+
+\paragraph{Feature map resize}
+\begin{itemize}
+  \item 上采样：$1 \times 1$ 卷积，压缩通道，再进行上采样。
+  \item 下采样：$3 \times 3, s = 2$ 卷积，压缩通道。
+\end{itemize}
+
+\paragraph{自适应融合}
+三个尺寸的 feature map 融合后生成三个新的 feature map：
+\begin{equation}
+  y_{ij}^l = \alpha_{ij}^l \cdot x_{ij}^{1 \rightarrow l} + \beta_{ij}^l \cdot x_{ij}^{2 \rightarrow l}
+  + \gamma_{ij}^l \cdot x_{ij}^{3 \rightarrow l}
+\end{equation}
+
 \subsection{图像金字塔}
 
 \subsubsection{SNIP}
