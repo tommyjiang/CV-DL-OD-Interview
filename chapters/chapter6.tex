@@ -773,6 +773,26 @@ FSAF 的分类分支使用 focal loss，回归分支使用 IoU loss。
     到最终结果。
 \end{itemize}
 
+\subsection{SAPD}
+文献\citerb{2019-SAPD}提出 SAPD，基础方法仍然采用 FSAF，但改进了训练策略。
+
+\paragraph{Anchor points 权重}
+FSAF 中，分类 heatmap 上所有点的权重均相同。SAPD 降低了分类 heatmap 上靠近物体边
+缘点的权重，即离中心越近，权重越高，离边缘越近，权重越低，权重的具体计算方法为：
+\begin{equation}
+  w_{lij} = \left( \frac{\mathrm{min} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{min} \left( d_{lij}^t, d_{lij}^b \right)}{\mathrm{max} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{max} \left( d_{lij}^t, d_{lij}^b \right)} \right)^{\eta}, \; p_{lij} \in p^+
+\end{equation}
+
+\paragraph{Feature map 权重}
+FSAF 中，每个 instance 的反传只选择 loss 最小的 scale。SAPD 同时选择 $k$ 个
+scale 的 feature map 计算 loss，每个 scale 对应的权重由一个小的网络生成。该网络
+的结构如下：
+\begin{itemize}
+  \item 对 $k$ 个 feature map 的 GT 做 RoI Align，得到 $C \times 7 \times 7$ 的 feature。
+  \item 经过 3 个 $3 \times 3$ 卷积 + ReLU，得到 $C \times 1 \times 1$ 的 feature。
+  \item 经过 FC + Softmax 得到 $k$ 个值，作为不同 scale feature map loss 的权重。
+\end{itemize}
+
 \section{其他}
 
 \subsection{RefineDet}
