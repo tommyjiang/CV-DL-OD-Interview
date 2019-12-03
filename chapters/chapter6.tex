@@ -1072,6 +1072,8 @@ ASFF）方法，用于融合不同尺度的 feature map 信息。
   + \gamma_{ij}^l \cdot x_{ij}^{3 \rightarrow l}
 \end{equation}
 
+其中权重满足 $\alpha_{ij}^l + \beta_{ij}^l + \gamma_{ij}^l = 1$。
+
 \subsection{图像金字塔}
 
 \subsubsection{SNIP}
@@ -1193,6 +1195,16 @@ IoU loss 的一个致命问题是输出检测框与 GT IoU 为 0 时无法进行
 
 Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐时，收敛速度慢导
 致的精度较差问题。
+
+\section{不平衡问题}
+\subsection{正负样本不平衡}
+
+传统的解决正负样本不平衡问题的方法包括 HEM 和 focal loss。
+
+\subsubsection{Sampling-Free}
+文献\citerb{2019-Sampling-Free}引入了三种手段，包括改进分类层初始化方法、自适应
+分类/回归权重和自适应类别前景阈值，提出 Sampling-Free 的训练方法，可以达到甚至超
+过原始检测器的精度。
 
 
 %%% Local Variables:
