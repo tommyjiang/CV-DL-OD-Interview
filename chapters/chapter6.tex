@@ -731,8 +731,8 @@ Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然�
 
 \subsection{FSAF}
 文献\citerb{2019-FSAF}在 RetinaNet 网络上加入了 anchor free 的平行分支，训练时通
-过选取不同 scale 的最小 loss，解决人为设定的 anchor 和 scale 对应关系可能并非最
-优的问题。
+过选取不同 scale 的最小 loss，解决人为给定的 anchor 和 scale 对应关系并非最优的问
+题。
 
 \paragraph{网络结构}
 FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
@@ -744,14 +744,14 @@ FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
   \label{fig:FSAF}
 \end{figure}
 
-在 RetinaNet FPN 结构每个尺度的分类和回归最后一个 feature map 上，分别接对应的平
-行分支。
+在 RetinaNet FPN 结构每个尺度的分类和回归的最后一个 feature map 上，分别接对应
+的 anchor free 平行分支。
 
 \begin{itemize}
-  \item 分类分支：接 $3 \times 3$ 的卷积和 sigmoid，输出尺寸为 $W \times H \times K$，每个点
-    取值区间为 [0, 1]，越大表示越可能是物体中心。
+  \item 分类分支：接 $3 \times 3$ 的卷积和 sigmoid，输出尺寸为 $W \times H \times
+    K$ 的 heatmap，每个点取值区间为 [0, 1]，越大表示越可能是物体中心。
   \item 回归分支：接 $3 \times 3$ 的卷积和 ReLU，输出尺寸为 $W \times H \times
-    4$，每个点均为正值，表示该点到上/下/左/右四条边的距离。
+    4$ 的 heatmap，每个点均为正值，表示该点到上/下/左/右四条边的距离。
 \end{itemize}
 
 \paragraph{损失函数}
