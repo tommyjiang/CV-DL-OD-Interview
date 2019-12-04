@@ -89,19 +89,11 @@ Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一�
 试速度\citerb{2015-Fast-RCNN}。
 
 \paragraph{网络结构}
-Fast R-CNN 的网络结构如图~\ref{fig:Fast-RCNN}~所示。网络最开始是统一的 CNN
-backbone，利用 backbone 得到 feature map 后，将每个 proposal 对应的 feature map区
-域，经过 RoI pooling 层得到尺寸为 $h \times w$ 的 RoI，再经过两个全连接层得
-到 RoI 对应的 feature，之后再分别经过全连接层 + Softmax 层的分类器得到分类分数
-（共 $C+1$ 类，多一个背景类），以及经过全连接层得到$t_x, t_y, t_w, t_h$四个回归变
-换值。
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.8\textwidth]{images/目标检测/Fast-RCNN.pdf}
-  \caption{Fast R-CNN 网络结构}
-  \label{fig:Fast-RCNN}
-\end{figure}
+Fast R-CNN 网络的最开始是统一的 CNN backbone，利用 backbone 得到 feature map 后，
+将每个 proposal 对应的 feature map区域，经过 RoI pooling 层得到尺寸为 $h \times
+w$ 的 RoI，再经过两个全连接层得到 RoI 对应的 feature，之后再分别经过全连接层 +
+Softmax 层的分类器得到分类分数（共 $C+1$ 类，多一个背景类），以及经过全连接层得
+到$t_x, t_y, t_w, t_h$四个回归变换值。
 
 \paragraph{RoI Pooling 层}
 RoI 的全称是 Region of Interest，中文为感兴趣区域。RoI Pooling 层的作用是将大小不
@@ -110,7 +102,7 @@ RoI 的全称是 Region of Interest，中文为感兴趣区域。RoI Pooling 层
 的输出。
 
 \paragraph{损失函数}
-Fast R-CNN 使用分类加回归的多任务 loss，具体形式为：
+Fast R-CNN 使用分类加回归的多任务 loss：
 \begin{align}
   L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\
     & = -\mathrm{log}\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
@@ -140,10 +132,9 @@ Proposal 正负样本的判断标准为：
 \end{itemize}
 
 负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（HEM），因
-为 IoU 小于 0.1 的 proposal 可以认为是简单样本，训练时只用较难的样本。
-
-训练时每个 batch 包含 2 张图，每张图取 64 个 proposal，相当于每个 batch 有 128
-个 proposal，其中正负样本比例为 1:3。
+为 IoU 小于 0.1 的 proposal 可以认为是简单样本，训练时只用较难的样本。训练时每
+个 batch 包含 2 张图，每张图取 64 个 proposal，相当于每
+个 batch 有 128个 proposal，其中正负样本比例为 1:3。
 
 \subsection{Faster R-CNN}
 \label{subsec:Faster-R-CNN}
@@ -205,9 +196,10 @@ Faster R-CNN 的训练方法包括 4 步交替训练法和近似联合训练法�
 
 通过以上四步即可得到 RPN 和 Fast R-CNN 共享 backbone 的 Faster R-CNN 网络。
 
-\section{FPN}
+\section{FPN 及其改进}
 \label{sec:FPN}
 
+\subsection{FPN}
 FPN 的核心思想是融合不同尺度的 feature map 得到 feature 金字塔，再进行多尺度预
 测。FPN 及不同方法的对比如图~\ref{fig:FPN}~所示：
 
@@ -255,22 +247,36 @@ FPN 在 Fast R-CNN 中的应用是根据 proposal 的尺寸将其分配到不同
 据 proposal 的面积将其分配到不同尺度的 feature map，面积越大分配的 feature map 越
 深，反之越浅。
 
+\subsection{PANet}
+PANet 在 FPN 的基础上新增了 bottom-up augmentation 和 adaptive feature pooling\cite{2018-PANet}。
+
+\paragraph{Bottom-up augmentation}
+FPN 在 CNN backbone bottom-up 的基础上，加入了 top-down 和横向连接，以融合不同层
+级 feature map 的信息。PANet 又加入了 bottom-up 连接，将较大尺寸的 feature map
+经过 $3 \times 3$ stride 为 2 的卷积，与较小尺寸的 feature map 做 element-wise
+相加，再经过 $3 \times 3$ 的卷积得到对应的 feature map。
+
+\paragraph{Adaptive feature pooling}
+FPN 根据尺寸将 proposal 分配到不同 scale，只从单个 feature map 做 RoI
+Align。PANet 中从多尺度 feature map 做 RoI Align，再利用 max/avg 操作融合不同尺度
+的 feature。
+
 \section{Faster R-CNN 的改进}
 \label{sec:faster-improve}
 
 \subsection{RoI Pooling 层的改进}
 \subsubsection{Mask R-CNN}
-Mask R-CNN 主要研究的是分割任务，其中提出了 RoI Align 层，可以看做是更精细的 RoI
-pooling 层，该层对检测任务的性能也有提升\citerb{2017-Mask-RCNN}。
+Mask R-CNN 的主题是实例分割，但论文中提出了 RoI Align 层，该层可看做是更精细的 RoI
+Pooling 层，应用后对检测模型的性能也有提升\citerb{2017-Mask-RCNN}。
 
 \paragraph{RoI Pooling 和 RoI Align 的对比}
 
 \begin{itemize}
   \item RoI Pooling：计算时有两次取整：第一次是计算 RoI 在 feature map 上的坐标
     时，将原坐标除以 stride 得到的小数取整；第二次是将 $H \times W$ 的 RoI 转化为 $h
-    \times w$ 的尺寸时，将 $H/h$ 和 $W/w$ 得到的小数取整。
-  \item RoI Align：对比 RoI Pooling，两次都不取整而直接保留小数，采用双线性插值计算
-    对应像素的值，具体如图~\ref{fig:roi-align}~所示。
+    \times w$ 的尺寸时，将 $H/h$ 和 $W/w$ 的结果取整。
+  \item RoI Align：RoI Pooling 中的两次计算都不取整而直接保留小数，采用双线性插值
+    计算对应像素的值，具体如图~\ref{fig:roi-align}~所示。
 \end{itemize}
 
 \begin{figure}[ht]
@@ -290,7 +296,7 @@ Faster R-CNN 中的检测 head 指的是 Fast R-CNN 中每个 RoI 之后接的�
 替换为全卷积网络 + Position Sensitive RoI Pooling(PS-RoI) 层 + 全局平均池化层，模
 型速度有2.5-20 倍的提升。
 
-\paragraph{R-FCN 的结构}
+\paragraph{网络结构}
 
 \begin{itemize}
   \item 在 Backbone 得到的 2048 通道的 feature map 之后接一个 $1 \times 1$ 的卷积降
@@ -313,7 +319,7 @@ PS-RoI Pooling 和 RoI Pooling 的过程十分类似，区别在于 PS-RoI 在�
 根据 pooling 区域在 RoI 中的位置，选择对应通道 feature map 的对应位置做 pooling，
 而非对所有 feature map 的所有位置都做 pooling。
 
-\paragraph{R-FCN 的损失函数和正负样本}
+\paragraph{损失函数和 label}
 与 \hyperref[subsec:Fast-R-CNN]{Fast R-CNN} 相同。
 
 \subsubsection{Light-Head R-CNN}
@@ -729,77 +735,13 @@ $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 
 Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然后取分数最高的前 1000
 个结果，再进行阈值为 0.5 的 NMS，得到最终结果。
 
-\subsection{FSAF}
-文献\citerb{2019-FSAF}在 RetinaNet 网络上加入了 anchor free 的平行分支，训练时通
-过选取不同 scale 的最小 loss，解决人为给定的 anchor 和 scale 对应关系并非最优的问
-题。
-
-\paragraph{网络结构}
-FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.8\textwidth]{images/目标检测/FSAF.pdf}
-  \caption{FSAF 网络结构}
-  \label{fig:FSAF}
-\end{figure}
-
-在 RetinaNet FPN 结构每个尺度的分类和回归的最后一个 feature map 上，分别接对应
-的 anchor free 平行分支。
-
-\begin{itemize}
-  \item 分类分支：接 $3 \times 3$ 的卷积和 sigmoid，输出尺寸为 $W \times H \times
-    K$ 的 heatmap，每个点取值区间为 [0, 1]，越大表示越可能是物体中心。
-  \item 回归分支：接 $3 \times 3$ 的卷积和 ReLU，输出尺寸为 $W \times H \times
-    4$ 的 heatmap，每个点均为正值，表示该点到上/下/左/右四条边的距离。
-\end{itemize}
-
-\paragraph{损失函数}
-FSAF 的分类分支使用 focal loss，回归分支使用 IoU loss。
-
-\paragraph{正负样本}
-与 GA-RPN 相同。
-
-\paragraph{回归 label}
-回归分支的 label 为像素点与四条边的距离值，只在 $b_e$ 范围内有值，其余均为忽略区
-域。
-
-\paragraph{训练和测试}
-\begin{itemize}
-  \item 训练：多个 scale 同时计算每个 instance 的 loss，取最小的作为最终结果进行
-    反传。
-  \item 测试：由于最优的 scale 输出的分数更高，相当于模型会自适应选择合适的
-    scale。取所有 scale 分类分数 > 0.05 top 1000 结果，进行阈值为 0.5 的 NMS，得
-    到最终结果。
-\end{itemize}
-
-\subsection{SAPD}
-文献\citerb{2019-SAPD}提出 SAPD，基础方法仍然采用 FSAF，但改进了训练策略。
-
-\paragraph{Anchor points 权重}
-FSAF 中，分类 heatmap 上所有点的权重均相同。SAPD 降低了分类 heatmap 上靠近物体边
-缘点的权重，即离中心越近，权重越高，离边缘越近，权重越低，权重的具体计算方法为：
-\begin{equation}
-  w_{lij} = \left( \frac{\mathrm{min} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{min} \left( d_{lij}^t, d_{lij}^b \right)}{\mathrm{max} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{max} \left( d_{lij}^t, d_{lij}^b \right)} \right)^{\eta}, \; p_{lij} \in p^+
-\end{equation}
-
-\paragraph{Feature map 权重}
-FSAF 中，每个 instance 的反传只选择 loss 最小的 scale。SAPD 同时选择 $k$ 个
-scale 的 feature map 计算 loss，每个 scale 对应的权重由一个小的网络生成。该网络
-的结构如下：
-\begin{itemize}
-  \item 对 $k$ 个 feature map 的 GT 做 RoI Align，得到 $C \times 7 \times 7$ 的 feature。
-  \item 经过 3 个 $3 \times 3$ 卷积 + ReLU，得到 $C \times 1 \times 1$ 的 feature。
-  \item 经过 FC + Softmax 得到 $k$ 个值，作为不同 scale feature map loss 的权重。
-\end{itemize}
-
 \section{其他}
 
 \subsection{RefineDet}
 RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收了单阶段和两阶段
 目标检测的优点\citerb{2017-RefineDet}。
 
-\paragraph{RefineDet 网络结构}
+\paragraph{网络结构}
 主要包括 ARM、ODM 和 TCB 三个模块。
 \begin{itemize}
   \item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
@@ -810,7 +752,7 @@ RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收
     $3 \times 3$ 卷积。
 \end{itemize}
 
-\paragraph{RefineDet 损失函数}
+\paragraph{损失函数}
 ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，总 loss 为二者之和。
 
 \subsection{LapNet}
@@ -824,7 +766,7 @@ LapNet 的思路与传统的检测网络有明显区别，其特点是体现了�
   \label{fig:LapNet}
 \end{figure}
 
-\paragraph{LapNet 网络结构}
+\paragraph{网络结构}
 主体网络仍然借鉴 FPN 的思路，即采用 bottom-up + 横向连接 + top-down 的结构得到信
 息融合的不同尺寸的 feature map。但 LapNet 并不在这些不同尺寸的feature map 上直接
 加检测 head，而是用卷积 + 上采样得到与最大尺寸相同的多个 feature map，将它们拼在
@@ -832,7 +774,7 @@ LapNet 的思路与传统的检测网络有明显区别，其特点是体现了�
 而非 RetinaNet 的 $4A$，因为 LapNet 每个类别都有各自的 anchor，所以每个类别都需要
 单独输出。
 
-\paragraph{LapNet 中的 PONO map}
+\paragraph{PONO map}
 PONO（Per-Object Normalized Overlap）是 LapNet 中的核心概念，其具体的计算方法为：
 
 \begin{itemize}
@@ -842,7 +784,7 @@ PONO（Per-Object Normalized Overlap）是 LapNet 中的核心概念，其具体
     对应的所有点的值做标准化，标准化后最大值点变为 1，其他点的值为该点原值/基值。
 \end{itemize}
 
-\paragraph{LapNet 损失函数}
+\paragraph{损失函数}
 LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 
 \begin{itemize}
@@ -877,12 +819,14 @@ LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 
 为克服上述缺点，Anchor free 检测方法应运而生，成为目标检测的一个新方向。
 
-\section{CornerNet}
+\section{关键点方法}
+
+\subsection{CornerNet}
 \label{sec:CornerNet}
 CornerNet\cite{2018-CornerNet} 是 anchor free 方法的代表作之一，与传统目标检测
 预测目标框位置和长/宽不同，CornerNet 直接预测左上/右下角点及配对关系。
 
-\paragraph{CornerNet 网络结构}
+\paragraph{网络结构}
 CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-network}~和图~\ref{fig:CornerNet-network}~所示：
 
 \begin{figure}[ht]
@@ -954,7 +898,7 @@ CornerNet 的损失函数包括三个输出对应的损失函数：
     \end{align}
 \end{itemize}
 
-\paragraph{CornerNet 的测试}
+\paragraph{Inference 步骤}
 \begin{itemize}
   \item 获得角点：先对 heatmap 做 $3 \times 3$ 的 max pooling，然后挑选所有类
     别 heatmap 中 top 100 的左上点和右下点。
@@ -964,12 +908,12 @@ CornerNet 的损失函数包括三个输出对应的损失函数：
     heatmap 对应点的平均值。
 \end{itemize}
 
-\section{ExtremeNet}
+\subsection{ExtremeNet}
 \label{sec:ExtremeNet}
 ExtremeNet\citerb{2019-ExtremeNet}借鉴了 CornerNet 的思想，预测的是四个方向上的极值
 点和中心点。
 
-\paragraph{ExtremeNet 网络结构}
+\paragraph{网络结构}
 ExtremeNet 沿用了 CornerNet 中预测 heatmap 和 offset map 的结构，共预测上、下、
 左、右及中心 5 个 heatmap，以及除中心外共 $4 \times 2$ 个 offset map。正负样本及
 loss 也和 CornerNet 相同。
@@ -995,13 +939,16 @@ Ghost box 是指包含多个较小检测框的大的检测框，文中提出一�
 值，$\tilde{Y}_m = \hat{Y}_m + \lambda_{\mathrm{aggr}}\sum_{i=i_0}^{i_1}Y_i^m$，
 其中 $\lambda_{\mathrm{aggr}}=0.1$。
 
-\section{CenterNet}
+\subsection{RepPoints}
+
+\section{中心 + 变换方法}
+\subsection{CenterNet}
 \label{sec:CenterNet}
 CenterNet 和 ExtremeNet 类似，都出自 UT Austin 的 Zhou Xingyi，且同样借
 鉴 CornerNet 的思路，但不再预测角点及其组合，而是直接预测中心点和物体的长和
 宽\citerb{2019-CenterNet}。
 
-\paragraph{CenterNet 网络结构和损失函数}
+\paragraph{网络结构和损失函数}
 CenterNet 沿用了 CornerNet 中预测 heatmap 和 offset map 的结构，每个类别预测一个
 中心点的 heatmap 及长和宽两个方向的 offset。此外还多预测长和宽方向检测框的尺寸，
 除中心点 heatmap 外，offset 和尺寸所有类别共享同一个，loss 均为 Smooth $L_1$
@@ -1013,7 +960,7 @@ loss，总的 loss 为：
 
 其中 $\lambda_{\mathrm{size}}=0.1, \lambda_{\mathrm{off}}=1$。
 
-\section{FCOS}
+\subsection{FCOS}
 \label{sec:FCOS}
 FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 anchor，网络的分类和回归也有一
 定区别\citerb{2019-FCOS}：
@@ -1025,31 +972,19 @@ FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 anchor，网络
     中 anchor 到 GT 的变换。
 \end{itemize}
 
-\paragraph{FCOS 网络结构}
+\paragraph{网络结构和损失函数}
 FCOS 的网络结构参考 RetinaNet，由于使用了 FPN 结构，每个尺度都包括三部分输出：
 \begin{itemize}
   \item 分类：输出 $H \times W \times C$ 个 map，其中 $C$ 为类别数，与
     RetinaNet 相同，均为二分类。由于每个点只对应一个值，与 RetinaNet 相比，减少
-    了 $A$ 倍，其中 $A$ 为 RetinaNet 中每个点的 anchor 数。
-  \item 回归：输出 $H \times W \times 4$ 个 map，所有分类共享回归的距离值。
-  \item 中心度：输出 $H \times W \times 1$ 个 map，同样所有分类共享中心度值。
+    了 $A$ 倍，其中 $A$ 为 RetinaNet 中每个点的 anchor 数。损失函数为 focal loss。
+  \item 回归：输出 $H \times W \times 4$ 个 map，所有分类共享回归的距离值。损失
+    函数为 IoU loss。
+  \item 中心度：输出 $H \times W \times 1$ 个 map，同样所有分类共享中心度值。损
+    失函数为交叉熵 loss。
 \end{itemize}
 
-\paragraph{FCOS 损失函数}
-FCOS 的损失函数为：
-\begin{align}
-  \label{equ:fcos-loss}
-  \begin{split}
-    L = & \, \frac{1}{N_{\mathrm{pos}}} \sum_{x, y} L_{\mathrm{cls}} (P_{x,y}, c_{x,y}^*) \\
-    & \, + \frac{1}{N_{\mathrm{pos}}} \sum_{x, y} \mathds{1}_{c_{x,y}^* > 0}L_{\mathrm{reg}}(t_{x,y}, t_{x,y}^*) \\
-    & \, + \frac{1}{N_{\mathrm{pos}}} \sum_{x, y} L_{\mathrm{center}}(t_{x,y}, t_{x,y}^*) \\
-  \end{split}
-\end{align}
-
-其中 $L_{\mathrm{cls}}$ 为 focal loss，$L_{\mathrm{reg}}$ 为 IoU loss\cite{2016-IoU-loss}，
-$L_{\mathrm{pos}}$ 为交叉熵 loss。
-
-\paragraph{FCOS label 计算}
+\paragraph{训练 label}
 \begin{itemize}
   \item 分类 label：根据点与四条边距离的最大值分配到 FPN 的不同尺度，在对应尺度
     内的 GT 框内为正样本，否则为负样本。
@@ -1059,9 +994,99 @@ $L_{\mathrm{pos}}$ 为交叉熵 loss。
         b^*)}{\mathrm{max}(t^*, b^*)}}$ 计算。
 \end{itemize}
 
-\paragraph{FCOS Inference}
+\paragraph{Inference}
 Inference 时检测框的分数为分类分数和中心度的乘积，只取分类分数大于 0.05 的值生成
 检测框，之后做 NMS 得到最终的检测结果。
+
+\subsection{FoveaBox}
+文献\citerb{2019-FoveaBox}同样以 RetinaNet 为基础，提出 FoveaBox 网络。 
+
+\paragraph{网络结构和损失函数}
+\begin{itemize}
+  \item 分类分支：最后一个卷积层的输出通道数为 $K$，对应的输出为 $W \times H
+    \times K$的 heatmap，其中 $K$ 为类别数。损失函数为 focal loss。
+  \item 回归分支：最后一个卷积层的输出通道数为 4，为该点坐标到 GT 的变换，具体参
+    考训练 label 部分。损失函数为 Smooth $L_1$ loss。
+\end{itemize}
+
+\paragraph{训练 label}
+FoveaBox 仍然借鉴 FPN 的思想，根据 GT 的尺寸分配 scale，不在 scale 负责范围内的
+GT 为忽略样本。
+\begin{itemize}
+  \item 分类 label：GT 中心附近 $\sigma_1=0.3$ 倍长和宽内的区域为正样本，
+    $\sigma_2=0.4$ 倍长和宽外的区域为负样本，中间为忽略样本。 
+  \item 回归 label：网络输出的变换值与 GT 的关系为：
+    \begin{align}
+      t_{x1} & = \mathrm{log} \frac{2^l (x+0.5)-x_1}{z} \\
+      t_{y1} & = \mathrm{log} \frac{2^l (y+0.5)-y_1}{z} \\
+      t_{x2} & = \mathrm{log} \frac{x_2 - 2^l (x+0.5)}{z} \\
+      t_{y2} & = \mathrm{log} \frac{y_2 - 2^l (y+0.5)}{z}
+    \end{align}
+    其中 $z = \sqrt{S_l}$。根据变换关系可以计算对应的 label 值。
+\end{itemize}
+
+\subsection{FSAF}
+文献\citerb{2019-FSAF}在 RetinaNet 网络上加入了 anchor free 的平行分支，训练时通
+过选取不同 scale 的最小 loss，解决人为给定的 anchor 和 scale 对应关系并非最优的问
+题。
+
+\paragraph{网络结构}
+FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/FSAF.pdf}
+  \caption{FSAF 网络结构}
+  \label{fig:FSAF}
+\end{figure}
+
+在 RetinaNet FPN 结构每个尺度的分类和回归的最后一个 feature map 上，分别接对应
+的 anchor free 平行分支。
+
+\begin{itemize}
+  \item 分类分支：接 $3 \times 3$ 的卷积和 sigmoid，输出尺寸为 $W \times H \times
+    K$ 的 heatmap，每个点取值区间为 [0, 1]，越大表示越可能是物体中心。
+  \item 回归分支：接 $3 \times 3$ 的卷积和 ReLU，输出尺寸为 $W \times H \times
+    4$ 的 heatmap，每个点均为正值，表示该点到上/下/左/右四条边的距离。
+\end{itemize}
+
+\paragraph{损失函数}
+FSAF 的分类分支使用 focal loss，回归分支使用 IoU loss。
+
+\paragraph{训练 label}
+\begin{itemize}
+  \item 分类 label：与 GA-RPN 相同。
+  \item 回归 label：为像素点与四条边的距离值，只在 $b_e$ 范围内有值，其余均为忽略区域。
+\end{itemize}
+
+\paragraph{训练和测试}
+\begin{itemize}
+  \item 训练：多个 scale 同时计算每个 instance 的 loss，取最小的作为最终结果进行
+    反传。
+  \item 测试：由于最优的 scale 输出的分数更高，相当于模型会自适应选择合适的
+    scale。取所有 scale 分类分数 > 0.05 top 1000 结果，进行阈值为 0.5 的 NMS，得
+    到最终结果。
+\end{itemize}
+
+\subsection{SAPD}
+文献\citerb{2019-SAPD}提出 SAPD，基础方法仍然采用 FSAF，但改进了训练策略。
+
+\paragraph{Anchor points 权重}
+FSAF 中，分类 heatmap 上所有点的权重均相同。SAPD 降低了分类 heatmap 上靠近物体边
+缘点的权重，即离中心越近，权重越高，离边缘越近，权重越低，权重的具体计算方法为：
+\begin{equation}
+  w_{lij} = \left( \frac{\mathrm{min} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{min} \left( d_{lij}^t, d_{lij}^b \right)}{\mathrm{max} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{max} \left( d_{lij}^t, d_{lij}^b \right)} \right)^{\eta}, \; p_{lij} \in p^+
+\end{equation}
+
+\paragraph{Feature map 权重}
+FSAF 中，每个 instance 的反传只选择 loss 最小的 scale。SAPD 同时选择 $k$ 个
+scale 的 feature map 计算 loss，每个 scale 对应的权重由一个小的网络生成。该网络
+的结构如下：
+\begin{itemize}
+  \item 对 $k$ 个 feature map 的 GT 做 RoI Align，得到 $C \times 7 \times 7$ 的 feature。
+  \item 经过 3 个 $3 \times 3$ 卷积 + ReLU，得到 $C \times 1 \times 1$ 的 feature。
+  \item 经过 FC + Softmax 得到 $k$ 个值，作为不同 scale feature map loss 的权重。
+\end{itemize}
 
 \chapter{专题}
 \section{Scale 问题}
@@ -1147,7 +1172,7 @@ Chips 指的是图像金字塔的子图，文中给出了 chips 的选取策略�
 且共享参数的空洞卷积 branch 代替原始的卷积，同时结合 SNIP 训练方法，不同 branch
 只使用对应 scale 的 GT 进行训练。 
 
-\paragraph{TridentNet 结构}
+\paragraph{网络结构}
 TridentNet 的结构如图~\ref{fig:tridentnet}~所示：
 
 \begin{figure}[ht]
@@ -1160,7 +1185,7 @@ TridentNet 的结构如图~\ref{fig:tridentnet}~所示：
 TridentNet 将 ResNet 最后一个 block 中的 $3 \times 3$ 卷积分别替换成 stride 为
 1、2、3 的空洞卷积，共有三个平行的 branch，这三个 branch 共享参数，但感受野不同。
 
-\paragraph{TridentNet 训练}
+\paragraph{训练时与 SNIP 的结合}
 训练时应用 SNIP，每个 branch 都有对应的有效 range，只有 GT 落在有效 range 内才认
 为有效，否则为忽略。RPN 中，anchor 的正负样本根据有效 GT 确定，R-CNN 中，只选择
 在有效 range 内的 proposal。
@@ -1222,9 +1247,29 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
 传统的解决正负样本不平衡问题的方法包括 HEM 和 focal loss。
 
 \subsubsection{Sampling-Free}
-文献\citerb{2019-Sampling-Free}引入了三种手段，包括改进分类层初始化方法、自适应
-分类/回归权重和自适应类别前景阈值，提出 Sampling-Free 的训练方法，可以达到甚至超
-过原始检测器的精度。
+文献\citerb{2019-Sampling-Free}引入了三种手段，包括改进分类层初始化方法、自适应分
+类/回归 loss 权重和自适应类别前景阈值，提出 Sampling-Free 的训练方法，可以达到甚
+至超过原始检测器的精度。
+
+\begin{itemize}
+  \item 分类网络卷积层偏置初始值：RetinaNet 中，偏置的初始值 $b =
+    -\mathrm{log}\frac{1-\pi}{\pi}$，其中 $\pi=0.01$。如果不采用 focal loss，直
+    接训练网络会出现 loss 爆炸，性能很差。文中将 $\pi$ 的值降为 $10^{-5}$，再计
+    算对应的 $b$ 作为初始值。
+  \item 自适应 loss 权重：总 loss 形式为：
+    \begin{equation}
+    L = w^{\mathrm{reg}} L^{reg} +
+    w^{\mathrm{cls}} L^{\mathrm{cls}} \cdot r = \left( w^{\mathrm{cls}} + 1
+    \right) w^{\mathrm{reg}} L^{\mathrm{reg}}
+    \end{equation}
+    令 $w^{\mathrm{reg}} = 1$，则只需要调整 $w^{\mathrm{cls}}$ 的值即可，相当于按
+    照分类/回归 loss 比例将分类 loss 归一化。
+  \item 自适应类别前景阈值：每个类别的前景阈值 $\theta$ 的计算方式为：
+    \begin{equation}
+      \theta_j = \frac{N_f}{N} \cdot \frac{N_j}{\sum_{j=1}^{C} N_j}
+    \end{equation}
+    其中 $N_f$ 为前景样本数，$N$ 为样本总数，$N_j$ 为第 $j$ 类的前景样本数。
+\end{itemize}
 
 
 %%% Local Variables:
