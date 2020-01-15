@@ -201,7 +201,7 @@ Faster R-CNN 的训练方法包括 4 步交替训练法和近似联合训练法�
 
 \subsection{FPN}
 FPN 的核心思想是融合不同尺度的 feature map 得到 feature 金字塔，再进行多尺度预
-测。FPN 及不同方法的对比如图~\ref{fig:FPN}~所示：
+测\citerb{2016-FPN}。FPN 及不同方法的对比如图~\ref{fig:FPN}~所示：
 
 \begin{figure}[ht]
   \centering
@@ -229,37 +229,57 @@ map 的通道数相同，再将二者进行 element-wise 相加，最后经过�
 FPN 中所有尺寸预测的检测 head 均共享权重，且输出的通道数均为 256，同时 head 中没
 有非线性层。
 
-\paragraph{FPN 在 RPN 上的应用}
+\paragraph{FPN 中的 RPN}
 
 \begin{itemize}
-  \item 加入 FPN 结构的 RPN 从 5 个尺度分别预测，与 SSD 类似，15 个预设尺寸的
-    anchor 分别放在 5 个尺度的 feature map，每层 feature map 上有 3 个与其尺寸匹
-    配的 anchor。
+  \item FPN 中的 RPN 从 5 个尺度分别预测，与 SSD 类似，15 个预设尺寸的anchor 分别放
+    在 5 个尺度的 feature map，每层 feature map 上有 3 个与其尺寸匹配的 anchor。
   \item Anchor 的正负样本标准与 Faster R-CNN 相同，GT 不再分配到不同尺度，而是直
     接和所有 anchor 计算 IoU，相当于 GT 和 anchor 进行匹配，这样即隐式地将 GT 分
     配到不同尺度。
 \end{itemize}
 
-\paragraph{FPN 在 Fast R-CNN 上的应用}
+\paragraph{FPN 中的 Fast R-CNN}
 
-FPN 在 Fast R-CNN 中的应用是根据 proposal 的尺寸将其分配到不同 scale，计算方法
-为 $ k = \lfloor k_0 + \mathrm{log}_2 ( \sqrt{wh}/224 ) \rfloor$，即根
-据 proposal 的面积将其分配到不同尺度的 feature map，面积越大分配的 feature map 越
-深，反之越浅。
+FPN 中的 Fast R-CNN 与原始 Fast R-CNN 相比，最大的区别是 FPN 根据 proposal 的尺寸
+将其分配到不同 scale，计算方法为 $ k = \lfloor k_0 + \mathrm{log}_2 (
+\sqrt{wh}/224 ) \rfloor$，即根据 proposal 的面积将其分配到不同尺度的 feature map，
+面积越大的 RoI 所分配的 feature map 越深，反之越浅。
 
-\subsection{PANet}
-PANet 在 FPN 的基础上新增了 bottom-up augmentation 和 adaptive feature pooling\cite{2018-PANet}。
+\subsection{FPN 的改进}
+FPN 的改进大致可分为以下几方面：
+\begin{enumerate}
+  \item Feature map 融合方式
+  \item RoI 分配/融合方式
+\end{enumerate}
 
-\paragraph{Bottom-up augmentation}
-FPN 在 CNN backbone bottom-up 的基础上，加入了 top-down 和横向连接，以融合不同层
-级 feature map 的信息。PANet 又加入了 bottom-up 连接，将较大尺寸的 feature map
-经过 $3 \times 3$ stride 为 2 的卷积，与较小尺寸的 feature map 做 element-wise
-相加，再经过 $3 \times 3$ 的卷积得到对应的 feature map。
+\subsubsection{Feature map 融合方式}
+\paragraph{PANet}
+PANet 在 FPN top-down 连接的基础上加入了 bottom-up 连接，将较大尺寸的 feature
+map 经过 $3 \times 3$ stride 为 2 的卷积，与较小尺寸的 feature
+map 做 element-wise 相加，再经过 $3 \times 3$ 的卷积得到对应的 feature
+map\cite{2018-PANet}。
 
-\paragraph{Adaptive feature pooling}
-FPN 根据尺寸将 proposal 分配到不同 scale，只从单个 feature map 做 RoI
-Align。PANet 中从多尺度 feature map 做 RoI Align，再利用 max/avg 操作融合不同尺度
-的 feature。
+\paragraph{AugFPN}
+AugFPN 与 FPN 的区别包括\citerb{2019-AugFPN}：
+\begin{itemize}
+  \item AugFPN 先将原始的 feature map $C_i$ 经过 $1 \times 1$ 卷积得到 $M_i$，
+    再经过 $3 \times 3$ 卷积与上采样后的 $P_{i-1}$ 相加得到 $P_i$。
+  \item AugFPN 中的 $C_5$ 会先缩放到不同尺度，再经过 $1 \times 1$ 卷积后上采样到
+    相同尺寸，之后做自适应空间融合得到 $M_6$，即求不同尺度 feature map 不同位置的
+    加权和，$M_6$ 再与 $M_5$ 相加后得到 $P_5$。
+\end{itemize}
+
+\subsubsection{RoI 分配/融合方式}
+\paragraph{PANet}
+PANet 将 RoI 投射到多尺度 feature map 进行 RoI Align 得到同一 RoI 的不同尺
+度 feature，再将不同尺度 feature 分别过权重共享的 fc 层后进行拼接，得到检
+测 head的 feature\cite{2018-PANet}。
+
+\paragraph{AugFPN}
+AugFPN 将 RoI 同时投射到多个 feature map 做 RoI Align，将得到的 feature concat
+后经过两个 $1 \times 1$ 卷积 + Sigmoid 得到 $N \times C$ 的权重，将不同 RoI
+feature 做加权和得到 $C \times h \times w$ 的融合后 RoI feature\cite{2019-AugFPN}。
 
 \section{Faster R-CNN 的改进}
 \label{sec:faster-improve}
@@ -450,6 +470,7 @@ heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点�
 
 \subsection{RPN 的改进}
 \subsubsection{GA-RPN}
+\label{subsubsec:GA-RPN}
 文献\citerb{2019-GA-RPN}中对 RPN 网络进行了改进，提出 GA-RPN，anchor 数量仅为 baseline
 的 10\%，同时 recall 比 baseline 高 9.1 个点。
 
@@ -1026,9 +1047,9 @@ GT 为忽略样本。
 \end{itemize}
 
 \subsection{FSAF}
-文献\citerb{2019-FSAF}在 RetinaNet 网络上加入了 anchor free 的平行分支，训练时通
-过选取不同 scale 的最小 loss，解决人为给定的 anchor 和 scale 对应关系并非最优的问
-题。
+文献\citerb{2019-FSAF}在 RetinaNet 基础上加入 anchor free 平行分支，训练时通过选
+取不同 scale 中最小的 loss 进行反传，解决了人为给定 anchor 和 scale 对应关系并非
+最优的问题。
 
 \paragraph{网络结构}
 FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
@@ -1040,12 +1061,12 @@ FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
   \label{fig:FSAF}
 \end{figure}
 
-在 RetinaNet FPN 结构每个尺度的分类和回归的最后一个 feature map 上，分别接对应
-的 anchor free 平行分支。
+在 RetinaNet 每个尺度分类和回归的最后一个 feature map 上，分别接对应
+的 anchor free 分类/回归平行分支。
 
 \begin{itemize}
   \item 分类分支：接 $3 \times 3$ 的卷积和 sigmoid，输出尺寸为 $W \times H \times
-    K$ 的 heatmap，每个点取值区间为 [0, 1]，越大表示越可能是物体中心。
+    K$ 的 heatmap，每个点取值区间为 [0, 1]，值越大表示越可能是物体中心。
   \item 回归分支：接 $3 \times 3$ 的卷积和 ReLU，输出尺寸为 $W \times H \times
     4$ 的 heatmap，每个点均为正值，表示该点到上/下/左/右四条边的距离。
 \end{itemize}
@@ -1055,17 +1076,16 @@ FSAF 的分类分支使用 focal loss，回归分支使用 IoU loss。
 
 \paragraph{训练 label}
 \begin{itemize}
-  \item 分类 label：与 GA-RPN 相同。
+\item 分类 label：与~\hyperref[subsubsec:GA-RPN]{GA-RPN}~相同。
   \item 回归 label：为像素点与四条边的距离值，只在 $b_e$ 范围内有值，其余均为忽略区域。
 \end{itemize}
 
 \paragraph{训练和测试}
 \begin{itemize}
-  \item 训练：多个 scale 同时计算每个 instance 的 loss，取最小的作为最终结果进行
-    反传。
-  \item 测试：由于最优的 scale 输出的分数更高，相当于模型会自适应选择合适的
-    scale。取所有 scale 分类分数 > 0.05 top 1000 结果，进行阈值为 0.5 的 NMS，得
-    到最终结果。
+  \item 训练：多个 scale 同时计算每个 instance 的 loss，取最小的作为结果进行反传。
+  \item 测试：由于最优 scale 输出的分数更高，相当于模型会自适应选择最合适
+    的 scale。取所有 scale 中分类分数 > 0.05 的 top 1000 结果，进行阈值
+    为 0.5 的 NMS，得到最终结果。
 \end{itemize}
 
 \subsection{SAPD}
