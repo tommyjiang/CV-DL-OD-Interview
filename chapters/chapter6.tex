@@ -261,7 +261,7 @@ map 做 element-wise 相加，再经过 $3 \times 3$ 的卷积得到对应的 fe
 map\cite{2018-PANet}。
 
 \paragraph{AugFPN}
-AugFPN 与 FPN 的区别包括\citerb{2019-AugFPN}：
+AugFPN 对 FPN 进行了以下改进\citerb{2019-AugFPN}：
 \begin{itemize}
   \item AugFPN 先将原始的 feature map $C_i$ 经过 $1 \times 1$ 卷积得到 $M_i$，
     再经过 $3 \times 3$ 卷积与上采样后的 $P_{i-1}$ 相加得到 $P_i$。
@@ -269,6 +269,20 @@ AugFPN 与 FPN 的区别包括\citerb{2019-AugFPN}：
     相同尺寸，之后做自适应空间融合得到 $M_6$，即求不同尺度 feature map 不同位置的
     加权和，$M_6$ 再与 $M_5$ 相加后得到 $P_5$。
 \end{itemize}
+
+\paragraph{MFPN}
+MFPN 同时采用了三种 FPN 结构\citerb{2019-MFPN}：
+
+\begin{itemize}
+  \item Top-down FPN：类似原始 FPN，区别是在最深层之后加入了全局平均池化层
+    （Global Average Pooling，GAP），将结果与最深层相加，其余与原始 FPN 类似。
+  \item Bottom-up FPN：与原始 FPN 相反，先从最浅层开始搭金字塔，该层和其上下两层
+    都参与生成金字塔中对应的 feature map。
+  \item Fusing-splitting FPN：先将前两层、后两层分别融合，再将融合后的两层融合，
+    然后再将浅层上采样，深层下采样，得到最终的四个 feature map。
+\end{itemize}
+
+MFPN 将以上三种 FPN 得到的 feature map 相加，作为最终的 feature map。
 
 \subsubsection{RoI 分配/融合方式}
 \paragraph{PANet}
@@ -1291,6 +1305,23 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
     其中 $N_f$ 为前景样本数，$N$ 为样本总数，$N_j$ 为第 $j$ 类的前景样本数。
 \end{itemize}
 
+\subsection{不一致问题}
+\subsubsection{分类分数与位置精度不一致}
+目标检测模型通常将检测框的分类分数作为 NMS 的依据，即优先保留分类分数高的检测框。
+但检测框的分数与位置精度并非简单的正相关，有可能出现高分位置不准的检测框杀掉低分
+位置准的检测框。
+
+\paragraph{LTR}
+LTR 中利用子网络预测每个 proposal 的排序分数，目标是排序分数与 proposal 和 GT 的
+IoU 正相关\citerb{2019-LTR}。
+
+\begin{itemize}
+  \item 子网络：类似分类网络，RoI feature 接两个 fc 层得到排序分数。
+  \item 正负样本：借鉴 HEM 思想，将 proposal 按照与 GT 的 IoU 划分成 $n$ 个区间，每
+    个区间内的 proposal 作为正样本，负样本为低区间所有 proposal 中分数最高的 top
+    $h$ 个。
+  \item 损失函数：Hinge loss 形式。
+\end{itemize}
 
 %%% Local Variables:
 %%% TeX-master: "../master"
