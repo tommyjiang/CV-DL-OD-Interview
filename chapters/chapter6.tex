@@ -770,6 +770,19 @@ $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 
 Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然后取分数最高的前 1000
 个结果，再进行阈值为 0.5 的 NMS，得到最终结果。
 
+\subsection{RetinaNet 的改进}
+
+\subsubsection{正负样本}
+\paragraph{ATSS}
+ATSS 论文发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 RetinaNet 后，二者性
+能十分接近，借鉴 FCOS 的思路提出 ATSS 方法作为正负样本判据\citerb{2019-ATSS}。
+
+\begin{enumerate}
+  \item 每层选出离 GT 中心 $L_2$ 距离最近的 $k$ 个 anchor 作为候选集合。
+  \item 计算候选集合中所有 anchor 与对应 GT 的 IoU，及候选集合与 GT IoU 的均值 $m_g$ 和标准差 $v_g$。
+  \item 正负样本 IoU 阈值取为 $t_g = m_g + v_g$。
+\end{enumerate}
+
 \section{其他}
 
 \subsection{RefineDet}
@@ -780,7 +793,7 @@ RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收
 主要包括 ARM、ODM 和 TCB 三个模块。
 \begin{itemize}
   \item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
-    0.01 的负样本 anchor 训练时和测试时均不再送给 ODM。
+    0.01 的负样本 anchor 训练时和测试时均直接舍弃，不再传给 ODM。
   \item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
   \item TCB：类似 FPN，但结构略复杂，底层 feature map 的操作由上采样改为反卷积，
     上层 feature map 的操作由 $1 \times 1$ 卷积改为 $3 \times 3$ 卷积 + ReLU +
@@ -1312,15 +1325,32 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
 位置准的检测框。
 
 \paragraph{LTR}
-LTR 中利用子网络预测每个 proposal 的排序分数，目标是排序分数与 proposal 和 GT 的
+LTR 利用子网络预测每个 proposal 的排序分数，目标是排序分数与 proposal 和 GT 的
 IoU 正相关\citerb{2019-LTR}。
 
 \begin{itemize}
   \item 子网络：类似分类网络，RoI feature 接两个 fc 层得到排序分数。
-  \item 正负样本：借鉴 HEM 思想，将 proposal 按照与 GT 的 IoU 划分成 $n$ 个区间，每
-    个区间内的 proposal 作为正样本，负样本为低区间所有 proposal 中分数最高的 top
-    $h$ 个。
+  \item 正负样本：借鉴 HEM 思想，将 proposal 按照与 GT 的 IoU 划分成 $n$ 个区间，
+    每个区间内的 proposal 作为正样本，负样本为低区间所有 proposal 中分数最高
+    的 $h$ 个。
   \item 损失函数：Hinge loss 形式。
+\end{itemize}
+
+\paragraph{Noisy Anchor}
+Noisy Anchor 的改进包括以下两方面：
+
+\begin{itemize}
+  \item 自适应分类 soft label：正样本的分类 label 不再是 1，而是与分类和回归分支
+    的输出相关
+    \begin{equation}
+      c = \alpha \cdot \mathtt{loc\_a} + (1 - \alpha) \cdot \mathtt{cls\_c}
+    \end{equation}
+    其中 $\mathtt{loc\_a}$ 为回归后的 bbox 与 GT 的 IoU。
+  \item 自适应权重：正样本的权重 $r$ 同样与分类和回归分支的输出相关
+    \begin{equation}
+      r = \left( \alpha \cdot \frac{1}{1-\mathtt{loc\_a}} + (1 - \alpha) \cdot \frac{1}{1-\mathtt{cls\_c}} \right ) ^ {\gamma}
+    \end{equation}
+    将所有正样本权重的平均值归一化为 1。
 \end{itemize}
 
 %%% Local Variables:
