@@ -74,7 +74,7 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \begin{enumerate}
   \item 对任一检测框，计算所有分数低于该框的检测框与该框的 IoU。
   \item 根据 IoU 和每个检测框的不确定度 $\sigma$，修正该检测框的位置，其中 IoU
-    越大，$ \sigma $ 越小，权重越高。
+    越大，$\sigma$ 越小，权重越高。
 \end{enumerate}
 
 \chapter{两阶段方法}
@@ -90,7 +90,7 @@ Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一�
 
 \paragraph{网络结构}
 Fast R-CNN 网络的最开始是统一的 CNN backbone，利用 backbone 得到 feature map 后，
-将每个 proposal 对应的 feature map区域，经过 RoI pooling 层得到尺寸为 $h \times
+将每个 proposal 对应的 feature map 区域，经过 RoI pooling 层得到尺寸为 $h \times
 w$ 的 RoI，再经过两个全连接层得到 RoI 对应的 feature，之后再分别经过全连接层 +
 Softmax 层的分类器得到分类分数（共 $C+1$ 类，多一个背景类），以及经过全连接层得
 到$t_x, t_y, t_w, t_h$四个回归变换值。
@@ -178,8 +178,8 @@ R-CNN 的输入，后处理的步骤为：
 \item 取第 2 步 NMS 之后分数最高的 top $N_{\mathrm{post}}$ 个 proposal。
 \end{enumerate}
 
-需要强调的是，后处理得到 proposal 后，后续训练就不再需要 RPN 的分数了。Proposal 正负样本的
-判断与 RPN 分数无关，\textbf{只与其与 GT 的 IoU 有关}。
+需要强调的是，后处理得到 proposal 后，后续训练就不再需要 RPN 的分数了。Proposal
+正负样本的判断与 RPN 分数无关，\textbf{只与其与 GT 的 IoU 有关}。
 
 \paragraph{训练方法}
 
@@ -188,10 +188,12 @@ Faster R-CNN 的训练方法包括 4 步交替训练法和近似联合训练法�
 
 \begin{enumerate}
   \item Backbone 采用 pretrain model 权重初始化，训练 RPN。
-  \item Backbone 采用 pretrain model 权重初始化，利用第 1 步 RPN 生成的 proposal，训练 Fast R-CNN。
-  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，只 fine tune RPN 新增的层。
-  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，利用第 3 步生成的
-    proposal，只 fine tune Fast R-CNN 新增的层。
+  \item Backbone 采用 pretrain model 权重初始化，利用第 1 步 RPN 生成的 proposal，
+    训练 Fast R-CNN。
+  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，只 fine tune RPN 新
+    增的层。
+  \item Backbone 采用第 2 步得到的权重初始化，固定 backbone，利用第 3 步生成
+    的 proposal，只 fine tune Fast R-CNN 新增的层。
 \end{enumerate}
 
 通过以上四步即可得到 RPN 和 Fast R-CNN 共享 backbone 的 Faster R-CNN 网络。
@@ -215,7 +217,8 @@ FPN 的核心思想是融合不同尺度的 feature map 得到 feature 金字塔
     图片的前传。
   \item 图(b)为 Faster R-CNN 采用的方法，从单个 feature map 进行预测，未充分利用
     不同 feature map 的信息。
-  \item 图(c)为 SSD 采用的方法，从多个 feature map 分别预测，未进行 feature map 信息的融合。
+  \item 图(c)为 SSD 采用的方法，从多个 feature map 分别预测，未进行 feature map
+    信息的融合。
   \item 图(d)为 FPN 采用的方法，先融合不同 feature map 信息，再进行多尺度预测。
 \end{itemize}
 
@@ -523,7 +526,7 @@ heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点�
 匹配的 GT。文中的做法是利用预设的 $w$ 和 $h$ 寻找匹配的 GT，再利用匹配的 GT 的 $w$ 和
 $h$ 作为回归分支的 label。
 
-\subsection{其他}
+\subsection{级联方法的改进}
 
 \subsubsection{Cascade R-CNN}
 \label{subsub:cascade-rcnn}
@@ -726,6 +729,23 @@ SSD 中，预测模块只有 $3 \times 3$ 卷积，直接接在对应的 feature
   \item 将 feature map 1 和 feature map 2 做 element-wise 求和，得到最终的
     feature map，之后再接 $3 \times 3$ 的卷积分别进行分类和回归。
 \end{itemize}
+\subsection{RefineDet}
+RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收了单阶段和两阶段
+目标检测的优点\citerb{2017-RefineDet}。
+
+\paragraph{网络结构}
+主要包括 ARM、ODM 和 TCB 三个模块。
+\begin{itemize}
+\item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
+  0.01 的负样本 anchor 训练时和测试时均直接舍弃，不再传给 ODM。
+\item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
+\item TCB：类似 FPN，但结构略复杂，底层 feature map 的操作由上采样改为反卷积，
+  上层 feature map 的操作由 $1 \times 1$ 卷积改为 $3 \times 3$ 卷积 + ReLU +
+  $3 \times 3$ 卷积。
+\end{itemize}
+
+\paragraph{损失函数}
+ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，总 loss 为二者之和。
 
 \section{RetinaNet 系列}
 
@@ -783,27 +803,7 @@ ATSS 论文发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 Reti
   \item 正负样本 IoU 阈值取为 $t_g = m_g + v_g$。
 \end{enumerate}
 
-\section{其他}
-
-\subsection{RefineDet}
-RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收了单阶段和两阶段
-目标检测的优点\citerb{2017-RefineDet}。
-
-\paragraph{网络结构}
-主要包括 ARM、ODM 和 TCB 三个模块。
-\begin{itemize}
-  \item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
-    0.01 的负样本 anchor 训练时和测试时均直接舍弃，不再传给 ODM。
-  \item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
-  \item TCB：类似 FPN，但结构略复杂，底层 feature map 的操作由上采样改为反卷积，
-    上层 feature map 的操作由 $1 \times 1$ 卷积改为 $3 \times 3$ 卷积 + ReLU +
-    $3 \times 3$ 卷积。
-\end{itemize}
-
-\paragraph{损失函数}
-ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，总 loss 为二者之和。
-
-\subsection{LapNet}
+\section{LapNet}
 LapNet 的思路与传统的检测网络有明显区别，其特点是体现了良好的速度和精度的均衡，
 如图~\ref{fig:LapNet}~所示：
 
@@ -1318,8 +1318,8 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
     其中 $N_f$ 为前景样本数，$N$ 为样本总数，$N_j$ 为第 $j$ 类的前景样本数。
 \end{itemize}
 
-\subsection{不一致问题}
-\subsubsection{分类分数与位置精度不一致}
+\section{不一致问题}
+\subsection{分类分数与位置精度不一致}
 目标检测模型通常将检测框的分类分数作为 NMS 的依据，即优先保留分类分数高的检测框。
 但检测框的分数与位置精度并非简单的正相关，有可能出现高分位置不准的检测框杀掉低分
 位置准的检测框。

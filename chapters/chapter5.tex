@@ -2,6 +2,35 @@
 
 \chapter{经典模型}
 
+\section{SENet/SKNet}
+SENet 和 SKNet 的主要思想是利用 feature map 信息调整不同 feature map 的权重。
+
+\subsection{SENet}
+SENet 的基本单元如图~\ref{fig:senet}~所示\citerb{2017-SENet}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/SENet.pdf}
+  \caption{SENet 基本模块}
+  \label{fig:senet}
+\end{figure}
+
+图中 sigmoid 之后得到的权重用于与对应 channel 的 feature map 相乘，以调整不
+同 feature map 的权重。
+
+\subsection{SKNet}
+SKNet 的基本单元如图~\ref{fig:sknet}~所示\citerb{2019-SKNet}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/分类/SKNet.png}
+  \caption{SKNet 基本模块}
+  \label{fig:sknet}
+\end{figure}
+
+SKNet 相当于通过网络选择不同卷积核（$3 \times 3$ 和 $5 \times 5$）生成 feature
+map 的权重。
+
 \chapter{轻量模型}
 
 \section{MobileNet 系列}
@@ -28,6 +57,23 @@ Residual block 的结构，具体结构包括：
 \end{itemize}
 
 \subsection{ShuffleNet v2}
+
+\chapter{涨点 Tricks}
+\section{模型改进}
+\subsection{ResNet-D}
+文献\citerb{2018-BoT}中对 ResNet 结构进行了三点改进：
+\begin{itemize}
+  \item 将第一层 $7 \times 7, s=2$ 卷积改为三个 $3 \times 3$ 的卷积，其中第一个
+    卷积的 stride 为 2。
+  \item 将下采样模块的 $1 \times 1, s=2 + 3 \times 3$ 卷积改为 $1 \times 1 + 3
+    \times 3, s=2$ 卷积。
+  \item 将下采样模块的 $1 \times 1, s=2$ 卷积改为 $2 \times 2$ 平均池化 + $1
+    \times 1$ 卷积。
+\end{itemize}
+
+\section{正则化}
+
+\section{训练技巧}
 
 
 %%% Local Variables:
