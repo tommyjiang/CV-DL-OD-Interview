@@ -6,6 +6,7 @@
 SENet 和 SKNet 的主要思想是利用 feature map 信息调整不同 feature map 的权重。
 
 \subsection{SENet}
+\label{subsec:SENet}
 SENet 的基本单元如图~\ref{fig:senet}~所示\citerb{2017-SENet}：
 
 \begin{figure}[ht]
@@ -72,6 +73,65 @@ Residual block 的结构，具体结构包括：
 \end{itemize}
 
 \section{正则化}
+\subsection{数据增广}
+\subsubsection{AutoAugment}
+文献\citerb{2018-AutoAugment}中利用强化学习得到适用于不同数据集的最优增广策略，每
+个策略包括 5 个子策略，其中每个子策略又包括两个具体的操作：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/AutoAugment.pdf}
+  \caption{AutoAugment 方法得到的 ImageNet 数据集的最优策略}
+  \label{fig:autoaugment}
+\end{figure}
+
+
+\subsubsection{GridMask}
+文献\citerb{2020-GridMask}中将规则的 0-1 mask 覆盖到输入数据，将 mask 值为 0 位置
+的输入值设为 0，相当于人为将部分输入数据置为 0。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/GridMask.pdf}
+  \caption{GridMask 方法示例}
+  \label{fig:gridmask}
+\end{figure}
+
+\subsection{Label}
+\subsubsection{Label Smooth Regularization（LSR）}
+文献\citerb{2015-inception-v2-v3}中提出 LSR 策略：
+\begin{equation}
+  q'(k) = (1-\epsilon) \delta_{k,y} + \frac{\epsilon}{K}
+\end{equation}
+
+\begin{itemize}
+  \item 不采用 LSR 策略时，GT class 的 label 为 1，其他 class 为 0。
+  \item 采用 LSR 策略时，GT class 的 label 为 $(1-\epsilon) + \frac{\epsilon}{K}$，
+    其他 class 为 $\frac{\epsilon}{K}$。
+\end{itemize}
+
+\subsubsection{mixup}
+文献\citerb{2017-mixup}中提出 mixup 策略，将两个训练样本融合得到新的训练样本：
+\begin{align}
+  \begin{split}
+    \tilde{x} = & \, \lambda x_i + (1-\lambda) x_j  \\
+    \tilde{y} = & \, \lambda y_i + (1-\lambda) y_j  \\
+  \end{split}
+\end{align}
+
+其中 $x$ 为输入数据，$y$ 为 label。
+
+\subsection{Drop 系列}
+\subsubsection{DropBlock}
+文献\citerb{2018-DropBlock}提出 DropBlock，可看作改进版的 Dropout，去掉的是连续
+区域内的输入，而非 Dropout 中的随机区域。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/DropBlock.pdf}
+  \caption{(c)DropBlock 与 (b)Dropout 对比}
+  \label{fig:dropblock}
+\end{figure}
 
 \section{训练技巧}
 

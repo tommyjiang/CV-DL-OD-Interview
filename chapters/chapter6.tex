@@ -202,6 +202,7 @@ Faster R-CNN 的训练方法包括 4 步交替训练法和近似联合训练法�
 \label{sec:FPN}
 
 \subsection{FPN}
+\label{subsec:FPN}
 FPN 的核心思想是融合不同尺度的 feature map 得到 feature 金字塔，再进行多尺度预
 测\citerb{2016-FPN}。FPN 及不同方法的对比如图~\ref{fig:FPN}~所示：
 
@@ -699,14 +700,11 @@ box 尺寸小，反之尺寸大，具体请参
 SSD 训练时的正负样本比为 1:3，在训练时使用了难样本挖掘（HEM），即只选择 loss 最高
 的负样本进行计算。
 
-\subsection{DSSD}
-\label{subsec:DSSD}
-
+\subsection{SSD 的改进}
+\subsubsection{FPN 思想}
+\paragraph{DSSD}
 DSSD 是 SSD 的扩展版，思想与 \hyperref[sec:FPN]{FPN} 类似，同样对不同尺度的
-feature map 进行融合以提高模型性能\citerb{2017-DSSD}。
-
-\paragraph{DSSD 的特征融合}
-DSSD 的特征融合模块包括：
+feature map 进行融合以提高模型性能\citerb{2017-DSSD}。DSSD 的特征融合模块包括：
 
 \begin{itemize}
   \item 深层 feature map：先经过 $2 \times 2$ 的反卷积，再接 $3 \times 3$ 的卷积
@@ -717,9 +715,8 @@ DSSD 的特征融合模块包括：
     后的 feature map。
 \end{itemize}
 
-\paragraph{DSSD 对预测模块的改进}
-SSD 中，预测模块只有 $3 \times 3$ 卷积，直接接在对应的 feature map 上，DSSD 中对
-这一部分也进行了改进：
+DSSD 对 SSD 的预测模块也进行了改进。SSD 中，预测模块只有 $3 \times 3$ 卷积，直接
+接在对应的 feature map 上，DSSD 中对这一部分也进行了改进：
 
 \begin{itemize}
   \item 原始 feature map 先经过 3 个 $1 \times 1$ 的卷积，输出通道数分别为 256，
@@ -729,26 +726,159 @@ SSD 中，预测模块只有 $3 \times 3$ 卷积，直接接在对应的 feature
   \item 将 feature map 1 和 feature map 2 做 element-wise 求和，得到最终的
     feature map，之后再接 $3 \times 3$ 的卷积分别进行分类和回归。
 \end{itemize}
-\subsection{RefineDet}
+
+\paragraph{RON}
+RON 借鉴 FPN 思想融合不同尺度的 feature map，此外还预测 feature map 上每个点对应
+的 objectness score，仅在 objectness 分数高于一定阈值的区域进行检测，从而减轻单阶
+段检测器的正负样本不平衡问题\citerb{2017-RON}。
+
+\paragraph{NETNet}
+NETNet 借鉴了 \hyperref[subsec:FPN]{FPN} 的思路对 SSD 进行改进，
+同时引入 Neighbor Erasing Module（NEM） 和 Neighbor Transferring Module（NTM）融
+合不同 scale feature map 信息\citerb{2020-NETNet}。
+
+NETNet 中每层融合的 feature map 与本层及前后两层相关，下层上采样 + 本层 + 上层下
+采样后接$1 \times 1$ 卷积后逐元素相加。
+
+NEM 的具体结构为：
+\begin{itemize}
+  \item 上层 $p_{s+1}$ 经过上采样、$1 \times 1$卷积、sigmoid 得到 $g_{s+1}^s$。
+  \item $g_{s+1}^s$ 与 $p_s$ 相乘得到 $p_{es}$。
+  \item $p_s$ 与 $p_{es}$ 相减得到 $\tilde{p}_s$。
+\end{itemize}
+
+NTM 将 NEM 得到的 $p_{es}$ 经过下采样和 $1 \times 1$ 卷积，再与 $p_{s+1}$ 相加得
+到 $\tilde{p}_{s+1}$。
+
+\subsubsection{双向 FPN}
+\paragraph{BPN}
+BPN 在 FPN top-down 的基础上又加入了 bottom-up 的路径，整体结构类似 PANet，同时也
+应用了 Cascade R-CNN 的思想，路径越深对应的 IoU 阈值越高，其整体结构如
+图~\ref{fig:BPN}~所示\citerb{2018-BPN}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/目标检测/BPN.pdf}
+  \caption{BPN 的结构}
+  \label{fig:BPN}
+\end{figure}
+
+\paragraph{LSN}
+LSN 在 SSD 基础上加入双向 FPN，其结构如图~\ref{fig:LSN}~所示\citerb{2019-LSN}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/LSN.pdf}
+  \caption{LSN 的结构}
+  \label{fig:LSN}
+\end{figure}
+
+\begin{itemize}
+  \item 新加入了 scratch 网络，先将原始图片下采样，再经过 6 个卷积，取四个尺寸的
+    中间结果分别经过 $1 \times 1$ 的卷积，用于特征融合。
+  \item 双向 FPN，包括由浅及深和由深及浅两部分，分别对应 bottom-up 和 top-down
+    子网络。
+\end{itemize}
+
+\subsubsection{组合 FPN}
+\paragraph{PFPNet}
+PFPNet 从同一个 feature map 上 pooling 得到不同尺寸的 feature map，再分别组合得
+到用于预测的 feature map，其结构如图~\ref{fig:PFPNet}~所示\citerb{2018-PFPNet}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/PFPNet.pdf}
+  \caption{PFPNet 的结构}
+  \label{fig:PFPNet}
+\end{figure}
+
+\begin{itemize}
+\item Backbone 得到的 feature map 经过不同 stride 的 pooling 得到不同尺寸的
+  feature map。 
+\item 不同尺寸 feature map 经过上/下采样后 concat，再经过卷积得到用于预测的
+  feature map。
+\end{itemize}
+
+\subsubsection{网络新模块}
+\paragraph{RefineDet}
 RefineDet 借鉴了 Faster R-CNN、SSD 和 FPN 等论文的思路，综合吸收了单阶段和两阶段
 目标检测的优点\citerb{2017-RefineDet}。
 
-\paragraph{网络结构}
-主要包括 ARM、ODM 和 TCB 三个模块。
+RefineDet 的网络结构包括 ARM、ODM 和 TCB 三个模块。
 \begin{itemize}
-\item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
-  0.01 的负样本 anchor 训练时和测试时均直接舍弃，不再传给 ODM。
-\item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
-\item TCB：类似 FPN，但结构略复杂，底层 feature map 的操作由上采样改为反卷积，
-  上层 feature map 的操作由 $1 \times 1$ 卷积改为 $3 \times 3$ 卷积 + ReLU +
-  $3 \times 3$ 卷积。
+  \item ARM：类似 Faster R-CNN 中的 RPN，将 anchor 做二分类和粗调。ARM 分数低于
+    0.01 的负样本 anchor 训练时和测试时均直接舍弃，不再传给 ODM。
+  \item ODM：类似 SSD，将粗调的 anchor 做全分类和精修。
+  \item TCB：类似 FPN，但结构略复杂，底层 feature map 的操作由上采样改为反卷积，
+    上层 feature map 的操作由 $1 \times 1$ 卷积改为 $3 \times 3$ 卷积 + ReLU +
+    $3 \times 3$ 卷积。
 \end{itemize}
 
-\paragraph{损失函数}
-ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，总 loss 为二者之和。
+RefineDet 的损失函数包括 ARM 和 ODM 两个模块的分别对应 RPN 和 Fast R-CNN 的 loss，
+总 loss 为二者之和。
+
+\paragraph{RFBNet}
+RFBNet 借鉴 Inception V4 中的 inception 模块思想，同时加入了空洞卷积\citerb{2017-RFBNet}。
+
+\paragraph{DES}
+DES 借鉴了 \hyperref[subsec:SENet]{SENet} 的思想调整不同 feature map channel 的
+权重，同时加入了弱监督的 segmentation 分支提升模型性能\citerb{2017-DES}。
+
+图~\ref{fig:des-seg}~为 DES 中的 Segmentation 分支结构：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/目标检测/DES.pdf}
+  \caption{DES 中的 segmentation 分支}
+  \label{fig:des-seg}
+\end{figure}
+
+Segmentation 分支中间结果 $G(X)$ 经过卷积和 sigmoid 与原始 feature map 相乘得到改
+进后用于 detection 的 feature map，同时中间结果经过卷积和 softmax 得到的 mask 还
+会根据弱监督的分割信息计算分割 loss。弱监督的分割信息是指将 GT 检测框内全部视为对
+应类别，如果有区域属于多个 GT 则类别为面积最小的 GT 对应的类别。
+
+\paragraph{STDN}
+STDN 以 DenseNet 为 Backbone，引入 scale transfer module，将$C \times r^2 \times
+H \times W$ 的 feature map 变为 $C \times rH \times rW$ 的形式，即将 $r^2$ 个
+channel 的值挪到一个 channel 上，拼成一个 $r^2$ 的正方形，将原 $H \times
+W$ 的 feature map 的尺寸变为 $rH \times rW$。
+
+\paragraph{LFIP}
+LFIP 借鉴了传统的图像金字塔方法，将下采样的图像经过轻量级网络与原始 feature map
+作 attention，同时将不同 level 的信息进行融合。LFIP 的结构如图~\ref{fig:LFIP}~所
+示\citerb{2019-LFIP}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/目标检测/LFIP.pdf}
+  \caption{LFIP 网络结构}
+  \label{fig:LFIP}
+\end{figure}
+
+\begin{itemize}
+  \item 原图像下采样后的各个图像都经过 4 个卷积层的轻量网络与原始 feature map 作 attention。
+  \item 浅层 feature map 与深层 feature map 相加做融合。
+\end{itemize}
+
+\paragraph{EFGRNet}
+EFGRNet 的结构如图~\ref{fig:EFGRNet}~所示\citerb{2019-EFGRNet}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/目标检测/EFGRNet.pdf}
+  \caption{EFGRNet 网络结构}
+  \label{fig:EFGRNet}
+\end{figure}
+
+EFGRNet 综合借鉴了多篇论文的思路：
+\begin{itemize}
+  \item 空洞卷积：RFBNet 
+  \item 级联结构和 deformable 卷积：HSD
+  \item 下采样原始图片过简单卷积网络：LFIP
+\end{itemize}
 
 \section{RetinaNet 系列}
-
 \subsection{RetinaNet}
 \label{sub:RetinaNet}
 
@@ -1324,7 +1454,7 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
 但检测框的分数与位置精度并非简单的正相关，有可能出现高分位置不准的检测框杀掉低分
 位置准的检测框。
 
-\paragraph{LTR}
+\subsubsection{LTR}
 LTR 利用子网络预测每个 proposal 的排序分数，目标是排序分数与 proposal 和 GT 的
 IoU 正相关\citerb{2019-LTR}。
 
@@ -1336,7 +1466,7 @@ IoU 正相关\citerb{2019-LTR}。
   \item 损失函数：Hinge loss 形式。
 \end{itemize}
 
-\paragraph{Noisy Anchor}
+\subsubsection{Noisy Anchor}
 Noisy Anchor 的改进包括以下两方面：
 
 \begin{itemize}
@@ -1351,6 +1481,33 @@ Noisy Anchor 的改进包括以下两方面：
       r = \left( \alpha \cdot \frac{1}{1-\mathtt{loc\_a}} + (1 - \alpha) \cdot \frac{1}{1-\mathtt{cls\_c}} \right ) ^ {\gamma}
     \end{equation}
     将所有正样本权重的平均值归一化为 1。
+\end{itemize}
+
+\subsection{分类分数与检测框对应关系不一致}
+单阶段检测模型中，分类分支的 label 与原始 anchor 的位置相关，可能出现由于原
+始 anchor为负样本，回归后的检测框位置较准但分数较低的情况。
+
+\subsubsection{ConRetinaNet}
+
+\subsubsection{HSD}
+HSD 借鉴了 cascade 的思路，同时引入 reg-offset-cls(ROC) 模块，利用回归后 bbox 的
+信息获得 offset 再结合 deformable 卷积作为分类分支\citerb{2019-HSD}。
+图~\ref{fig:hsd}~为 HSD 的具体结构：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/目标检测/HSD.pdf}
+  \caption{HSD 的结构}
+  \label{fig:hsd}
+\end{figure}
+
+\begin{itemize}
+  \item 检测分支与传统单阶段网络类似，在输出后再接两个 $1 \times 1$ 的卷积网络，
+    输出 $18N$ 的 offset。 
+  \item 分类分支利用 deformable 卷积代替传统卷积，offset 为回归分支的输出。
+  \item Cascade 两级之间的特征增强模块包括三个并列分支，分别为 $3 \times 3$ 卷积，
+    $3 \times 3, stride=2$ 的卷积和 non-local 模块。
+  \item 第一级类似 RPN，可以只做二分类，第二级再做 $C+1$ 分类。
 \end{itemize}
 
 %%% Local Variables:
