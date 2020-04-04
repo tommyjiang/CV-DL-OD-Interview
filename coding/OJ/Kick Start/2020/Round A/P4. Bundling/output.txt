@@ -1,0 +1,4 @@
+['KICK', 'START']
+Case #1: 0
+['G', 'G', 'GO', 'GO', 'GOO', 'GOO', 'GOOO', 'GOOO']
+Case #2: 0
