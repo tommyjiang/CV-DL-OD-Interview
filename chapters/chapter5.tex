@@ -35,6 +35,12 @@ map 的权重。
 \chapter{轻量模型}
 
 \section{MobileNet 系列}
+\subsection{MobileNet v1}
+
+\subsection{MobileNet v2}
+\label{subsec:MobileNetv2}
+
+\subsection{MobileNet v3}
 
 \section{ShuffleNet 系列}
 \subsection{ShuffleNet v1}
@@ -67,6 +73,9 @@ Residual block 的结构，具体结构包括：
 EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）和输入分辨率三个维度的
 放大比例，利用网格搜索得到 400M FLOPS 下的小网络 EfficientNet B0，再按照等比例放
 大的原则得到一系列网络 EfficientNet B1-B7 \cite{2019-EfficientNet}。
+
+EfficientNet 的基础模块是 \hyperref[subsec:MobileNetv2]{MobileNet v2} 中的
+MBConv 模块。
 
 \section{RegNet}
 
