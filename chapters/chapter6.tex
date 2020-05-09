@@ -934,6 +934,20 @@ ATSS 论文发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 Reti
 \end{enumerate}
 
 \section{EfficientDet}
+EfficientDet 利用 EfficientNet 作为 backbone，同时引入 BiFPN 结构，是当时 SOTA
+的检测方法。
+
+\subsection{BiFPN}
+BiFPN 在 PANet 的基础上做了以下改进：
+\begin{enumerate}
+  \item 去掉只有一个输出的节点，同时加入同级输入到输出的连接。
+  \item 加入重复的 BiFPN 模块进行特征融合。
+  \item 不同 feature map 采用加权融合，而非简单地直接相加。
+  \item 融合时的卷积使用深度可分离卷积代替传统卷积。
+\end{enumerate}
+
+\subsection{EfficientDet}
+
 
 \section{LapNet}
 LapNet 的思路与传统的检测网络有明显区别，其特点是体现了良好的速度和精度的均衡，
