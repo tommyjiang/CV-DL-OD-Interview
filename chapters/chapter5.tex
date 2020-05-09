@@ -2,8 +2,14 @@
 
 \chapter{经典模型}
 
-\section{SENet/SKNet}
-SENet 和 SKNet 的主要思想是利用 feature map 信息调整不同 feature map 的权重。
+\section{ResNet 系列}
+
+\subsection{ResNet}
+\label{subsec:ResNet}
+
+\section{Feature map attention 模型}
+SENet 和 SKNet 的主要思想是利用 feature map 信息调整不同 feature map 的权重，相
+当于在 feature map 层面加入 attention。
 
 \subsection{SENet}
 \label{subsec:SENet}
@@ -40,6 +46,21 @@ map 的权重。
 \subsection{MobileNet v2}
 \label{subsec:MobileNetv2}
 
+\subsubsection{MBConv 模块}
+MobileNet v2 中的基本模块是 inverted residual 模块，之后的论文一般称其为 MBConv
+模块。MBConv 模块的结构与 ResNet 中的 residual 模块类似，但有以下几点区别。
+
+\begin{enumerate}
+  \item 减少非线性模块：MBConv 中的第一层 expansion 模块和最后的 add 模块之后没
+    有加非线性运算。
+  \item channel 数关系：MBConv 中，每个小模块中都先通过 $1 \times 1$ 卷积
+    将 channel 由少变多，而 ResNet 中是将 channel 数由多变少。
+  \item 中间卷积层类型：MBConv 模块中间的卷积层是 depthwise 卷积，ResNet 中的
+    residual 模块中间的卷积层是普通卷积。
+  \item 非线性模块：MBConv 中的非线性模块使用 ReLU6，即 ReLU 后再加一个最大值为
+    6 的限制，ResNet 中的非线性模块就是 ReLU。
+\end{enumerate}
+
 \subsection{MobileNet v3}
 
 \section{ShuffleNet 系列}
@@ -70,12 +91,11 @@ Residual block 的结构，具体结构包括：
 \section{NAS 搜索}
 
 \section{EfficientNet}
-EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）和输入分辨率三个维度的
-放大比例，利用网格搜索得到 400M FLOPS 下的小网络 EfficientNet B0，再按照等比例放
-大的原则得到一系列网络 EfficientNet B1-B7 \cite{2019-EfficientNet}。
-
-EfficientNet 的基础模块是 \hyperref[subsec:MobileNetv2]{MobileNet v2} 中的
-MBConv 模块。
+EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）和输入分辨率三个维度的放
+大比例，利用参数网格搜索得到 400M FLOPS 下的小网络 EfficientNet B0，再按照等比例
+放大的原则得到一系列网络 EfficientNet B1-B7
+\cite{2019-EfficientNet}。EfficientNet中的基础模块仍然使
+用 \hyperref[subsec:MobileNetv2]{MobileNet v2} 中的 MBConv 模块。
 
 \section{RegNet}
 
