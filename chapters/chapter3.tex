@@ -58,6 +58,16 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。ReLU 在 $x > 0$ 时对
 \section{损失函数}
 
 \subsection{交叉熵损失函数}
+\label{subsec:CELoss}
+
+交叉熵损失函数(Cross Entropy Loss)的形式为：
+\begin{equation}
+  \label{equ:CELoss}
+  \mathrm{L}_{\mathrm{CE}} = - \left( y \, \mathrm{log} \, \hat{y} + (1-y) \mathrm{log} (1-\hat{y}) \right )
+\end{equation}
+
+其中 $y$ 为真实 label，正样本取 1，负样本取 0，$\hat{y}$ 为预测值，介于 0 和 1
+之间，预测值越接近真实 label，loss 的值越小。
 
 \subsection{Softmax 损失函数}
 

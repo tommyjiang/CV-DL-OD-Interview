@@ -938,7 +938,7 @@ EfficientDet 利用 EfficientNet 作为 backbone，同时引入 BiFPN 结构，�
 的检测方法。
 
 \subsection{BiFPN}
-BiFPN 在 PANet 的基础上做了以下改进：
+BiFPN 的结构如图~\ref{fig:BiFPN}~在 PANet 的基础上做了以下改进：
 \begin{enumerate}
   \item 去掉只有一个输出的节点，同时加入同级输入到输出的连接。
   \item 加入重复的 BiFPN 模块进行特征融合。
@@ -946,8 +946,33 @@ BiFPN 在 PANet 的基础上做了以下改进：
   \item 融合时的卷积使用深度可分离卷积代替传统卷积。
 \end{enumerate}
 
-\subsection{EfficientDet}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{images/目标检测/BiFPN.pdf}
+  \caption{BiFPN 与其他 FPN 结构的对比}
+  \label{fig:BiFPN}
+\end{figure}
 
+\subsection{EfficientDet}
+EfficientDet 的结构如图~\ref{fig:EfficientDet}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{images/目标检测/EfficientDet.pdf}
+  \caption{EfficientDet 结构}
+  \label{fig:EfficientDet}
+\end{figure}
+
+EfficientDet D0-D7 采用 EfficientNet D0-D6 作为 backbone，D7 仍然采
+用 D6 作为 backbone，但输入尺寸更大，不同 level 对应的 BiFPN 宽度、深度、head 深
+度和输入尺寸用如下公式计算：
+
+\begin{enumerate}
+\item BiFPN 宽度：$W = 64 \cdot 1.35^{\phi}$
+\item BiFPN 深度：$D = 3 + \phi$
+\item Head 深度：$D = 3 + \lfloor \phi \rfloor$
+\item 输入尺寸：$R = 512 + 128 \phi$
+\end{enumerate}
 
 \section{LapNet}
 LapNet 的思路与传统的检测网络有明显区别，其特点是体现了良好的速度和精度的均衡，
