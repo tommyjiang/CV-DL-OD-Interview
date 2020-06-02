@@ -5,7 +5,7 @@
 文献\citerb{2014-GAN}中第一次提出了生成对抗网络，同时训练生成器和判别器完成图像生
 成任务。
 
-\subsection{生成器和判别器}
+\subsection{GAN 的生成器和判别器}
 
 \begin{itemize}
   \item 生成器 G：输入为隐空间向量 $z$，输出为与真实数据维度相同的生成数据 $G(z)$。对于
@@ -35,14 +35,45 @@
 GAN 采用判别器和生成器交替训练的方式。
 
 \begin{itemize}
-  \item 判别器的训练：输入为 $x$ 和 $G(z)$ 组成的 batch，输出为 loss，进行反向传播。
-    此时 $G(z)$ 为定值，因此训练只更新 D 的参数，不会更新 G 的参数。
-  \item 生成器的训练：输入为 $z$，输出为 $D(G(z))$，会同时更新 G 和 D 的参数。
+  \item 判别器的训练：输入为 $x$ 和 $G(z)$ 组成的 batch，输出为 $D(x)$ 和
+    $D(G(z))$，计算 loss 反传更新 D 的参数。
+  \item 生成器的训练：输入为 $z$，输出为 $D(G(z))$，计算 loss 反传更新 G 的参数。
 \end{itemize}
 
 \section{CGAN}
+文献\citerb{2014-CGAN}提出 CGAN（Conditional GAN），通过加入额外的 label 信息，
+可以控制 GAN 中生成器生成的图片类别。
+
+\subsection{CGAN 的生成器和判别器}
+\begin{itemize}
+  \item 生成器 G：与原始 GAN 相比，输入多了一个类别 label(0 到 $n-1$ 之间)，先转换
+    为对应的$1 \times n$ embedding，与隐空间向量 $z$ concat 后作为 G 的输入。
+  \item 判别器 D：与生成器 G 类似，输入同样多了一个类别 label(0 到 $n-1$ 之间)，
+    转换为 embedding 后与真实/生成图片 concat 后作为 D 的输入。
+\end{itemize}
 
 \section{ACGAN}
+文献\citerb{2016-ACGAN}提出 ACGAN，与 CGAN 相比，在判别器 D 结构中加入类别分类器
+和分类 loss，提升生成图像的质量。
+
+\subsection{ACGAN 的生成器和判别器}
+\begin{itemize}
+  \item 生成器 G：与原始 GAN 相比，输入多了一个类别 label(0 到 $n-1$ 之间)，先转换
+    为对应的$1 \times \mathrm{len}(z)$ 的 embedding，与隐空间向量 $z$ 相乘后作为 G
+    的输入。
+  \item 判别器 D：与原始 GAN 相比，多了一个类别输出的 branch，注意与 CGAN 不同，
+    ACGAN 中 D 的输入只有图像，不包括类别。
+\end{itemize}
+
+\subsection{ACGAN 的损失函数}
+\begin{itemize}
+  \item 判别器 D 的损失函数：包括原始 GAN 中图片来源的交叉熵损失函数 $L_{s}$，以及
+    图片类别的 Softmax 损失函数 $L_{c}$。判别器 D 试图最小化 $L_{s} + L_{c}$。
+  \item 生成器 G 的损失函数：生成器 G 试图最大化 $L_{s} - L_{c}$，注意 $L_{c}$的
+    符号为负，即 G 也试图使判别器 D 正确给出生成图片的类别，但错误地将生成图片认
+    为是真实图片。
+\end{itemize}
+
 
 %%% Local Variables:
 %%% TeX-master: "../master"
