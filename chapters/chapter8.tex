@@ -1,0 +1,152 @@
+\chapter{GAN 应用于图像生成}
+
+\section{评价指标}
+
+\subsection{Inception Score（IS）}
+文献\citerb{2016-IS}中提出用 Inception Score 衡量 GAN 生成图片的质量，其形式为：
+\begin{equation}
+  \label{equ:IS-score}
+  \mathrm{IS} = \mathrm{KL}(p(y|x) || p(y))
+\end{equation}
+
+其中 $x$ 为输入图片，$y$ 为网络输出，IS 的具体含义包括：
+
+\begin{itemize}
+  \item 使 $p(y|x)$ 的熵尽可能小，即输入图片的类别置信度高。
+  \item 使 $p(y)$ 的熵尽可能大，即尽可能生成所有类别的图片。
+\end{itemize}
+
+两个分布的散度即两种分布之间的差异，这个差异越大越好，因此 IS 越高，GAN 生成图片
+的质量越好。
+
+\subsection{Fréchet Inception Distance（FID）}
+文献\citerb{2017-TURR}中提出 FID 指标衡量 GAN 生成图片的质量，其形式为：
+\begin{equation}
+  \label{equ:FID}
+  \mathrm{FID} = \left\Vert m-m_w \right\Vert _{2}^2 + \mathrm{Tr} \left( C + C_w - 2 \left( C C_w \right)^{1/2} \right)
+\end{equation}
+上式中的所有值均取自 Inception 网络中的 feature，其中 $m, C$ 和 $m_w, C_w$ 分别
+为真实数据和生成数据对应的均值和协方差矩阵。
+
+\section{经典网络}
+
+\subsection{cGAN}
+文献\citerb{2014-cGAN}提出 cGAN（Conditional GAN），通过在输入中加入 label 信息，
+可以控制生成器生成的图片类别。cGAN 的生成器 G 和判别器 D 的结构为：
+
+\begin{itemize}
+  \item 生成器 G：与原始 GAN 相比，输入多了一个类别 label，先将 label 转换
+    为对应的$1 \times n$ embedding，与隐空间向量 $z$ concat 后作为 G 的输入。
+  \item 判别器 D：与生成器 G 类似，输入多了一个类别 label，转换为对应的$1 \times
+    n$ embedding 后与真实/生成图片 concat 后作为 D 的输入。
+\end{itemize}
+
+\subsection{ACGAN}
+文献\citerb{2016-ACGAN}提出 ACGAN，与 cGAN 相比，改进是在判别器 D 中加入了类别分类器。
+
+\subsubsection{ACGAN 的生成器和判别器}
+\begin{itemize}
+  \item 生成器 G：与 cGAN 类似，只是将 embedding 和 $z$ 之间的运算关系由 concat 改
+    为相乘。
+  \item 判别器 D：与原始 GAN 相比，多了一个类别输出的 branch，与 cGAN 不
+    同，ACGAN 中 D 的输入只有图像，不包括类别 label 的 embedding，类别 label 只
+    在计算分类 branch 的 loss 时使用。
+\end{itemize}
+
+\subsubsection{ACGAN 的损失函数}
+\begin{itemize}
+  \item 判别器 D 的损失函数：包括原始 GAN 中图片来源的交叉熵损失函数 $L_{s}$，以及
+    图片类别的 Softmax 损失函数 $L_{c}$。判别器 D 试图最小化 $L_{s} + L_{c}$。
+  \item 生成器 G 的损失函数：生成器 G 试图最小化 $-L_{s} + L_{c}$，注意 $L_{c}$ 的
+    符号为正，即 G 也试图使判别器 D 正确给出生成图片的类别，同时想让 D 将生成图
+    片误认为是真实图片。
+\end{itemize}
+
+\subsection{Projection cGAN}
+文献\citerb{2018-Projection-cGAN}提出 Projection cGAN 改进判别器的结构，该结构
+与 cGAN 和 ACGAN 的对比如图~\ref{fig:projection-gan}~所示。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/GAN/Projection-cGAN.pdf}
+  \caption{cGAN、ACGAN 和 Projection GAN 判别器的结构对比}
+  \label{fig:projection-gan}
+\end{figure}
+
+\begin{enumerate}
+  \item (a) 为 cGAN，将隐空间向量 $x$ 和类别 label $y$ concat 后作为判别器的输入。
+  \item (b) 与原始 cGAN 类似，只是将类别 label $y$ 的位置由输入挪到网络中间。
+  \item (c) 为 ACGAN，类别 label $y$ 只在计算分类 branch loss 时使用，并不作为判
+    别器的输入。
+  \item (d) 为 Projection cGAN，与 (b) 类似，类别 label $y$ 出现在网络中间层，但
+    并非简单 concat，而是与 $\phi(x)$ 做内积。
+\end{enumerate}
+
+\subsection{SAGAN}
+文献\citerb{2018-SAGAN}在 GAN 中加入 self-attention 模块，以改善卷积只能利用局部
+信息的问题。
+
+\subsubsection{SAGAN 中的 self-attention 模块}
+SAGAN 中的 self-attention 模块的结构如图~\ref{fig:self-attention}~所示。
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{images/GAN/Self-attention.png}
+  \caption{SAGAN 中的 self-attention 模块}
+  \label{fig:self-attention}
+\end{figure}
+
+Self-attention 模块将卷积后的 feature map 相乘经过 softmax 得到 attention map，
+引入了全局信息，其中 $f(x), g(x), h(x)$ 的通道数都是输入 feature map 通道数的
+1/8，模块输出 $y$ 为：
+\begin{equation}
+  \label{equ:self-attention}
+  y = \gamma \cdot o + x
+\end{equation}
+
+其中 $\gamma$ 为网络参数，初值为 0，这样在网络训练初期相当于没有 self-attention
+模块参与，只利用原始卷积 feature map。
+
+\subsubsection{SAGAN 的损失函数}
+SAGAN 采用 hinge loss 形式的损失函数：
+\begin{align}
+  L_{\mathrm{D}} & = -\mathrm{min} \left( 0, -1 + D(x) \right) - \mathrm{min} \left( 0, -1-D(G(z)) \right) \\
+  L_{\mathrm{G}} & = -D(G(z))
+\end{align}
+
+\subsubsection{SAGAN 的训练技巧}
+\begin{itemize}
+  \item 谱归一化（Spectral Normalization，SN）：原始论文只在判别器 D 中加入了 SN
+    模块，SAGAN 在 G 中也加入了 SN 模块，提高模型训练的稳定性。
+  \item 生成器和判别器采用不同学习率：借鉴文献\citerb{2017-TURR}中的思路，判别器
+    D 的学习率是生成器 G 的四倍，提高了训练速度。
+\end{itemize}
+
+\subsection{BigGAN}
+文献\citerb{2018-BigGAN}提出 BigGAN，可以生成 ImageNet 对应的 1000 类，分辨率从
+$128 \times 128$ 到 $512 \times 512$ 的图片。
+
+\subsubsection{BigGAN 对 SAGAN 的改进}
+
+\begin{itemize}
+  \item 更大的 batch size：batch size 变为原来的 8 倍，从 256 增加到 2048，IS 提高 46\%。
+  \item 更宽的网络：channel 数变为原来的 1.5 倍，从 64 增加到 96，IS 提高 21\%。
+  \item 共享类别 embedding：
+  \item Skip-z 连接：隐空间变量 $z$ 除了加入输入层，还会加入生成器 G 的中间层
+  \item 截断分布：在 inference 时将 $z$ 进行截断，超出范围的全部取为截断值，这样
+    可以提高 IS，但会降低 FID，需要做 trade-off。
+  \item 正交正则化：对生成器的卷积层权重加入正交正则化（Orthogonal
+    Regularization），原始形式为
+    \begin{equation}
+      R_{\beta}(W) = \beta \left\Vert W^{\mathrm{T}}W-I\right\Vert _{\mathrm{F}}^2
+    \end{equation}
+    文中采用的形式为
+    \begin{equation}
+      R_{\beta}(W) = \beta \left\Vert W^{\mathrm{T}}W \odot (1-I)\right\Vert _{\mathrm{F}}^2
+    \end{equation}
+    其中 $\odot$ 表示内积。
+\end{itemize}
+
+%%% Local Variables:
+%%% TeX-master: "../master"
+%%% End:

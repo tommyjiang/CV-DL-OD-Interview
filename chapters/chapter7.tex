@@ -1,5 +1,6 @@
-\chapter{生成对抗网络（GAN）}
+\part{生成对抗网络（GAN）}
 
+\chapter{GAN 基础}
 \section{GAN}
 
 文献\citerb{2014-GAN}中第一次提出了生成对抗网络（Generative Adversarial
@@ -46,81 +47,10 @@ GAN 的训练过程为交替训练判别器 D 和生成器 G。
 理想情况下，判别器 D 和生成器 G 收敛到纳什均衡解，即生成器 G 完美还原原始数据，判
 别器 D 对任何输入始终输出 0.5。
 
-\section{CGAN}
-文献\citerb{2014-CGAN}提出 CGAN（Conditional GAN），通过在输入中加入 label 信息，
-可以控制生成器生成的图片类别。
-
-\subsection{CGAN 的生成器和判别器}
-\begin{itemize}
-  \item 生成器 G：与原始 GAN 相比，输入多了一个类别 label，先将 label 转换
-    为对应的$1 \times n$ embedding，与隐空间向量 $z$ concat 后作为 G 的输入。
-  \item 判别器 D：与生成器 G 类似，输入多了一个类别 label，转换为对应的$1 \times
-    n$ embedding 后与真实/生成图片 concat 后作为 D 的输入。
-\end{itemize}
-
-\section{ACGAN}
-文献\citerb{2016-ACGAN}提出 ACGAN，与 CGAN 相比，改进是在判别器 D 中加入了类别分类器。
-
-\subsection{ACGAN 的生成器和判别器}
-\begin{itemize}
-  \item 生成器 G：与 CGAN 类似，只是将 embedding 和 $z$ 之间的运算关系由 concat 改
-    为相乘。
-  \item 判别器 D：与原始 GAN 相比，多了一个类别输出的 branch，与 CGAN 不
-    同，ACGAN 中 D 的输入只有图像，不包括类别 label 的 embedding。
-\end{itemize}
-
-\subsection{ACGAN 的损失函数}
-\begin{itemize}
-  \item 判别器 D 的损失函数：包括原始 GAN 中图片来源的交叉熵损失函数 $L_{s}$，以及
-    图片类别的 Softmax 损失函数 $L_{c}$。判别器 D 试图最小化 $L_{s} + L_{c}$。
-  \item 生成器 G 的损失函数：生成器 G 试图最小化 $-L_{s} + L_{c}$，注意 $L_{c}$ 的
-    符号为正，即 G 也试图使判别器 D 正确给出生成图片的类别，同时想让 D 将生成图
-    片误认为是真实图片。
-\end{itemize}
-
-\section{SAGAN}
-文献\citerb{2018-SAGAN}在 GAN 中加入 self-attention 模块，以改善卷积只能利用局部
-信息的问题。
-
-\subsection{SAGAN 中的 self-attention 模块}
-SAGAN 中的 self-attention 模块的结构如图~\ref{fig:self-attention}~所示。
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\textwidth]{images/GAN/Self-attention.png}
-  \caption{SAGAN 中的 self-attention 模块}
-  \label{fig:self-attention}
-\end{figure}
-
-Self-attention 模块将卷积后的 feature map 相乘经过 softmax 得到 attention map，
-引入了全局信息，其中 $f(x), g(x), h(x)$ 的通道数都是输入 feature map 通道数的
-1/8，模块输出 $y$ 为：
-\begin{equation}
-  \label{equ:self-attention}
-  y = \gamma \cdot o + x
-\end{equation}
-
-其中 $\gamma$ 为网络参数，初值为 0，这样在网络训练初期相当于没有 self-attention
-模块参与，只利用原始卷积 feature map。
-
-\subsection{SAGAN 的损失函数}
-SAGAN 采用 hinge loss 形式的损失函数：
-\begin{align}
-  L_{\mathrm{D}} & = -\mathrm{min} \left( 0, -1 + D(x) \right) - \mathrm{min} \left( 0, -1-D(G(z)) \right) \\
-  L_{\mathrm{G}} & = -D(G(z))
-\end{align}
-
-\subsection{SAGAN 的训练技巧}
-\begin{itemize}
-  \item 谱归一化（Spectral Normalization，SN）：原始论文只在判别器 D 中加入了 SN
-    模块，SAGAN 在 G 中也加入了 SN 模块，提高模型训练的稳定性。
-  \item 生成器和判别器采用不同学习率：借鉴文献\citerb{2017-TURR}中的思路，判别器
-    D 的学习率是生成器 G 的四倍，提高了训练速度。
-\end{itemize}
-
-\section{Spectral Normalization}
-文献\citerb{2018-SN}提出 Spectral Normalization，用于 GAN 中的判别器，以提升 GAN
-训练的稳定性。
+\section{GAN 的训练技巧}
+\subsection{Spectral Normalization}
+文献\citerb{2018-SN}提出 Spectral Normalization，将其加入 GAN 的判别器可以提
+升 GAN 训练的稳定性。
 
 假设神经网络中的卷积或全连接层为 $y = Wx$，其中 $W$ 为权重矩阵，SN 方法是将权重
 $W$ 归一化为 $W/\sigma(W)$，其中 $\sigma(W)$ 为 $W$ 的谱范数，即：
@@ -133,11 +63,10 @@ SN 在实际应用时，采用迭代求解的方式以加快计算速度，具�
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.8\textwidth]{images/目标检测/Soft-NMS.pdf}
+  \includegraphics[width=\textwidth]{images/GAN/SN.pdf}
   \caption{Spectral Normalization 迭代算法流程}
   \label{fig:sn-algo}
 \end{figure}
-
 
 %%% Local Variables:
 %%% TeX-master: "../master"
