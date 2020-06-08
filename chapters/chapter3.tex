@@ -4,13 +4,14 @@
 
 \section{激活函数}
 
-激活函数的作用是为神经网络引入非线性因素，提升网络的拟合能力。如果没有激活函数，
-无论神经网络有多少层，输出总为输入的线性函数，网络的拟合能力会十分有限。
+激活函数是神经网络中最典型的非线性层。如果没有激活函数，无论神经网络有多少层，输
+出总为输入的线性函数，即可以将多层等效为单个线性层，将无法解决异或这样简单的非线
+性问题。
 
 \subsection{Sigmoid 函数}
 \label{subsec:Sigmoid}
 
-Sigmoid 函数及其导数的形式和图像如下：
+Sigmoid 函数及其导数的形式为：
 \begin{align}
   \label{equ:sigmoid}
   \sigma(x) & = \frac{1}{1 + e^{-x}} \\
@@ -26,15 +27,16 @@ Sigmoid 函数及其导数的形式和图像如下：
 \end{figure}
 
 \begin{itemize}
-\item 图~\ref{fig:sigmoid}~中蓝色曲线为 Sigmoid 函数，其形状与字母 S 类似，可以
-  将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。
-\item 图~\ref{fig:sigmoid}~中红色曲线为 Sigmoid 函数的导数，在输入值较大或较小
-  时，该值趋于 0，这个性质可能导致梯度消失，网络无法正常训练。
+  \item 图~\ref{fig:sigmoid}~中蓝色曲线为 sigmoid 函数，其形状与字母 S 类似，可以
+    将 $-\infty$ 到 $\infty$ 的输入单调映射到 0 到 1 之间。
+  \item 图~\ref{fig:sigmoid}~中红色曲线为 sigmoid 函数的导数，在输入值较大或较小时，
+    该值趋于 0，因此 sigmoid 函数作为激活函数时，可能出现梯度消失，网络无法正常训
+    练。
 \end{itemize}
 
 \subsection{线性整流函数(ReLU)}
 
-线性整流函数（Rectifier Linear Unit，ReLU）是目前应用广泛的激活函数，其形式为：
+线性整流函数（Rectifier Linear Unit，ReLU）是目前应用最广泛的激活函数，其形式为：
 \begin{equation}
   \label{equ:ReLU}
   \mathrm{ReLU}(x) = \left\{
@@ -45,8 +47,8 @@ Sigmoid 函数及其导数的形式和图像如下：
   \right.
 \end{equation}
 
-ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。ReLU 在 $x > 0$ 时对应的导数始终
-为 1，不会出现梯度消失；但当 $x \leq 0$ 时梯度始终为 0，同样有梯度消失的风险。
+ReLU 的图像如图~\ref{fig:ReLU}~所示。当 $x > 0$ 时，梯度始终为 1；当 $x \leq 0$
+时梯度始终为 0，同样会导致梯度消失。
 
 \begin{figure}[ht]
   \centering
@@ -60,14 +62,14 @@ ReLU 的图像很简单，如图~\ref{fig:ReLU}~所示。ReLU 在 $x > 0$ 时对
 \subsection{交叉熵损失函数}
 \label{subsec:CELoss}
 
-交叉熵损失函数(Cross Entropy Loss)的形式为：
+交叉熵损失函数（Cross Entropy Loss，CE Loss）的形式为：
 \begin{equation}
   \label{equ:CELoss}
   \mathrm{L}_{\mathrm{CE}} = - \left( y \, \mathrm{log} \, \hat{y} + (1-y) \mathrm{log} (1-\hat{y}) \right )
 \end{equation}
 
-其中 $y$ 为真实 label，正样本取 1，负样本取 0，$\hat{y}$ 为预测值，介于 0 和 1
-之间，预测值越接近真实 label，loss 的值越小。
+其中 $y$ 为真实 label，正样本为 1，负样本为 0，$\hat{y}$ 为预测值，介于 0 和 1
+之间，预测值越接近真实 label，则 loss 越小。
 
 \subsection{Softmax 损失函数}
 
@@ -94,9 +96,9 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
 \subsection{Focal loss}
 
 文献\citerb{2017-RetinaNet}提出 focal loss，用于解决目标检测中正负样本不平衡的问
-题。Focal loss 降低了简单样本的权重，相当于进行了难样本挖掘（Hard Negative Mining，HEM）。
-
-Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:focal-loss}~所示：
+题。Focal loss 降低了简单样本的权重，与难样本挖掘（Hard Negative Mining，HEM）类
+似。Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:focal-loss}~所
+示：
 \begin{equation}
   \label{equ:focal-loss}
   \mathrm{FL}(p_{\mathrm{t}}) = - \alpha_t (1-p_{\mathrm{t}})^{\gamma} \mathrm{log}(p_{\mathrm{t}})
@@ -109,24 +111,23 @@ Focal loss 的形式和图像如公式~\ref{equ:focal-loss}~和图~\ref{fig:foca
   \label{fig:focal-loss}
 \end{figure}
 
-图~\ref{fig:focal-loss}~中，$\gamma = 0$ 的蓝色曲线即传统的交叉熵 loss，可以认为
-是 focal loss 的一个特例。其他颜色的曲线分别表示 $\gamma$ 取不同数值时的 focal
-loss。Focal loss 中两个参数的具体作用是：
+图~\ref{fig:focal-loss}~中，$\gamma = 0$ 的蓝色曲线即传统的交叉熵 loss。其他颜色
+的曲线分别表示 $\gamma$ 取不同数值时的 focal loss。Focal loss 中两个参数的作用
+是：
 
 \begin{itemize}
-  \item $\alpha_t$：用于平衡不同类别样本的权重，一般正负样本对应的 $\alpha_t$ 之
-    和为 1。
-  \item $\gamma$：用于平衡难易样本的权重，$\gamma$ 越大，简单样本的权重越小。例
-    如 $\gamma = 2$ 时，预测值 $p = 0.9$ 的样本，focal loss 的值要比交叉熵 loss
-    的值小 100 倍。
+  \item $\alpha_t$：平衡正负样本的权重，一般正负样本对应的 $\alpha_t$ 之和为 1。
+  \item $\gamma$：平衡难易样本的权重，$\gamma$ 越大，简单样本的权重越小。例
+    如 $\gamma = 2$ 时，对于预测值 $p = 0.9$ 的样本，focal loss 的值要比交叉
+    熵 loss 的值小 100 倍。
 \end{itemize}
 
 \section{优化方法}
 \label{sec:opt}
 
 \subsection{梯度下降（GD）和随机梯度下降（SGD）}
-梯度下降方法属于一阶优化算法，利用函数的一阶导数信息，即梯度是函数值上升最快的方
-向，因此选择负梯度方向即函数值下降最快的方向更新参数：
+梯度下降方法属于一阶优化算法，即利用函数的一阶导数。由于梯度是函数值上升最快的方
+向，因此在最小化 loss 时，选择负梯度方向更新参数：
 \begin{equation}
   \boldsymbol{\theta}_t = \boldsymbol{\theta}_{t-1} - \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta})
 \end{equation}
@@ -135,12 +136,13 @@ loss。Focal loss 中两个参数的具体作用是：
 \begin{itemize}
   \item 批梯度下降：使用全部样本计算梯度。
   \item 随机梯度下降：使用单个样本计算梯度。
-  \item Mini-batch 梯度下降：使用部分样本（例如 8、16、32 个样本）计算梯度。目前
-    应用最为广泛，有时也被称为随机梯度下降。
+  \item Mini-batch 梯度下降：使用部分样本（一般为 2 的整数次幂，例如 16、32、64
+    等）计算梯度。目前应用最为广泛，有时也称为随机梯度下降，注意与单个样本的随机
+    梯度下降做区分。
 \end{itemize}
 
 \subsection{带动量的随机梯度下降}
-带动量的随机梯度下降的作用是训练时，梯度方向相同时加速，梯度改变方向时减速：
+带动量的随机梯度下降可以使迭代过程中满足梯度方向相同时加速，梯度改变方向时减速：
 \begin{align}
   v_t & = \gamma v_{t-1} + \eta \cdot \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta}) \\
   \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - v_t
@@ -208,7 +210,7 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 相关。直观理解，如果梯度都小于 1，相乘后的值很小，会导致梯度消失；反之如果梯度都大
 于 1，相乘后的值很大，会导致梯度爆炸。
 
-梯度消失的一个典型原因是激活层使用了 Sigmoid 函数，具体原因请
+梯度消失的一个典型原因是激活函数使用了 sigmoid 函数，具体原因请
 见~\ref{subsec:Sigmoid}小节中的分析。
 
 梯度爆炸的一个简单的解决方法是梯度裁剪（Gradient Clipping），即设定一个阈值，当梯
