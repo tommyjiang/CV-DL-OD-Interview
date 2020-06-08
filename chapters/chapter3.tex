@@ -184,10 +184,10 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 \end{align}
 
 \section{反向传播算法}
-神经网络的训练实际上是一个不断调整网络参数，从而减小损失函数的过程。对网络参数的
-优化需要先得到损失函数 $L$ 对神经网络中各参数 $\omega$ 的导数，利用该值计算参
-数 $\omega$ 的调整值。反向传播算法利用链式法则，由后向前逐层计算 $L$ 对各参
-数$\omega$ 的导数，是神经网络训练的一个关键环节。
+神经网络的训练是通过不断调整网络参数从而减小损失函数的过程。对网络参数的优化一般
+采用基于梯度的方法，因此需要先计算损失函数 $L$ 对神经网络中各参数 $\omega$ 的导数。
+反向传播算法利用链式法则，由后向前逐层计算 $L$ 对各层参数 $W$ 的导数，是目前应用
+最多的导数计算方法。
 
 考虑一个神经网络中的某个全连接层 $Y = XW + b$，设网络的 loss 为 $L$，根据链式法
 则，有如下关系~\citerb{2017-FC-BP}：
@@ -199,10 +199,10 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
   \frac{\partial L}{\partial b} & = \frac{\partial L}{\partial Y} \frac{\partial Y}{\partial b} = \frac{\partial L}{\partial Y}
 \end{align}
 
-上面三个式子中，$\frac{\partial L}{\partial X}$ 是为了继续进行反向传播，因为上一
-层参数导数的计算依赖该值；$\frac{\partial L}{\partial W}$ 和 $\frac{\partial
-  L}{\partial b}$ 即更新参数时需要的梯度。前向计算完成后，逐层向后计算 loss 对每
-一层输入($X$)和参数($W, \, b$)的梯度。
+上面三个式子中，$\frac{\partial L}{\partial X}$ 是为了继续进行反向传播计算 loss
+对上一层参数的导数；$\frac{\partial L}{\partial W}$ 和 $\frac{\partial
+  L}{\partial b}$ 即更新参数时需要的梯度。类似以上过程，从最后的 loss 开始逐层向
+后计算 loss 对每一层输入($X$)和参数($W, \, b$)的梯度。
 
 \subsection{梯度消失和梯度爆炸}
 \label{subsec:gradient-vanish-explosion}
@@ -210,11 +210,9 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 相关。直观理解，如果梯度都小于 1，相乘后的值很小，会导致梯度消失；反之如果梯度都大
 于 1，相乘后的值很大，会导致梯度爆炸。
 
-梯度消失的一个典型原因是激活函数使用了 sigmoid 函数，具体原因请
-见~\ref{subsec:Sigmoid}小节中的分析。
-
-梯度爆炸的一个简单的解决方法是梯度裁剪（Gradient Clipping），即设定一个阈值，当梯
-度值大于阈值时，使其等于阈值，这样即可避免梯度过大。
+梯度消失的一个典型原因是激活函数使用了 sigmoid 函数。梯度爆炸的一个简单的解决方法
+是梯度裁剪（Gradient Clipping），即设定一个阈值，当梯度值大于阈值时，使其等于阈值，
+这样即可避免梯度过大。
 
 \section{归一化}
 
@@ -225,21 +223,19 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 BN 的作用包括：
 
 \begin{enumerate}
-  \item 降低深层神经网络的训练难度。加入 BN 后，网络训练时可以使用更大的学习率，同
-    时不需要特别谨慎地网络参数初始化。
-  \item 防止过拟合。BN 一定程度上相当于引入了正则项，网络中加入 BN 后可以去
-    掉起正则作用的 dropout 层，\hyperref[subsec:YOLOv2]{YOLOv2} 就是一个典型的例子。
-  \item 加快神经网络训练速度。
+  \item 降低深层神经网络的训练难度。加入 BN 后，训练时可以使用更大的学习率。
+  \item 防止过拟合。BN 一定程度上相当于引入了正则项，加入 BN 后可以去掉 dropout
+    层，\hyperref[subsec:YOLOv2]{YOLOv2} 就是一个典型的例子。
 \end{enumerate}
 
-文献\citerb{2015-BN}中提出 BN 有效的原因是其减少了神经网络的内部协同变化
-（Internal Covariate Shift，ICS），但有文献论证 BN 并不能减少 ICS，其提升性能的原
-因是使 loss 变得更平滑\citerb{2018-BN-help-opt}。
+文献\citerb{2015-BN}中认为 BN 有效的原因是其减少了神经网络的内部协同变化
+（Internal Covariate Shift，ICS），但文献\citerb{2018-BN-help-opt}论证 BN 并不能
+减少 ICS，其提升性能的原因是使网络的 loss 变得更平滑。
 
 \paragraph{BN 的形式}
-BN 包括归一化和线性变换两部分。其中归一化是为了减少上层网络参数变化导致对输入的影
-响；线性变换部分是为了增加 BN 层的表达能力，如果没有线性变换部分，BN 层的输出将始
-终为均值为 0，方差为 1 的分布，表达能力将十分有限。BN 的具体形式为：
+BN 包括归一化和线性变换两部分。其中归一化是为了减少上层网络参数变化对输入的影响；
+线性变换部分是为了增加 BN 层的拟合能力，如果没有线性变换部分，BN 层的输出将始终为
+均值为 0，方差为 1 的分布。BN 的具体形式为：
 \begin{align}
   \label{equ:BN}
   \mu_{\mathcal{B}} & = \frac{1}{m} \sum_{i=1}^{m} x_i \\
@@ -250,10 +246,9 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 
 \begin{itemize}
 \item 上式中 $m$ 为一个 batch 的样本数，即期望和方差计算的都是一个 batch 的统计量。
-  实际应用中，训练和测试有一定区别：训练时可以采用滑动平均法计算均值和方差，即同
-  时考虑历史 batch 和当前 batch 的统计量，例
-  如 Caffe 中的~\href{https://bit.ly/2JBY7aw}{BN层}；测试时\textbf{使用训练时保
-    存的均值和方差}，不需要每个 batch 都重新计算。
+  训练时采用滑动平均法计算均值和方差，即同时考虑历史 batch 和当前 batch 的统计量，
+  例如 Caffe 中的~\href{https://bit.ly/2JBY7aw}{BN层}，测试时\textbf{使用训练时保
+    存的均值和方差}，不需要都重新计算每个 batch 的统计量。
   \item BN 层中有两个需要学习的参数，即线性变换的参数 $\gamma$ 和 $\beta$，这两
     个参数的初值分别为 1 和 0。
 \end{itemize}
@@ -263,10 +258,10 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
   \item 卷积层之后 BN 均值和方差的计算方法：计算的是一个 batch 中 $m$ 个样本
     同一个 feature map 上所有点的均值和方差。如果一个 batch 对应的卷积层的输出维度
     为 $m \times C \times H \times W$，则只计算通道数 $C$ 个均值和方差，不同
-    的 feature map 利用对应的均值和方差进行归一化。
+    feature map 利用与其对应的均值和方差进行归一化。
   \item BN 的位置：文献~\citerb{2015-BN}~中给出的结构是\textbf{卷积层-BN-ReLU}，
     即 BN 层加在卷积层之后，ReLU 之前。
-  \item 卷积层的偏置 $b$：由于 BN 中包含减均值的操作，因此可以省略卷积层的偏置。
+  \item 卷积层的偏置 $b$：由于 BN 中包括减均值，因此可以省略卷积层的偏置。
   \item 测试时将卷积层和 BN 层进行合并：由于卷积层和 BN 层都是线性变换，且测试
     时 BN 层使用的均值和方差均为训练时保存的结果，因此可以将二者合并以提升计算速
     度，合并后参数的计算方法可以参考文献\citerb{2017-DSSD}。
@@ -276,7 +271,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 \label{sub:GN}
 
 文献\citerb{2018-GN}中提出了组归一化（Group Normalization，GN）方法，主要解决 BN
-在 batch 样本较少时性能不佳的问题。
+在 batch 较小时性能不佳的问题。
 
 \paragraph{GN 的形式}
 不同归一化方法的对比如图~\ref{fig:all-norm}~所示：
@@ -288,7 +283,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 \end{figure}
 
 \begin{itemize}
-  \item BN：一个 batch 内不同样本，对同一个通道的 feature map 做归一化，共有通道
+  \item BN：对一个 batch 内不同样本的同一个 feature map 做归一化，共有通道
     数 $C$ 个均值和方差。
   \item LN：同一样本，对所有通道的 feature map 做归一化，共有 batch 样本数 $N$
     个均值和方差。
@@ -303,7 +298,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 
 \subsection{分组卷积}
 
-分组卷积（Group Convolution，GC）在 AlexNet 中就已经有应用，但当时的背景是 GPU 计
+分组卷积（Group Convolution，GC）在 AlexNet 中就已经应用，但当时的原因是 GPU 计
 算能力不足，只能将标准卷积拆成 2 个分组卷积~\citerb{2012-AlexNet}。分组卷积和标准
 卷积的对比如图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所
 示~\citerb{2019-Diff-Conv}：
@@ -337,8 +332,8 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 分组卷积可以节省计算量，因此在轻量型网络中得到广泛应用。参数相同的情况下，分组卷
 积的计算量约为标准卷积的 $ 1 / g^2 $，组数越多，计算量越小。
 
-分层卷积（Depthwise Convolution，DW）是分组卷积的一种特例，指的是组数 $g$ 与 输
-入数据通道数 $C_{\mathrm{in}}$ 相同的卷积，即每组卷积的输入只有 1 个通道。
+分层卷积（Depthwise Convolution，DW）是分组卷积的一种特例，是指组数 $g$ 与输入数
+据通道数 $C_{\mathrm{in}}$ 相同的卷积，即每组卷积的输入只有 1 个通道。
 
 \subsection{深度可分离卷积}
 
@@ -375,10 +370,9 @@ j_{\mathrm {out}} & = j_{\mathrm{in}} \times s \\
 r_{\mathrm {out}} & = r_{\mathrm{in}} + (k-1) \times j_{\mathrm{in}}
 \end{align}
 
-其中 $j$ 为 jump，相当于每一层的 stride；s 为卷积的 stride，k 为卷积的 kernel
-size，r 即感受野。利用 \eqref{equ:rf-cal} 即可计算各层的感受野。
-
-经典网络 VGG-16 各层感受野的详细计算可以参考~\citerb{2018-VGG-16-RF-cal}。
+其中 $j$ 为 jump，即每一层的 stride；s 为该层运算的 stride，k 为卷积的 kernel
+size，r 即感受野。利用公式 \eqref{equ:rf-cal} 即可计算各层的感受野。经典网络 VGG-16
+各层感受野的详细计算可以参考文献~\citerb{2018-VGG-16-RF-cal}。
 
 %%% Local Variables:
 %%% TeX-master: "../master"
