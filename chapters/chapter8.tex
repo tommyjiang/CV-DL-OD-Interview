@@ -28,7 +28,19 @@
 上式中的所有值均取自 Inception 网络中的 feature，其中 $m, C$ 和 $m_w, C_w$ 分别
 为真实数据和生成数据对应的均值和协方差矩阵。
 
-\section{经典网络}
+\section{直接生成}
+本节中的文献是将隐空间向量 $z$ 和类别等信息作为生成器的输入，直接生成图像。
+
+\subsection{DCGAN}
+文献\citerb{2015-DCGAN}提出针对性地改进原始 GAN 结构的 DCGAN，主要结论包括：
+
+\begin{itemize}
+  \item 用空洞卷积和转置卷积代替池化层，用于下采样和上采样。
+  \item 去掉卷积层之前的全连接层。
+  \item 加入 BN 层，但生成器 G 的输出层和判别器 D 的输入层不加入 BN。
+  \item 生成器 G 的激活函数用 ReLU，输出层仍然用 tanh，判别器 D 的激活函数用
+    Leaky ReLU。
+\end{itemize}
 
 \subsection{cGAN}
 文献\citerb{2014-cGAN}提出 cGAN（Conditional GAN），通过在输入中加入 label 信息，
@@ -131,8 +143,13 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
 \begin{itemize}
   \item 更大的 batch size：batch size 变为原来的 8 倍，从 256 增加到 2048，IS 提高 46\%。
   \item 更宽的网络：channel 数变为原来的 1.5 倍，从 64 增加到 96，IS 提高 21\%。
-  \item 共享类别 embedding：
-  \item Skip-z 连接：隐空间变量 $z$ 除了加入输入层，还会加入生成器 G 的中间层
+  \item 共享类别 embedding：BN 层使用 class conditional BN，对不同的 class，生成
+    维度为 $g_e$ 的 embedding，将其和 $z$ 的对应部分拼接后，经过 FC 层得到 BN 层
+    的参数 $\gamma$ 和 $\beta$。
+  \item Skip-z 连接：隐空间变量 $z$ 除了加入输入层，还会加入生成器 G 的中间层。生
+    成器 G 中包含 $n$ 个 block 时，将 $z$ 的维度变
+    为 $\mathrm{int}({z}_{\mathrm{dim}} / (n+1)) \times (n+1)$ 份，第一份作为输入，其
+    他 $n$ 份分别送入对应的 $n$ 个 block。
   \item 截断分布：在 inference 时将 $z$ 进行截断，超出范围的全部取为截断值，这样
     可以提高 IS，但会降低 FID，需要做 trade-off。
   \item 正交正则化：对生成器的卷积层权重加入正交正则化（Orthogonal
@@ -146,6 +163,37 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
     \end{equation}
     其中 $\odot$ 表示内积。
 \end{itemize}
+
+\section{迁移生成}
+本节中的文献是将隐空间向量 $z$ 和待转换的图像作为生成器的输入，生成待转换图像迁移
+后的图像，一些典型示例包括分割 label 与原始图像的转换，季节/日夜的转换等。
+
+\subsection{pix2pix}
+文献\citerb{2016-pix2pix}提出 pix2pix 方法，利用成对图像训练 GAN，是利用 GAN 实
+现图像迁移生成的开山之作。
+
+\subsubsection{pix2pix 的生成器 G 和判别器 D}
+\begin{itemize}
+  \item 生成器 G：生成器 G 试图最小化 $-L_{s} + L_{c}$，注意 $L_{c}$ 的
+    符号为正，即 G 也试图使判别器 D 正确给出生成图片的类别，同时想让 D 将生成图
+    片误认为是真实图片。
+  \item 判别器 D：包括原始 GAN 中图片来源的交叉熵损失函数 $L_{s}$，以及
+    图片类别的 Softmax 损失函数 $L_{c}$。判别器 D 试图最小化 $L_{s} + L_{c}$。
+\end{itemize}
+
+\subsubsection{pix2pix 的损失函数}
+\begin{itemize}
+  \item 生成器 G 的损失函数：包括 GAN 的损失函数和 L1 loss 两部分：
+    \begin{equation}
+      L_{\mathrm{pix2pix\_G}} = \mathrm{log}(1 - D(x, G(x, z))) + \lambda \left\| y - G(x, z) \right\|_1
+    \end{equation}
+  \item 判别器 D 的损失函数：使用原始 GAN 的损失函数：
+    \begin{equation}
+      L_{\mathrm{pix2pix\_D}} = -(\mathrm{log}D(x, y) + \mathrm{log}(1 - D(x, G(x, z))))
+    \end{equation}
+\end{itemize}
+
+\subsection{CycleGAN}
 
 %%% Local Variables:
 %%% TeX-master: "../master"

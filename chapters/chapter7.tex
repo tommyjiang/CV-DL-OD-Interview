@@ -48,9 +48,10 @@ GAN 的训练过程为交替训练判别器 D 和生成器 G。
 别器 D 对任何输入始终输出 0.5。
 
 \section{GAN 的训练技巧}
-\subsection{Spectral Normalization}
-文献\citerb{2018-SN}提出 Spectral Normalization，将其加入 GAN 的判别器可以提
-升 GAN 训练的稳定性。
+\subsection{归一化}
+\subsubsection{谱归一化}
+文献\citerb{2018-SN}提出谱归一化（Spectral Normalization，SN)，将其加入 GAN 的判
+别器可以提升 GAN 训练的稳定性。
 
 假设神经网络中的卷积或全连接层为 $y = Wx$，其中 $W$ 为权重矩阵，SN 方法是将权重
 $W$ 归一化为 $W/\sigma(W)$，其中 $\sigma(W)$ 为 $W$ 的谱范数，即：
@@ -67,6 +68,64 @@ SN 在实际应用时，采用迭代求解的方式以加快计算速度，具�
   \caption{Spectral Normalization 迭代算法流程}
   \label{fig:sn-algo}
 \end{figure}
+
+\subsection{正则化}
+\subsubsection{一致性正则化}
+文献\citerb{2019-CRGAN}提出一致性正则化（Consistency Regularization，CR），可以
+与 SN 一起使用提高 GAN 的性能。CR 的目的是惩罚判别器 D 对真实图片增广变换的敏感性：
+\begin{equation}
+  L_{\mathrm{CR}} = \left\| D(x) - D(T(x)) \right\|_2
+\end{equation}
+其中 $T$ 表示增广变换。
+
+文献\citerb{2020-ICR}对 CR 进行改进，提出 ICR，加入判别器 D 对生成器生成图片增广变换敏感性的 loss：
+\begin{equation}
+  L_{\mathrm{CR\_fake}} = \left\| D(G(z)) - D(T(G(z))) \right\|_2
+\end{equation}
+
+此外，ICR 还考虑了判别器 D 对隐空间扰动的一致性：
+\begin{equation}
+  L_{\mathrm{CR\_z}} = \left\| D(G(z)) - D(G(z+\Delta z)) \right\|_2
+\end{equation}
+
+其中 $\Delta z$ 为加到 $z$ 上满足正态分布的噪声。但只加该 loss 容易导致生成器 G
+出现 collapse，即对不同的 $z$， G 都生成类似的图像，因此需要在生成器 G 训练时加
+入多样性 loss：
+\begin{equation}
+  L_{\mathrm{G\_z}} = -\left\| D(G(z)) - D(G(z+\Delta z)) \right\|_2
+\end{equation}
+
+\section{GAN 的损失函数}
+\subsection{原始 GAN 的损失函数}
+原始 GAN 使用的损失函数为：
+\begin{align}
+  \label{equ:origin-GAN-loss}
+  \mathrm{L}_{\mathrm{GAN-D}} & = - \left( \mathrm{log} D(x_i) + \mathrm{log} (1-D(G(z))) \right ) \\
+  \mathrm{L}_{\mathrm{GAN-G}} & = \mathrm{log} (1-D(G(z)))
+\end{align}
+
+原始 GAN 中判别器 D 最后加入了 sigmoid 模块，即 D 的输出在 0 和 1 之间。
+
+\subsection{Hinge Loss 形式的损失函数}
+Hinge Loss 形式的损失函数为：
+\begin{align}
+  \label{equ:origin-GAN-loss}
+  \mathrm{L}_{\mathrm{D}} & = -\mathrm{min}(0, -1 + D(x)) - \mathrm{min}(0,
+  -1-D(G(z))) \\
+  \mathrm{L}_{\mathrm{G}} & = -D(G(z))
+\end{align}
+
+判别器 D 最后未加入 sigmoid，输出值为 $-\infty$ 到 $\infty$ 之间。
+
+\subsection{Wassertein 形式的损失函数}
+Wassertein 形式的损失函数为：
+\begin{align}
+  \label{equ:origin-GAN-loss}
+  \mathrm{L}_{\mathrm{D}} & = -D(x) + D(G(z)) \\
+  \mathrm{L}_{\mathrm{G}} & = D(G(z))
+\end{align}
+
+与 hinge loss 形式类似，判别器 D 最后未加入 sigmoid，输出值为 $-\infty$ 到 $\infty$ 之间。
 
 %%% Local Variables:
 %%% TeX-master: "../master"
