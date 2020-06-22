@@ -31,18 +31,10 @@
 \section{直接生成}
 本节中的文献是将隐空间向量 $z$ 和类别等信息作为生成器的输入，直接生成图像。
 
-\subsection{DCGAN}
-文献\citerb{2015-DCGAN}提出针对性地改进原始 GAN 结构的 DCGAN，主要结论包括：
+\subsection{cGAN 系列}
+cGAN 系列的生成器 G 都能利用输入 label 信息控制生成图像的类别。
 
-\begin{itemize}
-  \item 用空洞卷积和转置卷积代替池化层，用于下采样和上采样。
-  \item 去掉卷积层之前的全连接层。
-  \item 加入 BN 层，但生成器 G 的输出层和判别器 D 的输入层不加入 BN。
-  \item 生成器 G 的激活函数用 ReLU，输出层仍然用 tanh，判别器 D 的激活函数用
-    Leaky ReLU。
-\end{itemize}
-
-\subsection{cGAN}
+\subsubsection{cGAN}
 文献\citerb{2014-cGAN}提出 cGAN（Conditional GAN），通过在输入中加入 label 信息，
 可以控制生成器生成的图片类别。cGAN 的生成器 G 和判别器 D 的结构为：
 
@@ -53,10 +45,10 @@
     n$ embedding 后与真实/生成图片 concat 后作为 D 的输入。
 \end{itemize}
 
-\subsection{ACGAN}
+\subsubsection{ACGAN}
 文献\citerb{2016-ACGAN}提出 ACGAN，与 cGAN 相比，改进是在判别器 D 中加入了类别分类器。
 
-\subsubsection{ACGAN 的生成器和判别器}
+\paragraph{ACGAN 的生成器和判别器}
 \begin{itemize}
   \item 生成器 G：与 cGAN 类似，只是将 embedding 和 $z$ 之间的运算关系由 concat 改
     为相乘。
@@ -65,7 +57,7 @@
     在计算分类 branch 的 loss 时使用。
 \end{itemize}
 
-\subsubsection{ACGAN 的损失函数}
+\paragraph{Title}{ACGAN 的损失函数}
 \begin{itemize}
   \item 判别器 D 的损失函数：包括原始 GAN 中图片来源的交叉熵损失函数 $L_{s}$，以及
     图片类别的 Softmax 损失函数 $L_{c}$。判别器 D 试图最小化 $L_{s} + L_{c}$。
@@ -74,7 +66,7 @@
     片误认为是真实图片。
 \end{itemize}
 
-\subsection{Projection cGAN}
+\subsubsection{Projection cGAN}
 文献\citerb{2018-Projection-cGAN}提出 Projection cGAN 改进判别器的结构，该结构
 与 cGAN 和 ACGAN 的对比如图~\ref{fig:projection-gan}~所示。
 
@@ -94,11 +86,11 @@
     并非简单 concat，而是与 $\phi(x)$ 做内积。
 \end{enumerate}
 
-\subsection{SAGAN}
+\subsubsection{SAGAN}
 文献\citerb{2018-SAGAN}在 GAN 中加入 self-attention 模块，以改善卷积只能利用局部
 信息的问题。
 
-\subsubsection{SAGAN 中的 self-attention 模块}
+\paragraph{Title}{SAGAN 中的 self-attention 模块}
 SAGAN 中的 self-attention 模块的结构如图~\ref{fig:self-attention}~所示。
 
 \begin{figure}[ht]
@@ -119,14 +111,14 @@ Self-attention 模块将卷积后的 feature map 相乘经过 softmax 得到 att
 其中 $\gamma$ 为网络参数，初值为 0，这样在网络训练初期相当于没有 self-attention
 模块参与，只利用原始卷积 feature map。
 
-\subsubsection{SAGAN 的损失函数}
+\paragraph{Title}{SAGAN 的损失函数}
 SAGAN 采用 hinge loss 形式的损失函数：
 \begin{align}
   L_{\mathrm{D}} & = -\mathrm{min} \left( 0, -1 + D(x) \right) - \mathrm{min} \left( 0, -1-D(G(z)) \right) \\
   L_{\mathrm{G}} & = -D(G(z))
 \end{align}
 
-\subsubsection{SAGAN 的训练技巧}
+\paragraph{SAGAN 的训练技巧}
 \begin{itemize}
   \item 谱归一化（Spectral Normalization，SN）：原始论文只在判别器 D 中加入了 SN
     模块，SAGAN 在 G 中也加入了 SN 模块，提高模型训练的稳定性。
@@ -134,11 +126,11 @@ SAGAN 采用 hinge loss 形式的损失函数：
     D 的学习率是生成器 G 的四倍，提高了训练速度。
 \end{itemize}
 
-\subsection{BigGAN}
+\subsubsection{BigGAN}
 文献\citerb{2018-BigGAN}提出 BigGAN，可以生成 ImageNet 对应的 1000 类，分辨率从
 $128 \times 128$ 到 $512 \times 512$ 的图片。
 
-\subsubsection{BigGAN 对 SAGAN 的改进}
+\paragraph{BigGAN 对 SAGAN 的改进}
 
 \begin{itemize}
   \item 更大的 batch size：batch size 变为原来的 8 倍，从 256 增加到 2048，IS 提高 46\%。
@@ -164,16 +156,64 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
     其中 $\odot$ 表示内积。
 \end{itemize}
 
-\subsection{ProGAN}
+\subsection{ProGAN 系列}
+\subsubsection{ProGAN}
 文献\citerb{2017-ProGAN}中提出 ProGAN 结构，从 $4 \times 4$ 的低分辨率开始学习 G
-和 D，再逐渐提高到图像分辨率。
+和 D，再逐渐提高到原始图像分辨率（例如 $1024 \times 1024$）。
 
-\subsubsection{ProGAN 的生成器和判别器}
+\paragraph{ProGAN 的生成器和判别器}
 \begin{itemize}
-  \item 生成器 G：
-  \item 判别器 D：
+  \item 主体结构：以 $3 \times 3$ 卷积为主，生成器 G 第一个卷积层和判别器 D 最后一
+    个卷积层使用 $4 \times 4$ 的卷积，生成器 G 的最后一个卷积层和判别器 D 的第一
+    个卷积层使用 $1 \times 1$ 的卷积。
+  \item 激活函数：生成器 G 和判别器 D 都采用 Leaky ReLU，但最后一层都不加激活函
+    数，通常 G 的最后一层会使用 tanh 激活函数。
+  \item 改变分辨率模块：直接使用线性上采样和 pooling，没有使用转置卷积和 stride
+    大于 1 的普通卷积。
+  \item 从低分辨率改为高分辨率时进行过渡训练。
 \end{itemize}
 
+\paragraph{ProGAN 中避免生成器 G 模式坍缩}
+为避免生成器 G 出现模式坍缩，在 D 的最后一层之前加入一层额外的 feature map，计算
+最后一层 feature map 所有 batch 所有点的标准差的平均值，再用这个值扩展成 $B
+\times 1 \times H \times W$ 的 feature map，与最后一层 feature map concat。这样可
+以使生成图像的统计量尽可能接近真实图片，否则很容易被判别器 D 根据统计量特征识别为
+生成的图片。
+
+\paragraph{ProGAN 中的归一化}
+\begin{itemize}
+  \item 各层学习率归一化：采用 He 初始化，每层权重除以 $\sqrt{2/n_{\mathrm{in}}}$，
+    其中 $n_{\mathrm{in}}$ 为输入的神经元个数。
+  \item 特征向量归一化：每个卷积层后将所有 feature map 同一位置的值进行归一化，
+    即 $b_{x, y} = a_{x, y}/\sqrt{\frac{1}{N} \sum_{j=0}^{N-1} \left( a_{x,
+          y}^{j} \right) ^ 2 + \epsilon }$
+\end{itemize}
+
+\subsubsection{StyleGAN}
+文献\citerb{2018-StyleGAN}提出 StyleGAN，在 ProGAN 的基础上进行改进。
+
+\paragraph{StyleGAN 对 ProGAN 的改进}
+\begin{itemize}
+  \item 隐向量 $z$ 到 $w$ 的映射：利用多层感知机将 $z$ 映射为 $w$，再经过统一的
+    仿射变换得到 AdaIN 的变换系数 $(y_s, y_b)$，维度为 $2 \times
+    C_{\mathrm{feature\ map}}$。
+  \item 高斯噪声：每个卷积层之后加入线性变换后的噪声，每个 feature map 有单独的
+    缩放系数，之后再经过 AdaIN。
+  \item 生成器 G 使用常数输入：隐向量 $z$ 映射为 $w$ 后作用于 AdaIN，不再加入 G
+    的输入层，直接使用常数输入。
+\end{itemize}
+
+\paragraph{StyleGAN 中 style 和细节的调整}
+\begin{itemize}
+  \item Style Mixing：利用 $z_1$ 和 $z_2$ 生成 $w_1$ 和 $w_2$，生成器 G 中前半部
+    分和后半部分分别用 $w_1$ 和 $w_2$ 变换后进行 AdaIN。这个技巧也被用于网络正则
+    化，在训练时使用。
+  \item Style 和细节调整：分别依靠 $w$ 和高斯噪声实现，因为 $w$ 影响整个 feature
+    map，噪声只影响 feature map 上的单个点，所以从生成图像结果看，不影响身份外貌
+    等整体特征，只影响局部特征。
+  \item 不同 scale 噪声的影响：stride 低的层上加噪声会使背景特征更多，stride 高
+    的层上加噪声会使前景特征更多，图像更细腻。
+\end{itemize}
 
 \section{迁移生成}
 本节中的文献是将隐空间向量 $z$ 和待转换的图像作为生成器的输入，生成待转换图像迁移

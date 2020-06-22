@@ -127,7 +127,7 @@ Wassertein 形式的损失函数为：
 
 与 hinge loss 形式类似，判别器 D 最后未加入 sigmoid，输出值为 $-\infty$ 到 $\infty$ 之间。
 
-Wassertein 形式损失函数的改进版是在损失函数中加入判别器 D 梯度的正则项，
+Wassertein 形式损失函数的改进版是在损失函数中加入判别器 D 梯度的正则项\citerb{2017-WGAN-GP} ，
 即 D 的 loss 为：
 \begin{equation}
   \label{equ:WGAN-GP-loss}
