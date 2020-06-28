@@ -223,6 +223,13 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
     的层上加噪声会使前景特征更多，图像更细腻。
 \end{itemize}
 
+\subsubsection{StyleGAN2}
+文献\citerb{2019-StyleGAN2}提出 StyleGAN2，对 StyleGAN 进行一系列改进。
+
+\begin{itemize}
+  \item 去掉 StyleGAN 生成图像中的“水滴”：水滴是 StyleGAN 中的 AdaIN 造成的，。
+\end{itemize}
+
 \section{迁移生成}
 本节中的文献是将隐空间向量 $z$ 和待转换的图像作为生成器的输入，生成待转换图像迁移
 后的图像，一些典型示例包括分割 label 与原始图像的转换，季节/日夜的转换等。

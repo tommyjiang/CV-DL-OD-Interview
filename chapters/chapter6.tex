@@ -470,7 +470,6 @@ Grid R-CNN 对每个 RoI 输出 $N \times N$ 个点的 feature map，再利用�
 \paragraph{扩张区域映射}
 RoI 可能不包括 GT 的角点，在做映射时使用如下公式：
 \begin{align}
-  \label{equ:yolo-v1-loss}
   \begin{split}
     I_x' = & P_x + \frac{4H_{x} - w_o}{2w_o} w_p  \\
     I_y' = & P_y + \frac{4H_{y} - h_o}{2h_o} h_p
@@ -1046,7 +1045,7 @@ CornerNet\cite{2018-CornerNet} 是 anchor free 方法的代表作之一，与传
 预测目标框位置和长/宽不同，CornerNet 直接预测左上/右下角点及配对关系。
 
 \paragraph{网络结构}
-CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-network}~和图~\ref{fig:CornerNet-network}~所示：
+CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-network}~和图~\ref{fig:CornerNet-prediction}~所示：
 
 \begin{figure}[ht]
   \centering
@@ -1059,7 +1058,7 @@ CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-netwo
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/CornerNet-预测模块.pdf}
   \caption{CornerNet 的预测模块}
-  \label{fig:CornerNet-network}
+  \label{fig:CornerNet-prediction}
 \end{figure}
 
 网络的三个输出分别为：
@@ -1187,30 +1186,32 @@ FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 anchor，网络
 \begin{itemize}
   \item 分类：FCOS 中，正负样本对应 feature map 上的点，而 RetinaNet 的正负样本对应
     的是与点相关联的 anchor，同时 FCOS 还多预测一个中心度（Center-ness）。
-  \item 回归：FCOS 直接回归 feature map 上的点到上、下、左、右的距离，而非 RetinaNet
-    中 anchor 到 GT 的变换。
+  \item 回归：FCOS 直接回归 feature map 上的点到 GT 上、下、左、右的距离，而
+    非 RetinaNet 中 anchor 到 GT 的变换。
 \end{itemize}
 
 \paragraph{网络结构和损失函数}
 FCOS 的网络结构参考 RetinaNet，由于使用了 FPN 结构，每个尺度都包括三部分输出：
 \begin{itemize}
-  \item 分类：输出 $H \times W \times C$ 个 map，其中 $C$ 为类别数，与
-    RetinaNet 相同，均为二分类。由于每个点只对应一个值，与 RetinaNet 相比，减少
-    了 $A$ 倍，其中 $A$ 为 RetinaNet 中每个点的 anchor 数。损失函数为 focal loss。
+  \item 分类：输出 $H \times W \times C$ 个 map，其中 $C$ 为类别数，与RetinaNet 相
+    同，均为二分类。由于每个点只对应一个值，与 RetinaNet 相比，减少了 $A$ 倍，其
+    中 $A$ 为 RetinaNet 中每个点的 anchor 数。分类损失函数为 focal loss。
   \item 回归：输出 $H \times W \times 4$ 个 map，所有分类共享回归的距离值。损失
     函数为 IoU loss。
-  \item 中心度：输出 $H \times W \times 1$ 个 map，同样所有分类共享中心度值。损
-    失函数为交叉熵 loss。
+  \item 中心度：输出 $H \times W \times 1$ 个 map，所有分类共享中心度值。损 失函
+    数为交叉熵 loss。
 \end{itemize}
 
 \paragraph{训练 label}
 \begin{itemize}
   \item 分类 label：根据点与四条边距离的最大值分配到 FPN 的不同尺度，在对应尺度
-    内的 GT 框内为正样本，否则为负样本。
+    内的 GT 框内为正样本，否则为负样本。如果一个点对应多个 GT，选择面积最小的 GT
+    作为该点对应的 GT。
   \item 回归 label：直接根据定义计算距离。
-  \item 中心度 label：利用 $\sqrt{\frac{\mathrm{min}(l^*,
+  \item 中心度 label：利用式 $\sqrt{\frac{\mathrm{min}(l^*,
         r^*)}{\mathrm{max}(l^*, r^*)} \times \frac{\mathrm{min}(t^*,
-        b^*)}{\mathrm{max}(t^*, b^*)}}$ 计算。
+        b^*)}{\mathrm{max}(t^*, b^*)}}$ 计算，当点位于中心时取极值 1，边缘时取极
+        值 0。
 \end{itemize}
 
 \paragraph{Inference}
