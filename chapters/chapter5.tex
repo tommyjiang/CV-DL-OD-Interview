@@ -4,8 +4,7 @@
 
 \section{ResNet 系列}
 
-\subsection{ResNet}
-\label{subsec:ResNet}
+\subsection{ResNet}\label{subsec:ResNet}
 
 \subsection{ResNeSt}
 
@@ -13,15 +12,13 @@
 SENet 和 SKNet 的主要思想是利用 feature map 信息调整不同 feature map 的权重，相
 当于在 feature map 层面加入 attention。
 
-\subsection{SENet}
-\label{subsec:SENet}
+\subsection{SENet}\label{subsec:SENet}
 SENet 的基本单元如图~\ref{fig:senet}~所示\citerb{2017-SENet}：
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\textwidth]{images/分类/SENet.pdf}
-  \caption{SENet 基本模块}
-  \label{fig:senet}
+  \caption{SENet 基本模块}\label{fig:senet}
 \end{figure}
 
 图中 sigmoid 之后得到的权重用于与对应 channel 的 feature map 相乘，以调整不
@@ -33,20 +30,27 @@ SKNet 的基本单元如图~\ref{fig:sknet}~所示\citerb{2019-SKNet}：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/分类/SKNet.png}
-  \caption{SKNet 基本模块}
-  \label{fig:sknet}
+  \caption{SKNet 基本模块}\label{fig:sknet}
 \end{figure}
 
 SKNet 相当于通过网络选择不同卷积核（$3 \times 3$ 和 $5 \times 5$）生成 feature
 map 的权重。
 
 \chapter{轻量模型}
+\section{SqueezeNet}
+SqueezeNet\cite{2016-SqueezeNet} 提出三个缩小网络大小的方法：
+\begin{enumerate}
+  \item 减小卷积核：用 $1 \times 1$ 卷积代替 $3 \times 3$ 卷积。
+  \item 减少卷积输入通道数：用 Squeeze 模块即 $1 \times 1$ 卷积减少卷积输入通道
+    数，之后接同时包含 $1 \times 1$ 和 $3 \times 3$ 卷积的 Expand 模块。
+  \item 下采样位置：在网络深层再进行下采样。
+\end{enumerate}
+
 
 \section{MobileNet 系列}
 \subsection{MobileNet v1}
 
-\subsection{MobileNet v2}
-\label{subsec:MobileNetv2}
+\subsection{MobileNet v2}\label{subsec:MobileNetv2}
 
 \subsubsection{MBConv 模块}
 MobileNet v2 中的基本模块是 inverted residual 模块，之后的论文一般称其为 MBConv
@@ -67,13 +71,12 @@ MobileNet v2 中的基本模块是 inverted residual 模块，之后的论文一
 
 \section{ShuffleNet 系列}
 \subsection{ShuffleNet v1}
-ShuffleNet v1 的基本单元如图~\ref{fig:shufflenet}~所示：
+ShuffleNet v1 的基本单元如图~\ref{fig:shufflenet}~所示\citerb{2017-ShuffleNet}：
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\textwidth]{images/分类/ShuffleNet.pdf}
-  \caption{ShuffleNet 基本模块}
-  \label{fig:shufflenet}
+  \caption{ShuffleNet 基本模块}\label{fig:shufflenet}
 \end{figure}
 
 上图中（b）和（c）分别对应 stride = 1 和 stride = 2 的模块，借鉴了 ResNet 中
@@ -87,6 +90,11 @@ Residual block 的结构，具体结构包括：
 \end{itemize}
 
 \subsection{ShuffleNet v2}
+ShuffleNet v2 总结了轻量神经网络设计的四个基本原则\citerb{2018-ShuffleNetv2}。
+
+\begin{enumerate}
+  \item 
+\end{enumerate}
 
 \chapter{参数搜索模型}
 
@@ -95,8 +103,7 @@ Residual block 的结构，具体结构包括：
 \section{EfficientNet}
 EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）和输入分辨率三个维度的放
 大比例，利用参数网格搜索得到 400M FLOPS 下的小网络 EfficientNet B0，再按照等比例
-放大的原则得到一系列网络 EfficientNet B1-B7
-\cite{2019-EfficientNet}。EfficientNet中的基础模块仍然使
+放大的原则得到一系列网络 EfficientNet B1-B7~\cite{2019-EfficientNet}。EfficientNet中的基础模块仍然使
 用 \hyperref[subsec:MobileNetv2]{MobileNet v2} 中的 MBConv 模块。
 
 \section{RegNet}
@@ -123,20 +130,18 @@ EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\textwidth]{images/分类/AutoAugment.pdf}
-  \caption{AutoAugment 方法得到的 ImageNet 数据集的最优策略}
-  \label{fig:autoaugment}
+  \caption{AutoAugment 方法得到的 ImageNet 数据集的最优策略}\label{fig:autoaugment}
 \end{figure}
 
 
 \subsubsection{GridMask}
-文献\citerb{2020-GridMask}中将规则的 0-1 mask 覆盖到输入数据，将 mask 值为 0 位置
+文献~\citerb{2020-GridMask}中用规则的 0 和 1 mask 覆盖输入数据，将 mask 值为 0 位置
 的输入值设为 0，相当于人为将部分输入数据置为 0。
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\textwidth]{images/分类/GridMask.pdf}
-  \caption{GridMask 方法示例}
-  \label{fig:gridmask}
+  \caption{GridMask 方法示例}\label{fig:gridmask}
 \end{figure}
 
 \subsection{Label 相关}
@@ -171,8 +176,7 @@ EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.7\textwidth]{images/分类/DropBlock.pdf}
-  \caption{(c)DropBlock 与 (b)Dropout 对比}
-  \label{fig:dropblock}
+  \caption{(c) DropBlock 与 (b) Dropout 对比}\label{fig:dropblock}
 \end{figure}
 
 \section{训练技巧}

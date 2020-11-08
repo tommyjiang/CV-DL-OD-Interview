@@ -23,13 +23,13 @@ Network，GAN），通过交替训练生成器 G 和判别器 D，生成器 G �
   \item 判别器 D 的损失函数为\hyperref[subsec:CELoss]{交叉熵损失函数}：
   \begin{equation}
     \label{equ:GAN-D}
-    \mathrm{L}_{\mathrm{GAN-D}} = - \left( \mathrm{log} D(x_i) + \mathrm{log} (1-D(G(z))) \right )
+    \mathrm{L}_{\mathrm{GAN-D}} = - \left( \\log D(x_i) + \\log (1-D(G(z))) \right )
   \end{equation}
 
   \item 生成器 G 的损失函数为判别器 D 损失函数的后一项取相反数，即：
   \begin{equation}
     \label{equ:GAN-G}
-    \mathrm{L}_{\mathrm{GAN-G}} =  \mathrm{log} (1-D(G(z)))
+    \mathrm{L}_{\mathrm{GAN-G}} =  \\log (1-D(G(z)))
   \end{equation}
 \end{itemize}
 
@@ -50,13 +50,13 @@ GAN 的训练过程为交替训练判别器 D 和生成器 G。
 \section{GAN 的训练技巧}
 \subsection{归一化}
 \subsubsection{谱归一化}
-文献\citerb{2018-SN}提出谱归一化（Spectral Normalization，SN)，将其加入 GAN 的判
+文献\citerb{2018-SN}提出谱归一化（Spectral Normalization，SN），将其加入 GAN 的判
 别器可以提升 GAN 训练的稳定性。
 
 假设神经网络中的卷积或全连接层为 $y = Wx$，其中 $W$ 为权重矩阵，SN 方法是将权重
 $W$ 归一化为 $W/\sigma(W)$，其中 $\sigma(W)$ 为 $W$ 的谱范数，即：
 \begin{equation}
-  \sigma(W) = \sqrt{\mathrm{max} \, \left | \mathrm{eig} (W^{\mathrm{T}} W) \right |}
+  \sigma(W) = \sqrt{\max \, \left | \mathrm{eig} (W^{\mathrm{T}} W) \right |}
 \end{equation}
 
 SN 在实际应用时，采用迭代求解的方式以加快计算速度，具体算法如
@@ -65,8 +65,7 @@ SN 在实际应用时，采用迭代求解的方式以加快计算速度，具�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{images/GAN/SN.pdf}
-  \caption{Spectral Normalization 迭代算法流程}
-  \label{fig:sn-algo}
+  \caption{Spectral Normalization 迭代算法流程}\label{fig:sn-algo}
 \end{figure}
 
 \subsection{正则化}
@@ -100,8 +99,8 @@ SN 在实际应用时，采用迭代求解的方式以加快计算速度，具�
 原始 GAN 使用的损失函数为：
 \begin{align}
   \label{equ:origin-GAN-loss}
-  \mathrm{L}_{\mathrm{GAN-D}} & = - \left( \mathrm{log} D(x_i) + \mathrm{log} (1-D(G(z))) \right ) \\
-  \mathrm{L}_{\mathrm{GAN-G}} & = \mathrm{log} (1-D(G(z)))
+  \mathrm{L}_{\mathrm{GAN-D}} & = - \left( \log D(x_i) + \log (1-D(G(z))) \right ) \\
+  \mathrm{L}_{\mathrm{GAN-G}} & = \log (1-D(G(z)))
 \end{align}
 
 原始 GAN 中判别器 D 最后加入了 sigmoid 模块，即 D 的输出在 0 和 1 之间。
@@ -110,8 +109,7 @@ SN 在实际应用时，采用迭代求解的方式以加快计算速度，具�
 Hinge Loss 形式的损失函数为：
 \begin{align}
   \label{equ:Hinge-GAN-loss}
-  \mathrm{L}_{\mathrm{D}} & = -\mathrm{min}(0, -1 + D(x)) - \mathrm{min}(0,
-  -1-D(G(z))) \\
+  \mathrm{L}_{\mathrm{D}} & = -\min(0, -1 + D(x)) - \min(0, -1-D(G(z))) \\
   \mathrm{L}_{\mathrm{G}} & = -D(G(z))
 \end{align}
 

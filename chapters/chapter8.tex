@@ -23,7 +23,7 @@
 文献\citerb{2017-TURR}中提出 FID 指标衡量 GAN 生成图片的质量，其形式为：
 \begin{equation}
   \label{equ:FID}
-  \mathrm{FID} = \left\Vert m-m_w \right\Vert _{2}^2 + \mathrm{Tr} \left( C + C_w - 2 \left( C C_w \right)^{1/2} \right)
+  \mathrm{FID} = \left\Vert m-m_w \right\Vert _{2}^2 + \mathrm{Tr} \left( C + C_w - 2 {\left( C C_w \right)}^{1/2} \right)
 \end{equation}
 上式中的所有值均取自 Inception 网络中的 feature，其中 $m, C$ 和 $m_w, C_w$ 分别
 为真实数据和生成数据对应的均值和协方差矩阵。
@@ -73,8 +73,7 @@ cGAN 系列的生成器 G 都能利用输入 label 信息控制生成图像的�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/GAN/Projection-cGAN.pdf}
-  \caption{cGAN、ACGAN 和 Projection GAN 判别器的结构对比}
-  \label{fig:projection-gan}
+  \caption{cGAN、ACGAN 和 Projection GAN 判别器的结构对比}\label{fig:projection-gan}
 \end{figure}
 
 \begin{enumerate}
@@ -96,15 +95,13 @@ SAGAN 中的 self-attention 模块的结构如图~\ref{fig:self-attention}~所�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{images/GAN/Self-attention.png}
-  \caption{SAGAN 中的 self-attention 模块}
-  \label{fig:self-attention}
+  \caption{SAGAN 中的 self-attention 模块}\label{fig:self-attention}
 \end{figure}
 
 Self-attention 模块将卷积后的 feature map 相乘经过 softmax 得到 attention map，
 引入了全局信息，其中 $f(x), g(x), h(x)$ 的通道数都是输入 feature map 通道数的
 1/8，模块输出 $y$ 为：
-\begin{equation}
-  \label{equ:self-attention}
+\begin{equation}\label{equ:self-attention}
   y = \gamma \cdot o + x
 \end{equation}
 
@@ -114,7 +111,7 @@ Self-attention 模块将卷积后的 feature map 相乘经过 softmax 得到 att
 \paragraph{Title}{SAGAN 的损失函数}
 SAGAN 采用 hinge loss 形式的损失函数：
 \begin{align}
-  L_{\mathrm{D}} & = -\mathrm{min} \left( 0, -1 + D(x) \right) - \mathrm{min} \left( 0, -1-D(G(z)) \right) \\
+  L_{\mathrm{D}} & = -\min \left( 0, -1 + D(x) \right) - \min \left( 0, -1-D(G(z)) \right) \\
   L_{\mathrm{G}} & = -D(G(z))
 \end{align}
 
@@ -140,7 +137,7 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
     的参数 $\gamma$ 和 $\beta$。
   \item Skip-z 连接：隐空间变量 $z$ 除了加入输入层，还会加入生成器 G 的中间层。生
     成器 G 中包含 $n$ 个 block 时，将 $z$ 的维度变
-    为 $\mathrm{int}({z}_{\mathrm{dim}} / (n+1)) \times (n+1)$ 份，第一份作为输入，其
+    为 $\mathrm{int}({z}_{\dim} / (n+1)) \times (n+1)$ 份，第一份作为输入，其
     他 $n$ 份分别送入对应的 $n$ 个 block。
   \item 截断分布：在 inference 时将 $z$ 进行截断，超出范围的全部取为截断值，这样
     可以提高 IS，但会降低 FID，需要做 trade-off。
@@ -185,8 +182,8 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
   \item 各层学习率归一化：采用 He 初始化，每层权重除以 $\sqrt{2/n_{\mathrm{in}}}$，
     其中 $n_{\mathrm{in}}$ 为输入的神经元个数。
   \item 特征向量归一化：每个卷积层后将所有 feature map 同一位置的值进行归一化，
-    即 $b_{x, y} = a_{x, y}/\sqrt{\frac{1}{N} \sum_{j=0}^{N-1} \left( a_{x,
-          y}^{j} \right) ^ 2 + \epsilon }$
+    即 $b_{x, y} = a_{x, y}/\sqrt{\frac{1}{N} \sum_{j=0}^{N-1} {\left( a_{x,
+          y}^{j} \right)} ^ 2 + \epsilon }$
 \end{itemize}
 
 \subsubsection{StyleGAN}
@@ -196,8 +193,7 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/GAN/StyleGAN.pdf}
-  \caption{StyleGAN 和 ProGAN 结构对比}
-  \label{fig:stylegan}
+  \caption{StyleGAN 和 ProGAN 结构对比}\label{fig:stylegan}
 \end{figure}
 
 \paragraph{StyleGAN 对 ProGAN 的改进}
@@ -226,9 +222,36 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
 \subsubsection{StyleGAN2}
 文献\citerb{2019-StyleGAN2}提出 StyleGAN2，对 StyleGAN 进行一系列改进。
 
+\paragraph{Instance Normalization 的改进}
 \begin{itemize}
-  \item 去掉 StyleGAN 生成图像中的“水滴”：水滴是 StyleGAN 中的 AdaIN 造成的，。
+  \item 将卷积偏置和 noise 输入挪到归一化之后，同时去掉均值，只对方差进行归一化
+    和 scale 操作。
+  \item 去掉对常量输入的归一化和 scale。
+  \item 不显式计算各层输入的 std，按照输入同分布假设进行 scale 和反 scale，不再
+    统一。
 \end{itemize}
+
+\paragraph{Path length 正则化}
+StyleGAN2 中加入 path length 正则化，其形式为：
+\begin{equation}
+  \mathbb{E}_{w,y \sim \mathcal{N}(0, I)} {\left( \left \lVert J_{\mathrm{w}}^{\mathrm{T}} y \right \rVert _ 2 - a \right)} ^ 2
+\end{equation}
+
+其中 $y$ 为各 pixel 满足正态分布的随机生成的图像，$J_{\mathrm{w}}$ 是生成器 G 的
+Jacobi 矩阵，$a$ 取为 $\left \lVert J_{\mathrm{w}}^{\mathrm{T}} y \right \rVert
+_ 2$ 的滑动平均值。
+
+\paragraph{Progressive 生成网络}
+ProGAN 提出从低分辨率开始逐渐过渡到高分辨率，这种 progressive 方法有利于网络训练，
+但图像生成时会保持位置，在朝向变化之后显得不自然，因此 StyleGAN2 中不再采用
+progressive 方法。生成器 G 采用 skip 结构，判别器 D 采用 residual 结构，具体结构
+如图~\ref{fig:stylegan2}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/GAN/StyleGAN2.pdf}
+  \caption{StyleGAN2 中生成器 G 和判别器 D 的结构}\label{fig:stylegan2}
+\end{figure}
 
 \section{迁移生成}
 本节中的文献是将隐空间向量 $z$ 和待转换的图像作为生成器的输入，生成待转换图像迁移
@@ -251,11 +274,11 @@ $128 \times 128$ 到 $512 \times 512$ 的图片。
 \begin{itemize}
   \item 生成器 G 的损失函数：包括 GAN 的损失函数和 L1 loss 两部分：
     \begin{equation}
-      L_{\mathrm{pix2pix\_G}} = \mathrm{log}(1 - D(x, G(x, z))) + \lambda \left\| y - G(x, z) \right\|_1
+      L_{\mathrm{pix2pix\_G}} = \log(1 - D(x, G(x, z))) + \lambda \left\| y - G(x, z) \right\|_1
     \end{equation}
   \item 判别器 D 的损失函数：使用原始 GAN 的损失函数：
     \begin{equation}
-      L_{\mathrm{pix2pix\_D}} = -(\mathrm{log}D(x, y) + \mathrm{log}(1 - D(x, G(x, z))))
+      L_{\mathrm{pix2pix\_D}} = -(\log D(x, y) + \log(1 - D(x, G(x, z))))
     \end{equation}
 \end{itemize}
 

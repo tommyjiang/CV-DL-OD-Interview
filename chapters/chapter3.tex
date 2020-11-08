@@ -8,8 +8,7 @@
 出总为输入的线性函数，即可以将多层等效为单个线性层，将无法解决异或这样简单的非线
 性问题。
 
-\subsection{Sigmoid 函数}
-\label{subsec:Sigmoid}
+\subsection{Sigmoid 函数}\label{subsec:Sigmoid}
 
 Sigmoid 函数及其导数的形式为：
 \begin{align}
@@ -22,8 +21,7 @@ Sigmoid 函数及其导数的形式为：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/Sigmoid.png}
-  \caption{Sigmoid 函数及其导数的图像}
-  \label{fig:sigmoid}
+  \caption{Sigmoid 函数及其导数的图像}\label{fig:sigmoid}
 \end{figure}
 
 \begin{itemize}
@@ -34,7 +32,7 @@ Sigmoid 函数及其导数的形式为：
     练。
 \end{itemize}
 
-\subsection{线性整流函数(ReLU)}
+\subsection{线性整流函数（ReLU）}
 
 线性整流函数（Rectifier Linear Unit，ReLU）是目前应用最广泛的激活函数，其形式为：
 \begin{equation}
@@ -53,19 +51,17 @@ ReLU 的图像如图~\ref{fig:ReLU}~所示。当 $x > 0$ 时，梯度始终为 1
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\textwidth]{images/机器学习和深度学习基础/基本概念/ReLU.png}
-  \caption{ReLU 的图像}
-  \label{fig:ReLU}
+  \caption{ReLU 的图像}\label{fig:ReLU}
 \end{figure}
 
 \section{损失函数}
 
-\subsection{交叉熵损失函数}
-\label{subsec:CELoss}
+\subsection{交叉熵损失函数}\label{subsec:CELoss}
 
 交叉熵损失函数（Cross Entropy Loss，CE Loss）的形式为：
 \begin{equation}
   \label{equ:CELoss}
-  \mathrm{L}_{\mathrm{CE}} = - \left( y \, \mathrm{log} \, \hat{y} + (1-y) \mathrm{log} (1-\hat{y}) \right )
+  \mathrm{L}_{\mathrm{CE}} = - \left( y \, \log \, \hat{y} + (1-y) \log (1-\hat{y}) \right )
 \end{equation}
 
 其中 $y$ 为真实 label，正样本为 1，负样本为 0，$\hat{y}$ 为预测值，介于 0 和 1
@@ -101,14 +97,13 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
 示：
 \begin{equation}
   \label{equ:focal-loss}
-  \mathrm{FL}(p_{\mathrm{t}}) = - \alpha_t (1-p_{\mathrm{t}})^{\gamma} \mathrm{log}(p_{\mathrm{t}})
+  \mathrm{FL}(p_{\mathrm{t}}) = - \alpha_t {(1-p_{\mathrm{t}})}^{\gamma} \log (p_{\mathrm{t}})
 \end{equation}
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/Focal-Loss.pdf}
-  \caption{Focal loss 的图像（$\alpha_t = 1$）}
-  \label{fig:focal-loss}
+  \caption{Focal loss 的图像（$\alpha_t = 1$}\label{fig:focal-loss}
 \end{figure}
 
 图~\ref{fig:focal-loss}~中，$\gamma = 0$ 的蓝色曲线即传统的交叉熵 loss。其他颜色
@@ -122,8 +117,7 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
     熵 loss 的值小 100 倍。
 \end{itemize}
 
-\section{优化方法}
-\label{sec:opt}
+\section{优化方法}\label{sec:opt}
 
 \subsection{梯度下降（GD）和随机梯度下降（SGD）}
 梯度下降方法属于一阶优化算法，即利用函数的一阶导数。由于梯度是函数值上升最快的方
@@ -167,8 +161,8 @@ Adagrad 方法中，分母上的历史梯度累计和会越来越大，导致当
 方法将历史梯度值的计算改为类似 Nesterov 的形式：
 \begin{align}
   g_t & = \nabla_{\boldsymbol{\theta}}J(\boldsymbol{\theta_t}) \\
-  E[g^2]_t & = \gamma E[g^2]_{t-1} + (1-\gamma)g_t^2 \\
-  \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - \frac{\eta \cdot g_t}{E[g^2]_t+\epsilon}
+  {E[g^2]}_t & = \gamma {E[g^2]} {t-1} + (1-\gamma)g_t^2 \\
+  \boldsymbol{\theta}_{t} & = \boldsymbol{\theta}_{t-1} - \frac{\eta \cdot g_t}{{E[g^2]}_t+\epsilon}
 \end{align}
 
 RMSProp 方法和 Adadelta 方法类似。
@@ -202,10 +196,9 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 上面三个式子中，$\frac{\partial L}{\partial X}$ 是为了继续进行反向传播计算 loss
 对上一层参数的导数；$\frac{\partial L}{\partial W}$ 和 $\frac{\partial
   L}{\partial b}$ 即更新参数时需要的梯度。类似以上过程，从最后的 loss 开始逐层向
-后计算 loss 对每一层输入($X$)和参数($W, \, b$)的梯度。
+后计算 loss 对每一层输入 $X$ 和参数 $W, \, b$ 的梯度。
 
-\subsection{梯度消失和梯度爆炸}
-\label{subsec:gradient-vanish-explosion}
+\subsection{梯度消失和梯度爆炸}\label{subsec:gradient-vanish-explosion}
 根据链式法则，对于深层神经网络，浅层参数的梯度与之后所有层输出对输入梯度的乘积
 相关。直观理解，如果梯度都小于 1，相乘后的值很小，会导致梯度消失；反之如果梯度都大
 于 1，相乘后的值很大，会导致梯度爆炸。
@@ -216,8 +209,7 @@ Adam 方法在 Adagrad 的基础上，同时计算梯度的动量：
 
 \section{归一化}
 
-\subsection{批归一化（BN）}
-\label{sub:BN}
+\subsection{批归一化（BN）}\label{sub:BN}
 
 批归一化（Batch Normalization，BN）是文献\citerb{2015-BN}中提出的一种归一化方法，
 BN 的作用包括：
@@ -239,7 +231,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 \begin{align}
   \label{equ:BN}
   \mu_{\mathcal{B}} & = \frac{1}{m} \sum_{i=1}^{m} x_i \\
-  \sigma_{\mathcal{B}}^2 & = \frac{1}{m} \sum_{i=1}^{m} (x_i-\mu_{\mathcal{B}})^2 \\
+  \sigma_{\mathcal{B}}^2 & = \frac{1}{m} \sum_{i=1}^{m} {(x_i-\mu_{\mathcal{B}})}^2 \\
   \hat{x}_i & = \frac{x_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}} \\
   y_i & = \gamma \hat{x}_i + \beta
 \end{align}
@@ -267,8 +259,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
     度，合并后参数的计算方法可以参考文献\citerb{2017-DSSD}。
 \end{itemize}
 
-\subsection{组归一化（GN）}
-\label{sub:GN}
+\subsection{组归一化（GN）}\label{sub:GN}
 
 文献\citerb{2018-GN}中提出了组归一化（Group Normalization，GN）方法，主要解决 BN
 在 batch 较小时性能不佳的问题。
@@ -278,8 +269,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/GN.pdf}
-  \caption{不同归一化方法对比}
-  \label{fig:all-norm}
+  \caption{不同归一化方法对比}\label{fig:all-norm}
 \end{figure}
 
 \begin{itemize}
@@ -300,21 +290,19 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 
 分组卷积（Group Convolution，GC）在 AlexNet 中就已经应用，但当时的原因是 GPU 计
 算能力不足，只能将标准卷积拆成 2 个分组卷积~\citerb{2012-AlexNet}。分组卷积和标准
-卷积的对比如图 \ref{fig:normal-conv} 和图 \ref{fig:group-conv} 所
+卷积的对比如图~\ref{fig:normal-conv} 和图~\ref{fig:group-conv} 所
 示~\citerb{2019-Diff-Conv}：
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/卷积神经网络/标准卷积.png}
-  \caption{标准卷积}
-  \label{fig:normal-conv}
+  \caption{标准卷积}\label{fig:normal-conv}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/卷积神经网络/分组卷积.png}
-  \caption{分组卷积}
-  \label{fig:group-conv}
+  \caption{分组卷积}\label{fig:group-conv}
 \end{figure}
 
 分组卷积的具体步骤是：
@@ -343,18 +331,15 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/卷积神经网络/深度可分离卷积.png}
-  \caption{深度可分离卷积}
-  \label{fig:ds-conv}
+  \caption{深度可分离卷积}\label{fig:ds-conv}
 \end{figure}
 
 深度可分离卷积的步骤包括分层卷积和逐点卷积两部分，计算量为标准卷积计算量的 $ 1 /
 C_{\mathrm{in}} + 1/k^2 $，$k$ 为分层卷积的卷积核大小。
 当通道数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\citerb{2017-MobileNet-v1}。
 
-\subsection{反卷积}
-\label{subsec:deconv}
-
-反卷积(Deconvolution)，有时也称转置卷积(Transposed Convolution)，是一种特殊的卷积
+\subsection{反卷积}\label{subsec:deconv}
+反卷积（Deconvolution），有时也称转置卷积（Transposed Convolution），是一种特殊的卷积
 形式。反卷积的具体步骤是，先通过补 0 扩大输入图像的尺寸，再进行标准卷积。反卷积的
 作用是将卷积后尺寸较小的 feature map 恢复到与输入大小相同的尺寸。 需要特别说明的
 是，反卷积虽然可以恢复尺寸，\textbf{但不能保证恢复后的数值与输入相同}~\citerb{2016-Guide-Conv}。
@@ -371,7 +356,7 @@ r_{\mathrm {out}} & = r_{\mathrm{in}} + (k-1) \times j_{\mathrm{in}}
 \end{align}
 
 其中 $j$ 为 jump，即每一层的 stride；s 为该层运算的 stride，k 为卷积的 kernel
-size，r 即感受野。利用公式 \eqref{equ:rf-cal} 即可计算各层的感受野。经典网络 VGG-16
+size，r 即感受野。利用公式~\eqref{equ:rf-cal}~即可计算各层的感受野。经典网络 VGG-16
 各层感受野的详细计算可以参考文献~\citerb{2018-VGG-16-RF-cal}。
 
 %%% Local Variables:

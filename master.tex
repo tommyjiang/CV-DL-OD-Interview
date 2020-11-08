@@ -5,7 +5,8 @@
 \setcounter{secnumdepth}{3} % 层次为 3 以上的标题生成序号
 
 %% 宏包
-\usepackage{amsmath} % AMS数学宏包
+\usepackage{amsmath} % AMS 数学宏包
+\usepackage{amssymb} % AMS 字体宏包
 \usepackage{fancyhdr} % 设置页眉页脚宏包
 \usepackage{geometry} % 设置页边距宏包
 \usepackage{xcolor} % 颜色宏包
@@ -85,7 +86,7 @@
 \tableofcontents % 目录
 }
 
-\mainmatter % 正文部分 重新编号
+\mainmatter{} % 正文部分 重新编号
 \pagenumbering{arabic} % 页码编号为阿拉伯数字
 
 \input{chapters/chapter3}

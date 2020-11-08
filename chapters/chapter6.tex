@@ -26,8 +26,7 @@ mAP 全称为 Mean Average Precision。
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/NMS.pdf}
-  \caption{NMS 示例}
-  \label{fig:nms}
+  \caption{NMS 示例}\label{fig:nms}
 \end{figure}
 
 \subsection{传统 NMS}
@@ -40,19 +39,17 @@ mAP 全称为 Mean Average Precision。
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\textwidth]{images/目标检测/Soft-NMS.pdf}
-  \caption{NMS 和 Soft NMS 算法流程}
-  \label{fig:nms-algo}
+  \caption{NMS 和 Soft NMS 算法流程}\label{fig:nms-algo}
 \end{figure}
 
-\subsection{Soft NMS}
-\label{subsec:soft-nms}
+\subsection{Soft NMS}\label{subsec:soft-nms}
 
 传统 NMS 算法需要选择合适 IoU 阈值，阈值太低会导致误检，而阈值太高又会导致漏
 检。Soft NMS 的基本思想是，两个检测框重叠较大时，降低低分检测框的分数，但并不直接
 将其删除。算法的具体流程如图~\ref{fig:nms-algo}~中的绿框所示\citerb{2017-Soft-NMS}，
 其中 $f(iou(M, b_i))$ 的形式为：
 \begin{equation}
-f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
+f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}{(M, b_i)}^2}{\sigma}}
 \end{equation}
 
 即两个框的 IoU 越大，低分框的分数降低得越多。
@@ -64,8 +61,7 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\textwidth]{images/目标检测/Softer-NMS.pdf}
-  \caption{Softer NMS 算法流程}
-  \label{fig:softer-nms}
+  \caption{Softer NMS 算法流程}\label{fig:softer-nms}
 \end{figure}
 
 由图~\ref{fig:softer-nms}~可知，Softer NMS 在 Soft NMS 基础上，加入了 var voting
@@ -78,11 +74,9 @@ f(iou(M, b_i)) = e^{-\frac{\mathrm{iou}(M, b_i)^2}{\sigma}}
 \end{enumerate}
 
 \chapter{两阶段方法}
-\section{R-CNN 系列}
-\label{sec:R-CNN}
+\section{R-CNN 系列}\label{sec:R-CNN}
 
-\subsection{Fast R-CNN}
-\label{subsec:Fast-R-CNN}
+\subsection{Fast R-CNN}\label{subsec:Fast-R-CNN}
 
 Fast R-CNN 在训练和测试时，只需要利用 CNN 将整张图片前传一次，不需要像 R-CNN 中将
 所有 proposal 对应的图片区域先缩放到固定尺寸再逐个前传，因此可以大大提升训练和测
@@ -105,7 +99,7 @@ RoI 的全称是 Region of Interest，中文为感兴趣区域。RoI Pooling 层
 Fast R-CNN 使用分类加回归的多任务 loss：
 \begin{align}
   L & = L_{\mathrm{cls}}(p, u) + \lambda [u \geq 1] L_{\mathrm{loc}}(t^u, v) \\
-    & = -\mathrm{log}\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
+    & = -\\log\,p_u + \sum_{i \in {x, y, w, h}} \mathrm{smooth}_{L_1}(t_i^u - v_i)
 \end{align}
 
 上式中计算的是正负样本（RoI）的分类 loss 和正样本的回归 loss。其中回归真值 $t^u$
@@ -113,8 +107,8 @@ Fast R-CNN 使用分类加回归的多任务 loss：
 \begin{align}
   t_x & = (G_x - P_x) / P_w \\
   t_y & = (G_y - P_y) / P_h \\
-  t_w & = \mathrm{log} (G_w/P_w) \\
-  t_h & = \mathrm{log} (G_h/P_h)
+  t_w & = \\log (G_w/P_w) \\
+  t_h & = \\log (G_h/P_h)
 \end{align}
 
 上式中，$G$ 和 $P$ 分别表示 GT 和 Proposal（即 RoI），因此 $t$ 相当于两者之间的一
@@ -128,7 +122,7 @@ Proposal 正负样本的判断标准为：
 
 \begin{itemize}
   \item 正样本：与任一 GT 的 IoU $ \geq $ 0.5。
-  \item 负样本：与所有 GT 的最大 IoU 在 $ [0.1, 0.5) $ 区间。
+  \item 负样本：与所有 GT 的最大 IoU 在 $ [0.1, 0.5] $ 区间，不包含 0.5。
 \end{itemize}
 
 负样本的 IoU 下限取为 0.1 相当于做了难样本挖掘（HEM），因
@@ -136,8 +130,7 @@ Proposal 正负样本的判断标准为：
 个 batch 包含 2 张图，每张图取 64 个 proposal，相当于每
 个 batch 有 128个 proposal，其中正负样本比例为 1:3。
 
-\subsection{Faster R-CNN}
-\label{subsec:Faster-R-CNN}
+\subsection{Faster R-CNN}\label{subsec:Faster-R-CNN}
 
 Faster R-CNN 是目标检测领域最经典的论文之一。文中提出了候选区域提取网络（Region
 Proposal Network，RPN），可以直接利用 CNN 生成 proposal 以替代 selective search
@@ -198,29 +191,26 @@ Faster R-CNN 的训练方法包括 4 步交替训练法和近似联合训练法�
 
 通过以上四步即可得到 RPN 和 Fast R-CNN 共享 backbone 的 Faster R-CNN 网络。
 
-\section{FPN 及其改进}
-\label{sec:FPN}
+\section{FPN 及其改进}\label{sec:FPN}
 
-\subsection{FPN}
-\label{subsec:FPN}
+\subsection{FPN}\label{subsec:FPN}
 FPN 的核心思想是融合不同尺度的 feature map 得到 feature 金字塔，再进行多尺度预
 测\citerb{2016-FPN}。FPN 及不同方法的对比如图~\ref{fig:FPN}~所示：
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/FPN.pdf}
-  \caption{FPN 与其他方法对比}
-  \label{fig:FPN}
+  \caption{FPN 与其他方法对比}\label{fig:FPN}
 \end{figure}
 
 \begin{itemize}
-  \item 图(a)为传统的图像金字塔方法，该方法的问题是速度很慢，因为要进行 $n$ 张
+  \item 图 (a) 为传统的图像金字塔方法，该方法的问题是速度很慢，因为要进行 $n$ 张
     图片的前传。
-  \item 图(b)为 Faster R-CNN 采用的方法，从单个 feature map 进行预测，未充分利用
+  \item 图 (b) 为 Faster R-CNN 采用的方法，从单个 feature map 进行预测，未充分利用
     不同 feature map 的信息。
-  \item 图(c)为 SSD 采用的方法，从多个 feature map 分别预测，未进行 feature map
+  \item 图 (c) 为 SSD 采用的方法，从多个 feature map 分别预测，未进行 feature map
     信息的融合。
-  \item 图(d)为 FPN 采用的方法，先融合不同 feature map 信息，再进行多尺度预测。
+  \item 图 (d) 为 FPN 采用的方法，先融合不同 feature map 信息，再进行多尺度预测。
 \end{itemize}
 
 \paragraph{FPN 不同 feature map 融合 block}
@@ -246,7 +236,7 @@ FPN 中所有尺寸预测的检测 head 均共享权重，且输出的通道数�
 \paragraph{FPN 中的 Fast R-CNN}
 
 FPN 中的 Fast R-CNN 与原始 Fast R-CNN 相比，最大的区别是 FPN 根据 proposal 的尺寸
-将其分配到不同 scale，计算方法为 $ k = \lfloor k_0 + \mathrm{log}_2 (
+将其分配到不同 scale，计算方法为 $ k = \lfloor k_0 + \\log_2 (
 \sqrt{wh}/224 ) \rfloor$，即根据 proposal 的面积将其分配到不同尺度的 feature map，
 面积越大的 RoI 所分配的 feature map 越深，反之越浅。
 
@@ -299,8 +289,7 @@ AugFPN 将 RoI 同时投射到多个 feature map 做 RoI Align，将得到的 fe
 后经过两个 $1 \times 1$ 卷积 + Sigmoid 得到 $N \times C$ 的权重，将不同 RoI
 feature 做加权和得到 $C \times h \times w$ 的融合后 RoI feature\cite{2019-AugFPN}。
 
-\section{Faster R-CNN 的改进}
-\label{sec:faster-improve}
+\section{Faster R-CNN 的改进}\label{sec:faster-improve}
 
 \subsection{RoI Pooling 层的改进}
 \subsubsection{Mask R-CNN}
@@ -320,8 +309,7 @@ Pooling 层，应用后对检测模型的性能也有提升\citerb{2017-Mask-RCN
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.5\textwidth]{images/目标检测/RoI-Align.png}
-  \caption{RoI Align 示意图}
-  \label{fig:roi-align}
+  \caption{RoI Align 示意图}\label{fig:roi-align}
 \end{figure}
 
 \subsection{检测 head 的改进}
@@ -331,8 +319,8 @@ Faster R-CNN 中的检测 head 指的是 Fast R-CNN 中每个 RoI 之后接的�
 
 \subsubsection{R-FCN}
 文献\citerb{2016-R-FCN}中将 Faster R-CNN 中每个 RoI 后面接的检测 head 的全连接层，
-替换为全卷积网络 + Position Sensitive RoI Pooling(PS-RoI) 层 + 全局平均池化层，模
-型速度有2.5-20 倍的提升。
+替换为全卷积网络 + Position Sensitive RoI Pooling (PS-RoI) 层 + 全局平均池化层，模
+型速度有 2.5 到 20 倍的提升。
 
 \paragraph{网络结构}
 
@@ -376,8 +364,7 @@ Light-Head R-CNN 的检测 head 综合借鉴了 Faster R-CNN 和 R-FCN 的模型
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/Light-Head-R-CNN.pdf}
-  \caption{Faster R-CNN/R-FCN/Light-Head R-CNN 结构对比}
-  \label{fig:light-head}
+  \caption{Faster R-CNN/R-FCN/Light-Head R-CNN 结构对比}\label{fig:light-head}
 \end{figure}
 
 \paragraph{Light-head R-CNN 中 PS-RoI pooling 的 feature map}
@@ -436,7 +423,7 @@ head 的 loss 又分别包含分类和回归两部分：
 \paragraph{分类分数}
 文中对比了四种不同的利用全连接和卷积 feature 分类分数计算最终分类分数的方法，分别
 是$s^{\mathrm{fc}}, (s^{\mathrm{fc}} + s^{\mathrm{conv}})/2,
-\mathrm{max}(s^{\mathrm{fc}}, s^{\mathrm{conv}}), s^{\mathrm{fc}} +
+\\max(s^{\mathrm{fc}}, s^{\mathrm{conv}}), s^{\mathrm{fc}} +
 s^{\mathrm{conv}}(1-s^{\mathrm{fc}})$，四种方法对应的模型性能 差别不大，最后一种
 方法性能最好。
 
@@ -450,8 +437,7 @@ Grid R-CNN 中借鉴了 CornerNet 的思路，改进了 Faster R-CNN 中的回�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/目标检测/Grid-R-CNN.pdf}
-  \caption{Grid R-CNN 网络结构}
-  \label{fig:Grid-RCNN}
+  \caption{Grid R-CNN 网络结构}\label{fig:Grid-RCNN}
 \end{figure}
 
 Grid R-CNN 对每个 RoI 输出 $N \times N$ 个点的 feature map，再利用这些点计算检测
@@ -486,8 +472,7 @@ heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点�
 采用每条边上三个点的加权平均确定位置，权重为回归 head 输出的分数。
 
 \subsection{RPN 的改进}
-\subsubsection{GA-RPN}
-\label{subsubsec:GA-RPN}
+\subsubsection{GA-RPN}\label{subsubsec:GA-RPN}
 文献\citerb{2019-GA-RPN}中对 RPN 网络进行了改进，提出 GA-RPN，anchor 数量仅为 baseline
 的 10\%，同时 recall 比 baseline 高 9.1 个点。
 
@@ -506,7 +491,7 @@ heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点�
 \paragraph{损失函数}
 分类分支为 focal loss，回归分支为如下 Smooth $L_1$ loss：
 \begin{equation}
-  \mathcal{L}_{\mathrm{shape}} = \mathcal{L}_1 \left( 1 - \mathrm{min}\left( \frac{w}{w_g}, \frac{w_g}{w} \right) \right) + \mathcal{L}_1 \left( 1 - \mathrm{min} \left( \frac{h}{h_g}, \frac{h_g}{h} \right) \right)
+  \mathcal{L}_{\mathrm{shape}} = \mathcal{L}_1 \left( 1 - \\min\left( \frac{w}{w_g}, \frac{w_g}{w} \right) \right) + \mathcal{L}_1 \left( 1 - \\min \left( \frac{h}{h_g}, \frac{h_g}{h} \right) \right)
 \end{equation}
 
 \paragraph{正负样本}
@@ -516,8 +501,7 @@ heatmap 的损失函数为交叉熵 loss，GT 角点及其上下左右四个点�
 \begin{itemize}
   \item 有效区域：$b_e^l=[x_p^l, y_p^l, \epsilon_e x_p^l, \epsilon_e y_p^l]$，其
     中 label 为 1。
-  \item 忽略区域：$b_i^l=[x_p^l, y_p^l, \epsilon_i x_p^l, \epsilon_i y_p^l]$ -
-    $b_e^l$。
+  \item 忽略区域：$b_i^l=[x_p^l, y_p^l, \epsilon_i x_p^l, \epsilon_i y_p^l] - b_e^l$。
   \item 其余区域：label 为 0。
 \end{itemize}
 
@@ -528,8 +512,7 @@ $h$ 作为回归分支的 label。
 
 \subsection{级联方法的改进}
 
-\subsubsection{Cascade R-CNN}
-\label{subsub:cascade-rcnn}
+\subsubsection{Cascade R-CNN}\label{subsub:cascade-rcnn}
 
 Cascade 方法是指利用多阶段检测器进行检测的方法。其实所有的两阶段方法都属于广义的
 Cascade 方法，因为两阶段方法一般都分为生成 proposal 的第一阶段和精修 proposal 的
@@ -554,21 +537,18 @@ Cascade R-CNN 与 Faster R-CNN 的对比如图~\ref{fig:Cascade-RCNN}~所示：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/Cascade-R-CNN.pdf}
-  \caption{Cascade R-CNN 与 Faster R-CNN 的对比}
-  \label{fig:Cascade-RCNN}
+  \caption{Cascade R-CNN 与 Faster R-CNN 的对比}\label{fig:Cascade-RCNN}
 \end{figure}
 
-Cascade R-CNN（上图(d)）与 Faster R-CNN（上图(a)）相比，多了两个检测 head，即 H2 和 H3。训练时，H1、
+Cascade R-CNN（上图 (d)）与 Faster R-CNN（上图 (a)）相比，多了两个检测 head，即 H2 和 H3。训练时，H1、
 H2、H3 对应的正负样本 IoU 阈值分别取为 0.5、0.6 和 0.7，由于每个 head 输出的结果
 相比输入都会有改善，相当于逐级微调得到最终的高质量检测框。
 
 \chapter{单阶段方法}
 
-\section{YOLO 系列}
-\label{sec:YOLO}
+\section{YOLO 系列}\label{sec:YOLO}
 
-\subsection{YOLO v1}
-\label{subsec:YOLOv1}
+\subsection{YOLO v1}\label{subsec:YOLOv1}
 YOLO v1 是目标检测单阶段方法的开创性工作之一，文中将检测问题转化为一个回归问题，而非
 两阶段文章中的分类和回归两方面问题\citerb{2015-YOLO-v1}。
 
@@ -576,10 +556,10 @@ YOLO v1 是目标检测单阶段方法的开创性工作之一，文中将检测
 
 \begin{enumerate}
   \item 将整张图片划分为 $S \times S$ 个网格，每个网格预测 $ B $ 个检测框和 $ C $
-    个条件概率 $ \mathrm{Pr}(\mathrm{Class}_i|\mathrm{Object}) $。
+    个条件概率 $ \Pr(\mathrm{Class}_i|\mathrm{Object}) $。
   \item 每个检测框共包括 5 个值： $x, y, w, h$ 和 confidence。其中 $x, y$为中心位
     置，$w, h$ 为长和宽（相对图片长宽的归一值
-    ），confidence 为$\mathrm{Pr}(\mathrm{Object}) \times
+    ），confidence 为$\Pr(\mathrm{Object}) \times
     \mathrm{IoU}^{\mathrm{truth}}_{\mathrm{pred}}$，
     检测框的 confidence 乘该网格对应的条件概率为最终的检测得分。网络的输出维度为 $ S
     \times S \times (B \times 5 + C) $。
@@ -597,11 +577,11 @@ YOLO v1 的 backbone 采用作者自己设计的结构为 24 个卷积层 + 2 �
 \begin{align}
   \label{equ:yolo-v1-loss}
   \begin{split}
-    L = & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left (x_i - \hat{x}_i \right )^2 + \left (y_i - \hat{y}_i \right )^2 \right ] \\
-    & \, + \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ \left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right)^2 + \left (\sqrt{h_i} - \sqrt{\hat{h}_i} \right )^2 \right ]  \\
-    & \, + \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left( C_i - \hat{C}_i \right)^2  \\
-    & \, + \lambda_{\mathrm{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{noobj}} \left( C_i - \hat{C}_i \right)^2  \\
-    & \, + \sum_{i=0}^{S^2} \mathds{1}_{i}^{\mathrm{obj}} \sum_{c \in \mathrm{classes}} \left( p_i(c) - \hat{p}_i(c) \right)^2
+    L = & \, \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ {\left (x_i - \hat{x}_i \right )}^2 + {\left (y_i - \hat{y}_i \right )}^2 \right ] \\
+    & \, + \lambda_{\mathrm{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} \left [ {\left(\sqrt{w_i} - \sqrt{\hat{w}_i} \right)}^2 + {\left (\sqrt{h_i} - \sqrt{\hat{h}_i} \right )}^2 \right ]  \\
+    & \, + \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{obj}} {\left( C_i - \hat{C}_i \right)}^2  \\
+    & \, + \lambda_{\mathrm{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathds{1}_{ij}^{\mathrm{noobj}} {\left( C_i - \hat{C}_i \right)}^2  \\
+    & \, + \sum_{i=0}^{S^2} \mathds{1}_{i}^{\mathrm{obj}} \sum_{c \in \mathrm{classes}} {\left( p_i(c) - \hat{p}_i(c) \right)}^2
   \end{split}
 \end{align}
 
@@ -615,8 +595,7 @@ YOLO v1 的 backbone 采用作者自己设计的结构为 24 个卷积层 + 2 �
     心才产生网格类别概率 loss。
 \end{enumerate}
 
-\subsection{YOLO v2}
-\label{subsec:YOLOv2}
+\subsection{YOLO v2}\label{subsec:YOLOv2}
 YOLO v2 在 YOLO v1 的基础上做了一系列改进\citerb{2016-YOLO-v2}：
 
 \begin{enumerate}
@@ -625,7 +604,7 @@ YOLO v2 在 YOLO v1 的基础上做了一系列改进\citerb{2016-YOLO-v2}：
   \item 改变预训练尺寸：YOLO v1 中预训练时图片输入尺寸为 $224 \times 224$，而检
     测时图片的输入尺寸为 $448 \times 448$，v2 中将预训练时的输入尺寸也改为 $448
     \times 448$，但网络实际的输入尺寸为 $416 \times 416$。
-  \item 引入 anchor：参考 Faster R-CNN \cite{2015-Faster-RCNN}，YOLO v2 中同样引
+  \item 引入 anchor：参考 Faster R-CNN~\cite{2015-Faster-RCNN}，YOLO v2 中同样引
     入 anchor 的概念，即网络的输出为 anchor 到 GT 的变换，同时每个 anchor 分别预
     测类别概率和前景分数，而不是一个网格只预测一个类别概率，这样就可以避免 v1 中
     每个网格只能预测一个类别的问题。
@@ -644,8 +623,7 @@ YOLO v2 在 YOLO v1 的基础上做了一系列改进\citerb{2016-YOLO-v2}：
     池化层。
 \end{enumerate}
 
-\subsection{YOLO v3}
-\label{subsec:YOLOv3}
+\subsection{YOLO v3}\label{subsec:YOLOv3}
 YOLO v3 在 YOLO v2 的基础上做了部分改进\citerb{2018-YOLO-v3}：
 
 \begin{enumerate}
@@ -664,11 +642,9 @@ YOLO v3 在 YOLO v2 的基础上做了部分改进\citerb{2018-YOLO-v3}：
     精度与 ResNet-152 相当，速度快 1 倍。
 \end{enumerate}
 
-\section{SSD 系列}
-\label{sec:SSD}
+\section{SSD 系列}\label{sec:SSD}
 
-\subsection{SSD}
-\label{subsec:SSD}
+\subsection{SSD}\label{subsec:SSD}
 
 SSD 是目标检测单阶段方法的经典工作之一，直观上可以将 SSD 看成多分类 + 多 feature
 map 预测的 RPN\cite{2015-SSD}。
@@ -758,8 +734,7 @@ BPN 在 FPN top-down 的基础上又加入了 bottom-up 的路径，整体结构
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/目标检测/BPN.pdf}
-  \caption{BPN 的结构}
-  \label{fig:BPN}
+  \caption{BPN 的结构}\label{fig:BPN}
 \end{figure}
 
 \paragraph{LSN}
@@ -768,8 +743,7 @@ LSN 在 SSD 基础上加入双向 FPN，其结构如图~\ref{fig:LSN}~所示\cit
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/LSN.pdf}
-  \caption{LSN 的结构}
-  \label{fig:LSN}
+  \caption{LSN 的结构}\label{fig:LSN}
 \end{figure}
 
 \begin{itemize}
@@ -787,8 +761,7 @@ PFPNet 从同一个 feature map 上 pooling 得到不同尺寸的 feature map，
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/PFPNet.pdf}
-  \caption{PFPNet 的结构}
-  \label{fig:PFPNet}
+  \caption{PFPNet 的结构}\label{fig:PFPNet}
 \end{figure}
 
 \begin{itemize}
@@ -828,8 +801,7 @@ DES 借鉴了 \hyperref[subsec:SENet]{SENet} 的思想调整不同 feature map c
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/DES.pdf}
-  \caption{DES 中的 segmentation 分支}
-  \label{fig:des-seg}
+  \caption{DES 中的 segmentation 分支}\label{fig:des-seg}
 \end{figure}
 
 Segmentation 分支中间结果 $G(X)$ 经过卷积和 sigmoid 与原始 feature map 相乘得到改
@@ -851,8 +823,7 @@ LFIP 借鉴了传统的图像金字塔方法，将下采样的图像经过轻量
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/目标检测/LFIP.pdf}
-  \caption{LFIP 网络结构}
-  \label{fig:LFIP}
+  \caption{LFIP 网络结构}\label{fig:LFIP}
 \end{figure}
 
 \begin{itemize}
@@ -866,8 +837,7 @@ EFGRNet 的结构如图~\ref{fig:EFGRNet}~所示\citerb{2019-EFGRNet}：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/目标检测/EFGRNet.pdf}
-  \caption{EFGRNet 网络结构}
-  \label{fig:EFGRNet}
+  \caption{EFGRNet 网络结构}\label{fig:EFGRNet}
 \end{figure}
 
 EFGRNet 综合借鉴了多篇论文的思路：
@@ -878,8 +848,7 @@ EFGRNet 综合借鉴了多篇论文的思路：
 \end{itemize}
 
 \section{RetinaNet 系列}
-\subsection{RetinaNet}
-\label{sub:RetinaNet}
+\subsection{RetinaNet}\label{sub:RetinaNet}
 
 RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster R-CNN、SSD 和 FPN 中
 的精华，同时提出新颖的 focal loss，精度超过了当时的两阶段模型，一举扭转了当时比较
@@ -888,7 +857,7 @@ RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster
 \paragraph{Focal loss 的应用}
 RetinaNet 网络的分类 loss 采用 focal loss，其中 $\alpha = 0.25, \gamma
 = 2$ 时效果最好。由于正样本数量很少，因此分类器的初始化也做了相应调整，将最后一个
-卷积层的偏置初值设为 $-\mathrm{log}((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
+卷积层的偏置初值设为 $-\\log((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
 文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要采样。
 
 \paragraph{Anchor 参数}
@@ -901,7 +870,7 @@ anchor 面积为 $32^2$ 到 $512^2$。每个尺度上有三个长宽比例和三
 \begin{itemize}
   \item 正样本：与任一 GT 的 IoU $\geq$ 0.5。
   \item 负样本：与所有 GT 的最大 IoU $ < $ 0.4。
-  \item 忽略样本：与所有 GT 的最大 IoU 在 $[0.4, 0.5)$。
+  \item 忽略样本：与所有 GT 的最大 IoU 在 $[0.4, 0.5]$，不包含 0.5。
 \end{itemize}
 
 \paragraph{分类 head}
@@ -923,13 +892,23 @@ Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然�
 
 \subsubsection{正负样本}
 \paragraph{ATSS}
-ATSS 论文发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 RetinaNet 后，二者性
+ATSS 发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 RetinaNet 后，二者性
 能十分接近，借鉴 FCOS 的思路提出 ATSS 方法作为正负样本判据\citerb{2019-ATSS}。
 
+\paragraph{RetinaNet 和 FCOS 的区别}
 \begin{enumerate}
-  \item 每层选出离 GT 中心 $L_2$ 距离最近的 $k$ 个 anchor 作为候选集合。
-  \item 计算候选集合中所有 anchor 与对应 GT 的 IoU，及候选集合与 GT IoU 的均值 $m_g$ 和标准差 $v_g$。
-  \item 正负样本 IoU 阈值取为 $t_g = m_g + v_g$。
+  \item 每个位置的 anchor 数：RetinaNet 为 $k$，FCOS 为 1。
+  \item 正负样本定义：RetinaNet 使用 GT 和 anchor 的 IoU，FCOS 只要点落在 GT 内
+    都算正样本，通过 FPN 和最小面积 GT 减少模糊样本数。
+  \item 回归初始值：RetinaNet 为 anchor，FCOS 为 feature map 上点的坐标。
+\end{enumerate}
+
+\begin{enumerate}
+  \item FPN 的每层选出离 GT 中心 $L_2$ 距离最近的 $k$ 个 anchor 作为候选集合。
+  \item 计算候选集合中所有 anchor 与 GT 的 IoU，得到候选集合所有 anchor 与 GT IoU 的均值 $m_g$ 和标准差 $v_g$。
+  \item IoU 阈值大于 $t_g = m_g + v_g$ 且 anchor 中心位于 GT 内的作为正样本，否
+    则为负样本。如果一个 anchor 对应多个 GT，取 IoU 最大的 GT 作为正样本，其余为
+    负样本。
 \end{enumerate}
 
 \section{EfficientDet}
@@ -948,8 +927,7 @@ BiFPN 的结构如图~\ref{fig:BiFPN}~在 PANet 的基础上做了以下改进�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{images/目标检测/BiFPN.pdf}
-  \caption{BiFPN 与其他 FPN 结构的对比}
-  \label{fig:BiFPN}
+  \caption{BiFPN 与其他 FPN 结构的对比}\label{fig:BiFPN}
 \end{figure}
 
 \subsection{EfficientDet}
@@ -958,8 +936,7 @@ EfficientDet 的结构如图~\ref{fig:EfficientDet}~所示：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{images/目标检测/EfficientDet.pdf}
-  \caption{EfficientDet 结构}
-  \label{fig:EfficientDet}
+  \caption{EfficientDet 结构}\label{fig:EfficientDet}
 \end{figure}
 
 EfficientDet D0-D7 采用 EfficientNet D0-D6 作为 backbone，D7 仍然采
@@ -980,8 +957,7 @@ LapNet 的思路与传统的检测网络有明显区别，其特点是体现了�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.6\textwidth]{images/目标检测/LapNet.pdf}
-  \caption{LapNet 与其他检测方法对比}
-  \label{fig:LapNet}
+  \caption{LapNet 与其他检测方法对比}\label{fig:LapNet}
 \end{figure}
 
 \paragraph{网络结构}
@@ -1019,7 +995,7 @@ LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 \begin{align}
   \mathcal{L} = & \frac{\lambda_{\mathrm{loc}}}{N^+}\sum_c \sum_a \lambda_{\mathrm{loc}}^{c,a} \sum_{i, j}\mathcal{L}_{\mathrm{loc}}(c,a,i,j) \, + \\
                 & \frac{\lambda_{\mathrm{cls}}}{N}\sum_c \sum_a \lambda_{\mathrm{cls}}^{c,a} \sum_{i, j}\mathcal{L}_{\mathrm{cls}}(c,a,i,j) \, + \\
-                & \mathrm{log}\frac{1}{\lambda_{\mathrm{cls}}} + \mathrm{log}\frac{1}{\lambda_{\mathrm{loc}}} + \frac{1}{KA}\sum_{c}\sum_{a}\left( \mathrm{log}\frac{1}{\lambda_{\mathrm{cls}}^{c,a}} + \mathrm{log}\frac{1}{\lambda_{\mathrm{loc}}^{c,a}} \right)
+                & \log\frac{1}{\lambda_{\mathrm{cls}}} + \log\frac{1}{\lambda_{\mathrm{loc}}} + \frac{1}{KA}\sum_{c}\sum_{a}\left( \log\frac{1}{\lambda_{\mathrm{cls}}^{c,a}} + \log\frac{1}{\lambda_{\mathrm{loc}}^{c,a}} \right)
 \end{align}
 
 其中 $N^+$ 为 anchor 正样本数，$N$ 为总 pixel 数。
@@ -1039,8 +1015,7 @@ LapNet 的损失函数包括回归、分类和正则化三部分 loss：
 
 \section{关键点方法}
 
-\subsection{CornerNet}
-\label{sec:CornerNet}
+\subsection{CornerNet}\label{sec:CornerNet}
 CornerNet\cite{2018-CornerNet} 是 anchor free 方法的代表作之一，与传统目标检测
 预测目标框位置和长/宽不同，CornerNet 直接预测左上/右下角点及配对关系。
 
@@ -1050,15 +1025,13 @@ CornerNet 的网络结构和预测模块的结构如图~\ref{fig:CornerNet-netwo
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/CornerNet-网络结构.pdf}
-  \caption{CornerNet 网络结构}
-  \label{fig:CornerNet-network}
+  \caption{CornerNet 网络结构}\label{fig:CornerNet-network}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/CornerNet-预测模块.pdf}
-  \caption{CornerNet 的预测模块}
-  \label{fig:CornerNet-prediction}
+  \caption{CornerNet 的预测模块}\label{fig:CornerNet-prediction}
 \end{figure}
 
 网络的三个输出分别为：
@@ -1079,21 +1052,20 @@ Corner Pooling 层是 CornerNet 中为了提取 feature map 上左上和右下�
 
 \paragraph{损失函数}
 CornerNet 的损失函数包括三个输出对应的损失函数：
-\begin{equation}
-  \label{eq:cornernet-loss}
-  L = L_{\mathrm{det}} + \gamma L_{\mathrm{off}} + (\alpha L_{\mathrm{pull}} + \beta L_{\mathrm{push}})
+\begin{equation}\label{eq:cornernet-loss}
+  L = L_{\det} + \gamma L_{\mathrm{off}} + (\alpha L_{\mathrm{pull}} + \beta L_{\mathrm{push}})
 \end{equation}
 
 \begin{itemize}
-  \item heatmap 损失函数 $L_{\mathrm{det}}$：类似 focal loss 形式，但 focal loss
+  \item heatmap 损失函数 $L_{\det}$：类似 focal loss 形式，但 focal loss
     中 label 只有 0 和 1 两种，而 CornerNet 中 label 是 $[0, 1]$ 区间的连续值：
     \begin{equation}
       \label{equ:cornernet-det-loss}
-      L_{\mathrm{det}} = -\frac{1}{N} \sum_{c=1}^{C} \sum_{i=1}^{H} \sum_{j=1}^{W}
+      L_{\det} = -\frac{1}{N} \sum_{c=1}^{C} \sum_{i=1}^{H} \sum_{j=1}^{W}
       \left\{
         \begin{array}{lr}
-           (1-p_{cij})^{\alpha}\mathrm{log}\,(p_{cij}) & y_{cij} = 1 \\
-           (1-y_{cij})^{\beta} (1-p_{cij})^{\alpha} \mathrm{log}\,(p_{cij}) & y_{cij} < 1 \\
+           {(1-p_{cij})}^{\alpha}\log\,(p_{cij}) & y_{cij} = 1 \\
+           {(1-y_{cij})}^{\beta} {(1-p_{cij})}^{\alpha} \log\,(p_{cij}) & y_{cij} < 1 \\
         \end{array}
       \right.
     \end{equation}
@@ -1110,9 +1082,9 @@ CornerNet 的损失函数包括三个输出对应的损失函数：
     同 GT 的尽可能大，同样只在 GT 角点位置计算：
     \begin{align}
       \label{equ:cornernet-em-loss-pull}
-      L_{\mathrm{pull}} & = \frac{1}{N} \sum_{k=1}^{N} \left[ (e_{t_k} - e_k)^2 + (e_{b_k} - e_k)^2 \right] \\
+      L_{\mathrm{pull}} & = \frac{1}{N} \sum_{k=1}^{N} \left[ {(e_{t_k} - e_k)}^2 + {(e_{b_k} - e_k)}^2 \right] \\
       \label{equ:cornernet-em-loss-push}
-      L_{\mathrm{push}} & = \frac{1}{N(N-1)} \sum_{k=1}^{N} \sum_{\substack{j=1 \\ j \neq k}}^{N} \mathrm{max} (0, 1-|e_k-e_j|)
+      L_{\mathrm{push}} & = \frac{1}{N(N-1)} \sum_{k=1}^{N} \sum_{\substack{j=1 \\ j \neq k}}^{N} \\max (0, 1-|e_k-e_j|)
     \end{align}
 \end{itemize}
 
@@ -1126,8 +1098,7 @@ CornerNet 的损失函数包括三个输出对应的损失函数：
     heatmap 对应点的平均值。
 \end{itemize}
 
-\subsection{ExtremeNet}
-\label{sec:ExtremeNet}
+\subsection{ExtremeNet}\label{sec:ExtremeNet}
 ExtremeNet\citerb{2019-ExtremeNet}借鉴了 CornerNet 的思想，预测的是四个方向上的极值
 点和中心点。
 
@@ -1160,8 +1131,7 @@ Ghost box 是指包含多个较小检测框的大的检测框，文中提出一�
 \subsection{RepPoints}
 
 \section{中心 + 变换方法}
-\subsection{CenterNet}
-\label{sec:CenterNet}
+\subsection{CenterNet}\label{sec:CenterNet}
 CenterNet 和 ExtremeNet 类似，都出自 UT Austin 的 Zhou Xingyi，且同样借
 鉴 CornerNet 的思路，但不再预测角点及其组合，而是直接预测中心点和物体的长和
 宽\citerb{2019-CenterNet}。
@@ -1171,15 +1141,13 @@ CenterNet 沿用了 CornerNet 中预测 heatmap 和 offset map 的结构，每�
 中心点的 heatmap 及长和宽两个方向的 offset。此外还多预测长和宽方向检测框的尺寸，
 除中心点 heatmap 外，offset 和尺寸所有类别共享同一个，loss 均为 Smooth $L_1$
 loss，总的 loss 为：
-\begin{equation}
-  \label{equ:extreme-net-loss}
-  L_{\mathrm{det}} = L_k + \lambda_{\mathrm{size}}L_{\mathrm{size}} + \lambda_{\mathrm{off}}L_{\mathrm{off}}
+\begin{equation}\label{equ:extreme-net-loss}
+  L_{\det} = L_k + \lambda_{\mathrm{size}}L_{\mathrm{size}} + \lambda_{\mathrm{off}}L_{\mathrm{off}}
 \end{equation}
 
 其中 $\lambda_{\mathrm{size}}=0.1, \lambda_{\mathrm{off}}=1$。
 
-\subsection{FCOS}
-\label{sec:FCOS}
+\subsection{FCOS}\label{sec:FCOS}
 FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 anchor，网络的分类和回归也有一
 定区别\citerb{2019-FCOS}：
 
@@ -1208,9 +1176,9 @@ FCOS 的网络结构参考 RetinaNet，由于使用了 FPN 结构，每个尺度
     内的 GT 框内为正样本，否则为负样本。如果一个点对应多个 GT，选择面积最小的 GT
     作为该点对应的 GT。
   \item 回归 label：直接根据定义计算距离。
-  \item 中心度 label：利用式 $\sqrt{\frac{\mathrm{min}(l^*,
-        r^*)}{\mathrm{max}(l^*, r^*)} \times \frac{\mathrm{min}(t^*,
-        b^*)}{\mathrm{max}(t^*, b^*)}}$ 计算，当点位于中心时取极值 1，边缘时取极
+  \item 中心度 label：利用式 $\sqrt{\frac{\\min(l^*,
+        r^*)}{\\max(l^*, r^*)} \times \frac{\\min(t^*,
+        b^*)}{\\max(t^*, b^*)}}$ 计算，当点位于中心时取极值 1，边缘时取极
         值 0。
 \end{itemize}
 
@@ -1237,10 +1205,10 @@ GT 为忽略样本。
     $\sigma_2=0.4$ 倍长和宽外的区域为负样本，中间为忽略样本。 
   \item 回归 label：网络输出的变换值与 GT 的关系为：
     \begin{align}
-      t_{x1} & = \mathrm{log} \frac{2^l (x+0.5)-x_1}{z} \\
-      t_{y1} & = \mathrm{log} \frac{2^l (y+0.5)-y_1}{z} \\
-      t_{x2} & = \mathrm{log} \frac{x_2 - 2^l (x+0.5)}{z} \\
-      t_{y2} & = \mathrm{log} \frac{y_2 - 2^l (y+0.5)}{z}
+      t_{x1} & = \\log \frac{2^l (x+0.5)-x_1}{z} \\
+      t_{y1} & = \\log \frac{2^l (y+0.5)-y_1}{z} \\
+      t_{x2} & = \\log \frac{x_2 - 2^l (x+0.5)}{z} \\
+      t_{y2} & = \\log \frac{y_2 - 2^l (y+0.5)}{z}
     \end{align}
     其中 $z = \sqrt{S_l}$。根据变换关系可以计算对应的 label 值。
 \end{itemize}
@@ -1256,8 +1224,7 @@ FSAF 的网络结构如图~\ref{fig:FSAF}~所示：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/FSAF.pdf}
-  \caption{FSAF 网络结构}
-  \label{fig:FSAF}
+  \caption{FSAF 网络结构}\label{fig:FSAF}
 \end{figure}
 
 在 RetinaNet 每个尺度分类和回归的最后一个 feature map 上，分别接对应
@@ -1294,7 +1261,7 @@ FSAF 的分类分支使用 focal loss，回归分支使用 IoU loss。
 FSAF 中，分类 heatmap 上所有点的权重均相同。SAPD 降低了分类 heatmap 上靠近物体边
 缘点的权重，即离中心越近，权重越高，离边缘越近，权重越低，权重的具体计算方法为：
 \begin{equation}
-  w_{lij} = \left( \frac{\mathrm{min} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{min} \left( d_{lij}^t, d_{lij}^b \right)}{\mathrm{max} \left( d_{lij}^l, d_{lij}^r \right) \cdot \mathrm{max} \left( d_{lij}^t, d_{lij}^b \right)} \right)^{\eta}, \; p_{lij} \in p^+
+  w_{lij} = {\left( \frac{\\min \left( d_{lij}^l, d_{lij}^r \right) \cdot \\min \left( d_{lij}^t, d_{lij}^b \right)}{\\max \left( d_{lij}^l, d_{lij}^r \right) \cdot \\max \left( d_{lij}^t, d_{lij}^b \right)} \right)}^{\eta}, \; p_{lij} \in p^+
 \end{equation}
 
 \paragraph{Feature map 权重}
@@ -1397,8 +1364,7 @@ TridentNet 的结构如图~\ref{fig:tridentnet}~所示：
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/目标检测/TridentNet.pdf}
-  \caption{TridentNet 结构}
-  \label{fig:tridentnet}
+  \caption{TridentNet 结构}\label{fig:tridentnet}
 \end{figure}
 
 TridentNet 将 ResNet 最后一个 block 中的 $3 \times 3$ 卷积分别替换成 stride 为
@@ -1434,7 +1400,7 @@ IoU，二者并不一致。
 为统一训练 loss 和评测指标，文献\citerb{2016-IoU-loss}中提出 IoU loss 作为目标检
 测模型回归部分的损失函数：
 \begin{equation}
-  L_{\mathrm{IoU}} = - \mathrm{ln} (\mathrm{IoU})
+  L_{\mathrm{IoU}} = - \ln (\mathrm{IoU})
 \end{equation}
 
 \subsubsection{GIoU loss}
@@ -1453,7 +1419,7 @@ IoU loss 的一个致命问题是输出检测框与 GT IoU 为 0 时无法进行
   \mathcal{L} & = 1 - \mathrm{IoU} + \mathcal{R}(B, B^{gt}) \\
   \mathcal{R}_{\mathrm{DIoU}} & = \frac{\rho^2(b, b^{\mathrm{gt}})}{c^2} \\
   \mathcal{R}_{\mathrm{CIoU}} & = \frac{\rho^2(b, b^{\mathrm{gt}})}{c^2} + \alpha v \\
-  v & = \frac{4}{\pi^2}\left( \mathrm{arctan}\frac{w^{\mathrm{gt}}}{h^{\mathrm{gt}}} - \mathrm{arctan}\frac{w}{h} \right) \\
+  v & = \frac{4}{\pi^2}\left( \arctan\frac{w^{\mathrm{gt}}}{h^{\mathrm{gt}}} - \arctan \frac{w}{h} \right) \\
   \alpha & = \frac{v}{1 - \mathrm{IoU} + v}
 \end{align}
 
@@ -1472,7 +1438,7 @@ Distance IoU loss 可以有效改善 GIoU loss 在两个框水平或垂直对齐
 
 \begin{itemize}
   \item 分类网络卷积层偏置初始值：RetinaNet 中，偏置的初始值 $b =
-    -\mathrm{log}\frac{1-\pi}{\pi}$，其中 $\pi=0.01$。如果不采用 focal loss，直
+    -\\log\frac{1-\pi}{\pi}$，其中 $\pi=0.01$。如果不采用 focal loss，直
     接训练网络会出现 loss 爆炸，性能很差。文中将 $\pi$ 的值降为 $10^{-5}$，再计
     算对应的 $b$ 作为初始值。
   \item 自适应 loss 权重：总 loss 形式为：
@@ -1520,7 +1486,7 @@ Noisy Anchor 的改进包括以下两方面：
     其中 $\mathtt{loc\_a}$ 为回归后的 bbox 与 GT 的 IoU。
   \item 自适应权重：正样本的权重 $r$ 同样与分类和回归分支的输出相关
     \begin{equation}
-      r = \left( \alpha \cdot \frac{1}{1-\mathtt{loc\_a}} + (1 - \alpha) \cdot \frac{1}{1-\mathtt{cls\_c}} \right ) ^ {\gamma}
+      r = {\left( \alpha \cdot \frac{1}{1-\mathtt{loc\_a}} + (1 - \alpha) \cdot \frac{1}{1-\mathtt{cls\_c}} \right )} ^ {\gamma}
     \end{equation}
     将所有正样本权重的平均值归一化为 1。
 \end{itemize}
@@ -1532,15 +1498,14 @@ Noisy Anchor 的改进包括以下两方面：
 \subsubsection{ConRetinaNet}
 
 \subsubsection{HSD}
-HSD 借鉴了 cascade 的思路，同时引入 reg-offset-cls(ROC) 模块，利用回归后 bbox 的
+HSD 借鉴了 cascade 的思路，同时引入 reg-offset-cls（ROC） 模块，利用回归后 bbox 的
 信息获得 offset 再结合 deformable 卷积作为分类分支\citerb{2019-HSD}。
 图~\ref{fig:hsd}~为 HSD 的具体结构：
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.9\textwidth]{images/目标检测/HSD.pdf}
-  \caption{HSD 的结构}
-  \label{fig:hsd}
+  \caption{HSD 的结构}\label{fig:hsd}
 \end{figure}
 
 \begin{itemize}
