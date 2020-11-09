@@ -41,33 +41,53 @@ map 的权重。
 SqueezeNet\cite{2016-SqueezeNet} 提出三个缩小网络大小的方法：
 \begin{enumerate}
   \item 减小卷积核：用 $1 \times 1$ 卷积代替 $3 \times 3$ 卷积。
-  \item 减少卷积输入通道数：用 Squeeze 模块即 $1 \times 1$ 卷积减少卷积输入通道
-    数，之后接同时包含 $1 \times 1$ 和 $3 \times 3$ 卷积的 Expand 模块。
-  \item 下采样位置：在网络深层再进行下采样。
+  \item 减少卷积输入通道数：用 $1 \times 1$ 卷积的 Squeeze 模块减少卷积输入通道数，
+    之后再接同时包含 $1 \times 1$ 和 $3 \times 3$ 卷积的 Expand 模块。
+  \item 下采样位置：在网络深层进行下采样。
 \end{enumerate}
 
+\section{Xception}
+Xception\cite{2016-Xception}
+网络利用\hyperref[subsec:DSC]{深度可分离卷积}减少参数和计算量。深度可分离卷积先
+用 depthwise 卷积融合空间信息，再用 pointwise 卷积融合通道信息。
 
 \section{MobileNet 系列}
 \subsection{MobileNet v1}
+MobileNet v1 与 Xception 类似，基本模块同样采用深度可分离卷积，降采样利用
+带 stride 的 depthwise 卷积实现，同时引入 width 系数和input resolution 系数，
+方便设计不同计算量的模型\citerb{2017-MobileNet-v1}。
 
-\subsection{MobileNet v2}\label{subsec:MobileNetv2}
-
-\subsubsection{MBConv 模块}
-MobileNet v2 中的基本模块是 inverted residual 模块，之后的论文一般称其为 MBConv
-模块。MBConv 模块的结构与 ResNet 中的 residual 模块类似，但有以下几点区别。
+\subsection{MobileNet v2}\label{subsec:MobileNet-v2}
+MobileNet v2 的基本模块是 inverted residual 模块，后续论文有时也称其 MBConv 模
+块。MBConv 模块的结构与 ResNet 中的 residual 模块类似，也有一些区
+别\citerb{2018-MobileNet-v2}。
 
 \begin{enumerate}
-  \item 减少非线性模块：MBConv 中的第一层 expansion 模块和最后的 add 模块之后没
-    有加非线性运算。
-  \item channel 数关系：MBConv 中，每个小模块中都先通过 $1 \times 1$ 卷积
-    将 channel 由少变多，而 ResNet 中是将 channel 数由多变少。
-  \item 中间卷积层类型：MBConv 模块中间的卷积层是 depthwise 卷积，ResNet 中的
-    residual 模块中间的卷积层是普通卷积。
+  \item 减少非线性模块：MBConv 的最后一个卷积后面不加非线性模块。
+  \item 通道数关系：MBConv 的通道数是中间多两边少，而 residual 模块是中间少两边多。
+    这也是 inverted residual 名称的来源，即中间和两边的通道数关系与 residual 模块
+    相反。
+  \item 中间层卷积类型：MBConv 中间卷积层是 depthwise 卷积，residual 模块中间卷积
+    层是普通卷积。
   \item 非线性模块：MBConv 中的非线性模块使用 ReLU6，即 ReLU 后再加一个最大值为
-    6 的限制，ResNet 中的非线性模块就是 ReLU。
+    6 的限制，residual 模块直接使用 ReLU。
 \end{enumerate}
 
+MnasNet 同样使用 inverted residual 作为基本模块，利用 NAS 搜索卷积核、扩
+张 ratio、stride 等参数\citerb{2018-MnasNet}。
+
 \subsection{MobileNet v3}
+MobileNet v3 改进了 MobileNet v2 中的 inverted residual 模块\citerb{2019-MobileNet-v3}：
+
+\begin{enumerate}
+  \item 加入 SE 模块：在 inverted residual 模块的 depthwise 卷积结果上加入 SE 模块。
+  \item 改进非线性模块：用 h-swish 模块代替 ReLU，h-swish 模块的形式为
+    \begin{equation}
+      \operatorname{h-swish}(x) = x \frac{\mathrm{ReLU}6 (x+3)}{6}
+    \end{equation}
+\end{enumerate}
+
+MobileNet v3 中并不是所有模块都加入 SE 和使用 h-swish，具体结构由 NAS 搜索得到。
 
 \section{ShuffleNet 系列}
 \subsection{ShuffleNet v1}
@@ -84,17 +104,40 @@ Residual block 的结构，具体结构包括：
 
 \begin{itemize}
   \item 卷积模块：$1 \times 1$ 分组卷积 + Shuffle + $3 \times 3$ 分层卷积 + $1
-    \time 1$ 分组卷积，分层卷积的 stride 与整体 stride 相同（1 或 2）。
+    \times 1$ 分组卷积，分层卷积的 stride 与整体 stride 相同（1 或 2）。注意只有第一
+    个卷积后有 ReLU，后两个卷积之后没有。
   \item Shortcut 路径：stride = 2 模块为 $3 \times 3$，stride = 2 的平均池化。
   \item 合并方法：stride = 1 模块为 element-wise 求和，stride = 2 模块为 concat。
 \end{itemize}
 
 \subsection{ShuffleNet v2}
-ShuffleNet v2 总结了轻量神经网络设计的四个基本原则\citerb{2018-ShuffleNetv2}。
+ShuffleNet v2 总结了轻量神经网络设计的四个基本原则\citerb{2018-ShuffleNet-v2}。
 
 \begin{enumerate}
-  \item 
+  \item 输入输出通道数尽可能相同。
+  \item 尽量减少分组卷积。
+  \item 尽量减少模块中的单独操作，提高并行能力。
+  \item 尽量减少 element-wise 操作。
 \end{enumerate}
+
+ShuffleNet v2 中的基本模块如~~所示：
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.7\textwidth]{images/分类/ShuffleNet-v2.pdf}
+%   \caption{ShuffleNet v2 基本模块}\label{fig:shufflenet-v2}
+% \end{figure}
+
+和 ShuffleNet v1 相比，ShuffleNet v2 去掉了分组卷积模块，将 element-wise 相加改
+为 concat，同时将 shuffle 操作从 block 内部挪到了两个 block 之间，减少了模块内部
+操作。
+
+\section{GhostNet}
+GhostNet 没有沿用 MobileNet v2 中的 inverted residual 模块，改为 $1 \times 1$ 卷
+积 +（Identity + $3 \times 3$ depthwise 卷积）的结构，称为 Ghost 模块，
+如~~所示\citerb{2019-GhostNet}：
+
+借鉴 ResNet 中的 bottleneck 结构，可以将两个 Ghost block 堆叠得到 Ghost
+bottleneck。
 
 \chapter{参数搜索模型}
 
@@ -103,8 +146,9 @@ ShuffleNet v2 总结了轻量神经网络设计的四个基本原则\citerb{2018
 \section{EfficientNet}
 EfficientNet 提出综合考虑网络深度（层数）、宽度（通道数）和输入分辨率三个维度的放
 大比例，利用参数网格搜索得到 400M FLOPS 下的小网络 EfficientNet B0，再按照等比例
-放大的原则得到一系列网络 EfficientNet B1-B7~\cite{2019-EfficientNet}。EfficientNet中的基础模块仍然使
-用 \hyperref[subsec:MobileNetv2]{MobileNet v2} 中的 MBConv 模块。
+放大的原则得到一系列网络 EfficientNet
+B1-B7~\cite{2019-EfficientNet}。EfficientNet 中的基础模块仍然使
+用~\hyperref[subsec:MobileNet-v2]{MobileNet v2} 中的 MBConv 模块。
 
 \section{RegNet}
 

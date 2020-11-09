@@ -32,7 +32,7 @@ Sigmoid 函数及其导数的形式为：
     练。
 \end{itemize}
 
-\subsection{线性整流函数（ReLU）}
+\subsubsection{线性整流函数（ReLU）}
 
 线性整流函数（Rectifier Linear Unit，ReLU）是目前应用最广泛的激活函数，其形式为：
 \begin{equation}
@@ -323,7 +323,7 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
 分层卷积（Depthwise Convolution，DW）是分组卷积的一种特例，是指组数 $g$ 与输入数
 据通道数 $C_{\mathrm{in}}$ 相同的卷积，即每组卷积的输入只有 1 个通道。
 
-\subsection{深度可分离卷积}
+\subsection{深度可分离卷积}\label{subsec:DSC}
 
 深度可分离卷积（Depthwise Separable Convolution，DSC）如图~\ref{fig:ds-conv}~所
 示~\citerb{2019-Diff-Conv}：
@@ -334,9 +334,10 @@ BN 包括归一化和线性变换两部分。其中归一化是为了减少上�
   \caption{深度可分离卷积}\label{fig:ds-conv}
 \end{figure}
 
-深度可分离卷积的步骤包括分层卷积和逐点卷积两部分，计算量为标准卷积计算量的 $ 1 /
+深度可分离卷积包括分层卷积和逐点卷积两部分，计算量为标准卷积计算量的 $ 1 /
 C_{\mathrm{in}} + 1/k^2 $，$k$ 为分层卷积的卷积核大小。
-当通道数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 / k^2$~\citerb{2017-MobileNet-v1}。
+当通道数 $C_{\mathrm{in}}$ 较大时，上式可近似为 $1 /
+k^2$~\citerb{2017-MobileNet-v1}。
 
 \subsection{反卷积}\label{subsec:deconv}
 反卷积（Deconvolution），有时也称转置卷积（Transposed Convolution），是一种特殊的卷积
