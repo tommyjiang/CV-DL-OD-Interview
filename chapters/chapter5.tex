@@ -120,12 +120,13 @@ ShuffleNet v2 总结了轻量神经网络设计的四个基本原则\citerb{2018
   \item 尽量减少 element-wise 操作。
 \end{enumerate}
 
-ShuffleNet v2 中的基本模块如~~所示：
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.7\textwidth]{images/分类/ShuffleNet-v2.pdf}
-%   \caption{ShuffleNet v2 基本模块}\label{fig:shufflenet-v2}
-% \end{figure}
+ShuffleNet v2 中的基本模块如~\ref{fig:shufflenet-v2}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.7\textwidth]{images/分类/ShuffleNet-v2.pdf}
+  \caption{ShuffleNet v2 基本模块}\label{fig:shufflenet-v2}
+\end{figure}
 
 和 ShuffleNet v1 相比，ShuffleNet v2 去掉了分组卷积模块，将 element-wise 相加改
 为 concat，同时将 shuffle 操作从 block 内部挪到了两个 block 之间，减少了模块内部
@@ -134,10 +135,16 @@ ShuffleNet v2 中的基本模块如~~所示：
 \section{GhostNet}
 GhostNet 没有沿用 MobileNet v2 中的 inverted residual 模块，改为 $1 \times 1$ 卷
 积 +（Identity + $3 \times 3$ depthwise 卷积）的结构，称为 Ghost 模块，
-如~~所示\citerb{2019-GhostNet}：
+如图~\ref{fig:ghostnet}~所示\citerb{2019-GhostNet}：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/分类/GhostNet.pdf}
+  \caption{GhostNet 中的 Ghost 模块和 Ghost Block}\label{fig:ghostnet}
+\end{figure}
 
 借鉴 ResNet 中的 bottleneck 结构，可以将两个 Ghost block 堆叠得到 Ghost
-bottleneck。
+bottleneck。注意 Add 之前的 ghost module 后面只有 BN，没有 ReLU。
 
 \chapter{参数搜索模型}
 
