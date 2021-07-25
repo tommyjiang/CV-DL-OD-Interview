@@ -855,10 +855,11 @@ RetinaNet 是单阶段目标检测里程碑式的论文，综合吸收了 Faster
 流行的目标检测模型双阶段准、单阶段快的观点\citerb{2017-RetinaNet}。
 
 \paragraph{Focal loss 的应用}
-RetinaNet 网络的分类 loss 采用 focal loss，其中 $\alpha = 0.25, \gamma
-= 2$ 时效果最好。由于正样本数量很少，因此分类器的初始化也做了相应调整，将最后一个
-卷积层的偏置初值设为 $-\\log((1 - \pi)/ \pi)$，其中 $\pi$ 为正样本概率，
-文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要采样。
+RetinaNet 网络的分类 loss 采用 \hyperref[subsec:focal]{focal loss}，其中 $\alpha
+= 0.25, \gamma = 2$ 时效果最好。由于正样本数量很少，因此分类器的初始化也做了相应
+调整，将最后一个卷积层的偏置初值设为 $-\log((1 - \pi)/\pi)$，其中 $\pi$ 为正样
+本概率，文中取为 0.01。使用 focal loss 后，所有 anchor 都参与计算 loss，不再需要
+采样 anchor 以及控制正负样本比例。
 
 \paragraph{Anchor 参数}
 RetinaNet 同样采用了 FPN 结构，分别从 $P_3$ 到 $P_7$ 五个尺度进行预测，对应的
@@ -877,12 +878,12 @@ anchor 面积为 $32^2$ 到 $512^2$。每个尺度上有三个长宽比例和三
 在 FPN 得到的通道数为 $C$ 的 feature map 上，先接 4 个通道数为 $C$ 的
 $3 \times 3$ 的包含 ReLU 的卷积，再接 1 个 channel 数为 $KA$ 的 $3 \times 3$ 的
 卷积，其中 $K$ 为类别数，$A$ 为 anchor 数，最后再接 sigmoid 层得到最终的分数。所
-有尺度的分类 head 均共享参数。
+有尺度分类 head 的最后一个卷积层均共享参数。
 
 \paragraph{回归 head}
 回归 head 与分类 head 的结构基本相同，但最后不接 sigmoid，因为回归部分需要输出负
-值。回归 head 所有类别共享相同的输出，而非每个类别单独输出。所有尺度的回归 head 也
-同样共享参数。回归 head 和分类 head 虽然结构类似，但并不共享参数。
+值。回归 head 所有类别共享相同的输出，而非每个类别单独输出。所有尺度回归 head 的
+最后一层同样共享参数。回归 head 和分类 head 虽然结构类似，但并不共享参数。
 
 \paragraph{Inference}
 Inference 时 FPN 每个尺度的预测结果取 0.05 作为分数阈值，然后取分数最高的前 1000
@@ -897,18 +898,20 @@ ATSS 发现将 FCOS\cite{2019-FCOS} 中的正负样本判据应用于 RetinaNet 
 
 \paragraph{RetinaNet 和 FCOS 的区别}
 \begin{enumerate}
-  \item 每个位置的 anchor 数：RetinaNet 为 $k$，FCOS 为 1。
-  \item 正负样本定义：RetinaNet 使用 GT 和 anchor 的 IoU，FCOS 只要点落在 GT 内
-    都算正样本，通过 FPN 和最小面积 GT 减少模糊样本数。
+  \item anchor 形式：RetinaNet 为 bbox，FCOS 为 feature map 上的点。
+  \item 每个位置的 anchor 数：RetinaNet 为 $k$ 个，FCOS 为 1 个。
+  \item 正负样本定义：RetinaNet 使用 GT 和 anchor 的 IoU 值判断，FCOS 原始论文中，
+    GT 内的点都算正样本，通过 FPN 和最小面积 GT 匹配减少模糊正样本数。
   \item 回归初始值：RetinaNet 为 anchor，FCOS 为 feature map 上点的坐标。
 \end{enumerate}
 
+\paragraph{ATSS 方法}
 \begin{enumerate}
-  \item FPN 的每层选出离 GT 中心 $L_2$ 距离最近的 $k$ 个 anchor 作为候选集合。
+  \item FPN 每层 feature map 选出离 GT 中心 $L_2$ 距离最近的 $k$ 个 anchor 作为
+    候选集合，其中 $k$ 为超参数。
   \item 计算候选集合中所有 anchor 与 GT 的 IoU，得到候选集合所有 anchor 与 GT IoU 的均值 $m_g$ 和标准差 $v_g$。
   \item IoU 阈值大于 $t_g = m_g + v_g$ 且 anchor 中心位于 GT 内的作为正样本，否
-    则为负样本。如果一个 anchor 对应多个 GT，取 IoU 最大的 GT 作为正样本，其余为
-    负样本。
+    则为负样本。如果一个 anchor 对应多个 GT，取 IoU 最大的 GT。
 \end{enumerate}
 
 \section{EfficientDet}
@@ -1148,13 +1151,13 @@ loss，总的 loss 为：
 其中 $\lambda_{\mathrm{size}}=0.1, \lambda_{\mathrm{off}}=1$。
 
 \subsection{FCOS}\label{sec:FCOS}
-FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 anchor，网络的分类和回归也有一
-定区别\citerb{2019-FCOS}：
+FCOS 的整体结构和 RetinaNet 非常相似，但不再使用 bounding box anchor，而直接使用
+feature map 上的点作为 anchor，网络的分类和回归也有一定区别\citerb{2019-FCOS}：
 
 \begin{itemize}
   \item 分类：FCOS 中，正负样本对应 feature map 上的点，而 RetinaNet 的正负样本对应
     的是与点相关联的 anchor，同时 FCOS 还多预测一个中心度（Center-ness）。
-  \item 回归：FCOS 直接回归 feature map 上的点到 GT 上、下、左、右的距离，而
+  \item 回归：FCOS 直接回归 feature map 上的点到 GT box 上、下、左、右的距离，而
     非 RetinaNet 中 anchor 到 GT 的变换。
 \end{itemize}
 
@@ -1178,7 +1181,7 @@ FCOS 的网络结构参考 RetinaNet，由于使用了 FPN 结构，每个尺度
   \item 回归 label：直接根据定义计算距离。
   \item 中心度 label：利用式 $\sqrt{\frac{\\min(l^*,
         r^*)}{\\max(l^*, r^*)} \times \frac{\\min(t^*,
-        b^*)}{\\max(t^*, b^*)}}$ 计算，当点位于中心时取极值 1，边缘时取极
+        b^*)}{\\max(t^*, b^*)}}$ 计算，当点位于中心时取极大值 1，边缘时取极小
         值 0。
 \end{itemize}
 

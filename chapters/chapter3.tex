@@ -89,7 +89,8 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
 值较大时为 $L_1$ 函数。在目标检测的两阶段方法中，回归 loss 一般使用 Smooth $L_1$
 损失函数。
 
-\subsection{Focal loss}
+\subsection{Focal loss}\label{subsec:focal}
+
 
 文献\citerb{2017-RetinaNet}提出 focal loss，用于解决目标检测中正负样本不平衡的问
 题。Focal loss 降低了简单样本的权重，与难样本挖掘（Hard Negative Mining，HEM）类
@@ -103,7 +104,7 @@ Smooth $L_1$ 损失函数是 $L_1$ 和 $L_2$ 损失函数的组合，其形式�
 \begin{figure}[ht]
   \centering
   \includegraphics[width=0.8\textwidth]{images/机器学习和深度学习基础/基本概念/Focal-Loss.pdf}
-  \caption{Focal loss 的图像（$\alpha_t = 1$}\label{fig:focal-loss}
+  \caption{Focal loss 的图像（$\alpha_t = 1$）}\label{fig:focal-loss}
 \end{figure}
 
 图~\ref{fig:focal-loss}~中，$\gamma = 0$ 的蓝色曲线即传统的交叉熵 loss。其他颜色
