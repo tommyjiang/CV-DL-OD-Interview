@@ -1494,9 +1494,24 @@ Noisy Anchor 的改进包括以下两方面：
     将所有正样本权重的平均值归一化为 1。
 \end{itemize}
 
+\subsubsection{Vari Focal Loss}
+Vari Focal Loss 是 Focal Loss 的变体，主要区别是将预测框与 GT 的 IoU 作为 label 引入分类 loss\citerb{2020-VarifocalNet}：
+
+\begin{equation}
+  \label{equ:VFL}
+    \mathrm{VFL}(p, q) = \left\{
+    \begin{array}{lr}
+      -q \left(q \log p + (1-q) \log (1-p) \right) & q > 0 \\
+        - \alpha p^{\gamma} \log (1-p) & q = 0 \\
+    \end{array}
+  \right.
+\end{equation}
+
+其中 $q$ 为预测框与 GT 的 IoU。
+
 \subsection{分类分数与检测框对应关系不一致}
 单阶段检测模型中，分类分支的 label 与原始 anchor 的位置相关，可能出现由于原
-始 anchor为负样本，回归后的检测框位置较准但分数较低的情况。
+始 anchor 为负样本，回归后的检测框位置较准但分数较低的情况。
 
 \subsubsection{ConRetinaNet}
 
