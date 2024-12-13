@@ -24,10 +24,9 @@ def sigmoid_focal_loss(
     Returns:
         Loss tensor with the reduction option applied.
     """
-    # Original implementation from https://github.com/facebookresearch/fvcore/blob/master/fvcore/nn/focal_loss.py
-
     p = torch.sigmoid(inputs)
-    ce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+    # ce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
+    ce_loss = - (targets * torch.log(p) + (1 - targets) * torch.log(1 - p))
     p_t = p * targets + (1 - p) * (1 - targets)
     loss = ce_loss * ((1 - p_t) ** gamma)
 
@@ -38,3 +37,9 @@ def sigmoid_focal_loss(
     loss = loss.mean()
 
     return loss
+
+inputs = torch.tensor([[1.1, -2.0, 3.4], [-2.4, 3.9, -4.7]])
+targets = torch.tensor([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0]])
+
+loss = sigmoid_focal_loss(inputs, targets)
+print(loss)

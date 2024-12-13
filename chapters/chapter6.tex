@@ -1494,8 +1494,8 @@ Noisy Anchor 的改进包括以下两方面：
     将所有正样本权重的平均值归一化为 1。
 \end{itemize}
 
-\subsubsection{Vari Focal Loss}
-Vari Focal Loss 是 Focal Loss 的变体，主要区别是将预测框与 GT 的 IoU 作为 label 引入分类 loss\citerb{2020-VarifocalNet}：
+\subsubsection{Vari Focal Loss(VFL)}
+Vari Focal Loss(VFL) 是 focal loss 的变体，主要区别是将预测框与 GT 的 IoU 作为 label 引入分类 loss\citerb{2020-VarifocalNet}：
 
 \begin{equation}
   \label{equ:VFL}
@@ -1508,6 +1508,21 @@ Vari Focal Loss 是 Focal Loss 的变体，主要区别是将预测框与 GT 的
 \end{equation}
 
 其中 $q$ 为预测框与 GT 的 IoU。
+
+\subsubsection{Matchability Aware Loss(MAL)}
+VFL 的一个问题是 IoU 高 + 分类分数低的检测框对应的 loss 较高，但 IoU 低 + 分类分数高的检测框 loss 较低。DETR 类检测器一般采用一对一的匹配机制，因此 IoU 低 + 分类分数高的检测框比例更高，由于 loss 较低，VFL 对其优化效果不好。MAL是对 VFL 的改进 \citerb{2024-DEIM}：
+
+\begin{equation}
+  \label{equ:MAL}
+    \mathrm{MAL}(p, q, y) = \left\{
+    \begin{array}{lr}
+      - \left(q^{\gamma} \log p + (1-q ^ {\gamma}) \log (1-p) \right) & y = 1 \\
+      - p^{\gamma} \log (1-p) & y = 0 \\
+    \end{array}
+  \right.
+\end{equation}
+
+与 VFL 相比，MAL 中正样本 loss 的权重去掉了 $q$，在检测框与 GT IoU 较小但分类分数较高的情况下，也能产生较大 loss，有利于模型学习这种分类和回归质量不一致的检测框。
 
 \subsection{分类分数与检测框对应关系不一致}
 单阶段检测模型中，分类分支的 label 与原始 anchor 的位置相关，可能出现由于原
