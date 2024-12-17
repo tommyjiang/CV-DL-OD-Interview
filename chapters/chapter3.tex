@@ -360,6 +360,27 @@ r_{\mathrm {out}} & = r_{\mathrm{in}} + (k-1) \times j_{\mathrm{in}}
 size，r 即感受野。利用公式~\eqref{equ:rf-cal}~即可计算各层的感受野。经典网络 VGG-16
 各层感受野的详细计算可以参考文献~\citerb{2018-VGG-16-RF-cal}。
 
+\chapter{Transformer}
+Transformer 结构目前应用十分广泛，已经成为深度学习的基础模型~\citerb{2017-Attention}。
+
+\section{Attention}
+
+Attention 模块是 Transformer 模型的基础模块，其结构如图~\ref{fig:attention}~所示：
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{images/Transformer/Attention.pdf}
+  \caption{Attention 和 Multi-Head Attention 模块}\label{fig:attention}
+\end{figure}
+
+Attention 模块的计算公式为：
+
+\begin{equation}
+  \label{equ:attention}
+    \mathrm{Attention}(Q, K, V) = \mathrm{softmax} \left( \frac{QK^{\mathrm
+    T}}{\sqrt{d_k}} \right) V
+\end{equation}
+
 %%% Local Variables:
 %%% TeX-master: "../master"
 %%% End:
