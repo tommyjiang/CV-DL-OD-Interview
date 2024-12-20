@@ -381,6 +381,23 @@ Attention 模块的计算公式为：
     T}}{\sqrt{d_k}} \right) V
 \end{equation}
 
+式~\ref{equ:attention}~中 $Q$ 和 $K^{\mathrm{T}}$ 的乘积用 $\sqrt{d_k}$
+做归一化的原因：
+
+\begin{itemize}
+  \item 两个 $d_k$ 维随机向量的点乘满足均值为 0，方差为 $d_k$
+      的正态分布，如果不做归一化，点乘后的数值方差较大，会导致 Softmax
+        梯度减小甚至消失，不利于模型训练。
+  \item 神经网络更偏好均值为 0，方差为 1 的数据分布。
+\end{itemize}
+
+\section{Transformer}
+
+Transformer 的结构如：
+
+图中共有 3 种 attention 结构，包括 self attention，masked self attention 和
+cross attention。其中 cross attention 的 $Q$ 来自 decoder，$K$ 和 $V$ 来自 encoder。
+
 %%% Local Variables:
 %%% TeX-master: "../master"
 %%% End:
