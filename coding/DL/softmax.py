@@ -1,9 +1,8 @@
 import numpy as np
 
 def softmax(x):
-    m = max(x)
-    x = [x_i - m for x_i in x]
+    y = np.exp(x - x.max())
+    return y / y.sum()
 
-    ex = np.exp(x)
-    return ex / sum(ex)
-
+x = np.array([1, 2, 3])
+print(softmax(x))
